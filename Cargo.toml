@@ -1,0 +1,11 @@
+[workspace]
+members = [
+    "clotho-core",
+    # "clotho-graph",
+    # "clotho-store",
+    # "clotho-extract",
+    # "clotho-cli",
+    # "clotho-mcp",
+    # "clotho-sync",
+]
+resolver = "2"

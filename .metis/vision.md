@@ -27,7 +27,8 @@ Clotho is a personal work and time management system centered on capturing, extr
 **Target audience:** Individual knowledge workers managing complex portfolios of work — engineering managers, technical leads, program managers, and similar roles where work spans multiple streams, meetings, and stakeholders.
 
 **Key benefits:**
-- Frictionless capture of meetings, transcripts, notes, reflections, and artifacts
+
+- Low Friction capture of information from meetings, transcripts, notes, reflections, and artifacts
 - AI-assisted extraction of decisions, risks, blockers, questions, and insights from unstructured content
 - A queryable graph of relationships between all work entities
 - Time-period-bound reflections that surface patterns across programs and responsibilities
@@ -41,11 +42,14 @@ Greenfield project. Design document and target README exist. No code written yet
 ## Future State
 
 A fully functional Rust-based personal work management system with:
+
 - A CLI (`clotho`) for all interactions — init, ingest, review, query, reflect
 - An MCP server (`clotho-mcp`) for AI agent integration
 - A workspace format (`.workspace/`) using Markdown, JSONL, graphqlite, and SQLite+FTS5
 - An AI extraction pipeline that identifies speech acts in transcripts and produces draft entities for human review
 - Git-based sync across devices (shallow history, auto-commit/push, single-user assumption)
+- A GUI/TUI for interacting with information (recieving and inputting)
+- Schedule push notifications.
 
 ## Major Features
 
@@ -58,7 +62,7 @@ A fully functional Rust-based personal work management system with:
 
 ## Success Criteria
 
-- Can initialize a workspace, ingest transcripts, and review AI-extracted draft entities via CLI
+- Can initialize a workspace, ingest transcripts, and review AI-extracted draft entities
 - Relation graph is queryable via Cypher through the CLI and MCP server
 - Reflections can reference and aggregate across programs and time periods
 - Workspace syncs reliably across devices via git
@@ -66,7 +70,7 @@ A fully functional Rust-based personal work management system with:
 
 ## Principles
 
-1. **Capture is cheap** — Getting information in should be frictionless
+1. **Capture is cheap** — Getting information in should be low friction
 2. **Extraction is AI-assisted** — Structured data emerges from unstructured content
 3. **Human-in-the-loop** — All AI extractions are drafts requiring review
 4. **Relations are first-class** — The graph of connections is as important as the content
@@ -79,4 +83,4 @@ A fully functional Rust-based personal work management system with:
 - **Rust implementation** — All crates in Rust (clotho-core, clotho-graph, clotho-store, clotho-extract, clotho-cli, clotho-mcp, clotho-sync)
 - **graphqlite dependency** — Graph layer built on graphqlite (colliery-io/graphqlite)
 - **No proprietary formats** — All data must be readable without Clotho installed
-- **Git sync model** — Shallow history (~20 commits), main-only, no branches, pull-before-push
+- **Git sync model** — Shallow history (\~20 commits), main-only, no branches, pull-before-push

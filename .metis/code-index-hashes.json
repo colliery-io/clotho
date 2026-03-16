@@ -1,0 +1,17 @@
+{
+  "files": {
+    "clotho-core/src/domain/entities/capture.rs": "2403bc4ed71b58fac991551b49935a397516c46d563097efb123d53d877578f3",
+    "clotho-core/src/domain/entities/derived.rs": "bed25890a88d545d34d225e195e4d9aadcf0c3d3ccad7753f8f1b9de86077cae",
+    "clotho-core/src/domain/entities/execution.rs": "e7a5f04770def9d12f8c03d4c9e4ac180a1487e1d2a0e3c93fac19bf96f05b05",
+    "clotho-core/src/domain/entities/mod.rs": "9cc40e28552687ec9ef22a3152190b22a1f3c0f27bffa105299e859952be56fa",
+    "clotho-core/src/domain/entities/person.rs": "06219d49f5d5fc22f6097838bf0eee0e23aa68ab83ab52a0fbcd54fa4cdb060d",
+    "clotho-core/src/domain/entities/structural.rs": "a081460f577ff1094a42f2945c3fb2ed35b85c6b786b7ea4c95a23196246e3ff",
+    "clotho-core/src/domain/llm_types.rs": "6aca3b20e757e2286387935826aadfeb976c1d8bb79282d14e9c3f3ba2939997",
+    "clotho-core/src/domain/mod.rs": "657a1bf8cb62c2fd417b3a0faf20cfbde4691b4842dab4fafd563a9724a08e41",
+    "clotho-core/src/domain/traits.rs": "76ca01465713c862787dc5ce23185f1c38bf103d03380fbf8a0ee2cff559fead",
+    "clotho-core/src/domain/types.rs": "13662742d718bb63eef106015b93645423e93d60e4ffafc797365dd18d81585f",
+    "clotho-core/src/error.rs": "e1b2d76b92ae2431eb00e985f8c856b645ebf4f65b7ab7baec6a84d4f6435659",
+    "clotho-core/src/lib.rs": "1c168abd3e121e6b333cd213f8901b2cedc5105ea5b73c8f236839464ebd5a70",
+    "clotho-core/tests/domain_tests.rs": "494e57c1af49d19d9f949a329e1aec5021f377922f1eba1a80b191d782fe7d54"
+  }
+}
