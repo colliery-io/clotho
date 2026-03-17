@@ -1,6 +1,11 @@
+pub mod create;
+pub mod delete;
+pub mod get;
 pub mod init;
 pub mod ingest;
 pub mod list;
 pub mod query;
 pub mod reflect;
+pub mod relate;
 pub mod search;
+pub mod update;

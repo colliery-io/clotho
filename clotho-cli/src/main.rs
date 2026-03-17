@@ -20,6 +20,18 @@ enum Commands {
     /// Initialize a new .workspace/ directory.
     Init(commands::init::InitArgs),
 
+    /// Create any entity type (program, task, person, etc.).
+    Create(commands::create::CreateArgs),
+
+    /// Read a single entity by ID.
+    Get(commands::get::GetArgs),
+
+    /// Update an entity's fields.
+    Update(commands::update::UpdateArgs),
+
+    /// Delete an entity from all backends.
+    Delete(commands::delete::DeleteArgs),
+
     /// Ingest a file as content (note, meeting, transcript, artifact).
     Ingest(commands::ingest::IngestArgs),
 
@@ -34,6 +46,15 @@ enum Commands {
 
     /// Create a new reflection entry.
     Reflect(commands::reflect::ReflectArgs),
+
+    /// Create a typed relation between two entities.
+    Relate(commands::relate::RelateArgs),
+
+    /// Remove a typed relation between two entities.
+    Unrelate(commands::relate::UnrelateArgs),
+
+    /// Show all relations for an entity.
+    Relations(commands::relate::RelationsArgs),
 }
 
 fn main() {
@@ -41,11 +62,18 @@ fn main() {
 
     let result = match cli.command {
         Commands::Init(args) => commands::init::run(args, cli.json),
+        Commands::Create(args) => commands::create::run(args, cli.json),
+        Commands::Get(args) => commands::get::run(args, cli.json),
+        Commands::Update(args) => commands::update::run(args, cli.json),
+        Commands::Delete(args) => commands::delete::run(args, cli.json),
         Commands::Ingest(args) => commands::ingest::run(args, cli.json),
         Commands::List(args) => commands::list::run(args, cli.json),
         Commands::Search(args) => commands::search::run(args, cli.json),
         Commands::Query(args) => commands::query::run(args, cli.json),
         Commands::Reflect(args) => commands::reflect::run(args, cli.json),
+        Commands::Relate(args) => commands::relate::run_relate(args, cli.json),
+        Commands::Unrelate(args) => commands::relate::run_unrelate(args, cli.json),
+        Commands::Relations(args) => commands::relate::run_relations(args, cli.json),
     };
 
     if let Err(e) = result {

@@ -1,6 +1,7 @@
 use crate::tools::{
-    ClothoTools, CreateNoteTool, CreateReflectionTool, IngestTool, InitTool, ListEntitiesTool,
-    QueryTool, ReadEntityTool, SearchTool,
+    ClothoTools, CreateEntityTool, CreateNoteTool, CreateReflectionTool, CreateRelationTool,
+    DeleteEntityTool, DeleteRelationTool, GetRelationsTool, IngestTool, InitTool,
+    ListEntitiesTool, QueryTool, ReadEntityTool, SearchTool, UpdateEntityTool,
 };
 use async_trait::async_trait;
 use rust_mcp_sdk::{
@@ -81,6 +82,36 @@ impl ServerHandler for ClothoServerHandler {
             }
             "clotho_create_reflection" => {
                 let tool: CreateReflectionTool = serde_json::from_value(args)
+                    .map_err(rust_mcp_sdk::schema::schema_utils::CallToolError::new)?;
+                tool.call_tool().await
+            }
+            "clotho_create_entity" => {
+                let tool: CreateEntityTool = serde_json::from_value(args)
+                    .map_err(rust_mcp_sdk::schema::schema_utils::CallToolError::new)?;
+                tool.call_tool().await
+            }
+            "clotho_update_entity" => {
+                let tool: UpdateEntityTool = serde_json::from_value(args)
+                    .map_err(rust_mcp_sdk::schema::schema_utils::CallToolError::new)?;
+                tool.call_tool().await
+            }
+            "clotho_delete_entity" => {
+                let tool: DeleteEntityTool = serde_json::from_value(args)
+                    .map_err(rust_mcp_sdk::schema::schema_utils::CallToolError::new)?;
+                tool.call_tool().await
+            }
+            "clotho_create_relation" => {
+                let tool: CreateRelationTool = serde_json::from_value(args)
+                    .map_err(rust_mcp_sdk::schema::schema_utils::CallToolError::new)?;
+                tool.call_tool().await
+            }
+            "clotho_delete_relation" => {
+                let tool: DeleteRelationTool = serde_json::from_value(args)
+                    .map_err(rust_mcp_sdk::schema::schema_utils::CallToolError::new)?;
+                tool.call_tool().await
+            }
+            "clotho_get_relations" => {
+                let tool: GetRelationsTool = serde_json::from_value(args)
                     .map_err(rust_mcp_sdk::schema::schema_utils::CallToolError::new)?;
                 tool.call_tool().await
             }

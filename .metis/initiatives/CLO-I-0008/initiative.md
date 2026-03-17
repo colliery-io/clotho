@@ -4,14 +4,14 @@ level: initiative
 title: "Entity Management & Graph Relations (CLI + MCP)"
 short_code: "CLO-I-0008"
 created_at: 2026-03-17T12:53:15.911473+00:00
-updated_at: 2026-03-17T12:53:15.911473+00:00
+updated_at: 2026-03-17T13:12:41.119671+00:00
 parent: CLO-V-0001
 blocked_by: []
 archived: false
 
 tags:
   - "#initiative"
-  - "#phase/discovery"
+  - "#phase/completed"
 
 
 exit_criteria_met: false

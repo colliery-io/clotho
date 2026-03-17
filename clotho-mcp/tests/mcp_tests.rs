@@ -12,9 +12,9 @@ use clotho_mcp_server::tools::ClothoTools;
 // ===========================================================================
 
 #[test]
-fn list_tools_returns_all_eight() {
+fn list_tools_returns_all_fourteen() {
     let tools = ClothoTools::tools();
-    assert_eq!(tools.len(), 8);
+    assert_eq!(tools.len(), 14);
 
     let names: Vec<&str> = tools.iter().map(|t| t.name.as_str()).collect();
     assert!(names.contains(&"clotho_search"));
