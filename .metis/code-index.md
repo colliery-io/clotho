@@ -1,6 +1,6 @@
 # Code Index
 
-> Generated: 2026-03-17T13:56:32Z | 73 files | Rust
+> Generated: 2026-03-17T14:36:40Z | 73 files | Rust
 
 ## Project Structure
 
@@ -999,7 +999,7 @@
 
 #### clotho-store/src/content.rs
 
-- pub `ContentStore` struct L9-11 — `{ content_root: PathBuf }` — Manages markdown content files under `.workspace/content/`.
+- pub `ContentStore` struct L9-11 — `{ content_root: PathBuf }` — Manages markdown content files under `.clotho/content/`.
 - pub `new` function L15-19 — `(workspace_path: &Path) -> Self` — Create a new ContentStore rooted at the workspace content directory.
 - pub `content_path` function L22-27 — `(&self, entity_type: EntityType, id: &EntityId) -> PathBuf` — Resolve the filesystem path for an entity's content file (no I/O).
 - pub `write_content` function L32-44 — `( &self, entity_type: EntityType, id: &EntityId, content: &str, ) -> Result<Path...` — Write markdown content for an entity.
@@ -1065,7 +1065,7 @@
 - pub `SyncConfig` struct L16-20 — `{ auto_commit: bool, debounce_seconds: u64, shallow_history_limit: u32 }`
 - pub `OntologyConfig` struct L37-40 — `{ known_entities: Vec<String>, extraction: ExtractionConfig }` — Default ontology configuration.
 - pub `ExtractionConfig` struct L43-45 — `{ default_confidence_threshold: f32 }`
-- pub `Workspace` struct L59-62 — `{ path: PathBuf }` — A Clotho workspace rooted at a `.workspace/` directory.
+- pub `Workspace` struct L59-62 — `{ path: PathBuf }` — A Clotho workspace rooted at a `.clotho/` directory.
 - pub `init` function L70-113 — `(base_path: &Path) -> Result<Self, StoreError>` — Initialize a new workspace at the given path.
 - pub `open` function L118-149 — `(base_path: &Path) -> Result<Self, StoreError>` — Open an existing workspace.
 - pub `content_path` function L152-154 — `(&self) -> PathBuf` — Path to the content directory.
@@ -1215,7 +1215,7 @@
 
 #### clotho-sync/tests/sync_tests.rs
 
--  `setup_workspace` function L8-17 — `(tmp: &tempfile::TempDir) -> std::path::PathBuf` — Helper: create a .workspace/ directory structure in a temp dir.
+-  `setup_workspace` function L8-17 — `(tmp: &tempfile::TempDir) -> std::path::PathBuf` — Helper: create a .clotho/ directory structure in a temp dir.
 -  `init_creates_git_repo` function L24-31 — `()`
 -  `init_creates_gitignore` function L34-41 — `()`
 -  `init_is_idempotent` function L44-51 — `()`

@@ -1,6 +1,6 @@
 [package]
 name = "clotho-store"
-version = "0.1.0"
+version = "0.0.0"
 edition = "2021"
 description = "Storage and data access layer for Clotho"
 license = "Apache-2.0"

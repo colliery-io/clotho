@@ -22,7 +22,7 @@ pub struct SyncConfig {
 impl Default for WorkspaceConfig {
     fn default() -> Self {
         Self {
-            version: "0.1.0".to_string(),
+            version: "0.0.0".to_string(),
             sync: SyncConfig {
                 auto_commit: true,
                 debounce_seconds: 30,
