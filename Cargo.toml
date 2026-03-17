@@ -2,7 +2,7 @@
 members = [
     "clotho-core",
     # "clotho-graph",
-    # "clotho-store",
+    "clotho-store",
     # "clotho-extract",
     # "clotho-cli",
     # "clotho-mcp",

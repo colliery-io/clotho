@@ -17,6 +17,18 @@
     "clotho-core/src/graph/queries.rs": "3a7c71d980f16a4265e16474cb6424ba09b30e457db253a1e2f15d13eae454d7",
     "clotho-core/src/lib.rs": "92cfb9ee652b61c90bfc0b4f01b8d55d71c7deea8be509b7997c56f9465d09d5",
     "clotho-core/tests/domain_tests.rs": "494e57c1af49d19d9f949a329e1aec5021f377922f1eba1a80b191d782fe7d54",
-    "clotho-core/tests/graph_tests.rs": "069aed6edc3ac41d1971a390ebb0c20b71d490e7004e1370cf538fd4958d15ec"
+    "clotho-core/tests/graph_tests.rs": "069aed6edc3ac41d1971a390ebb0c20b71d490e7004e1370cf538fd4958d15ec",
+    "clotho-store/src/content.rs": "53e19c51e5eeeb1015c40af8047952891d7384a590260845015ff95631a98123",
+    "clotho-store/src/data/entities.rs": "eec43b47409f4a913bc55b76b3f61a9a93aac2d0c1b588350161d66652de6cf2",
+    "clotho-store/src/data/extractions.rs": "f5f8af4357d4d89705c7255cbe25b2e4c2b7368b16834fda0830e06ed38270c2",
+    "clotho-store/src/data/jsonl.rs": "9cda23714cc5b2e5564eb1d0c436b21e292a30b13feedb27686168e526944283",
+    "clotho-store/src/data/mod.rs": "605e96b7d5da0f078e196ebf539ca1f271600db81a9603fd58409e33a611be85",
+    "clotho-store/src/error.rs": "79a5fbb7957a867c16ede301ba89f4845e9694a53e6a68fa3856dbf3d9d1fb7c",
+    "clotho-store/src/federation.rs": "6babb0b063a9513ad46995641e9de3ae27032bea278b744bcf27a440bddd7e6a",
+    "clotho-store/src/index.rs": "184fa10b4995a7a64b5487a5eaf6c54e0ae7764db257ff234f9e715f89fa2d48",
+    "clotho-store/src/lib.rs": "574eacb3ab44802efc68f794388f090dad63aa9d19631ccf36e3c7d99c464268",
+    "clotho-store/src/sync.rs": "254b94013e6ab6eb7e9371969e39276e2a637dae95c97517456b1abfc2fa7dbc",
+    "clotho-store/src/workspace.rs": "87bf736cf9f3d3fa8ff02ec9c80e6a4037dac2a61f1abe7077d53b459ab7018b",
+    "clotho-store/tests/store_tests.rs": "048ebf796a6a0d70c71fe85ebff406b709cf89cdca3ffd9b9a19dd77b3652f1e"
   }
 }

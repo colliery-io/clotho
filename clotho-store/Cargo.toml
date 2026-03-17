@@ -1,0 +1,19 @@
+[package]
+name = "clotho-store"
+version = "0.1.0"
+edition = "2021"
+description = "Storage and data access layer for Clotho"
+license = "Apache-2.0"
+
+[dependencies]
+clotho-core = { path = "../clotho-core" }
+chrono = { version = "0.4", features = ["serde"] }
+rusqlite = { version = "0.31", features = ["bundled", "column_decltype"] }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+thiserror = "2"
+toml = "0.8"
+uuid = { version = "1", features = ["v4", "serde"] }
+
+[dev-dependencies]
+tempfile = "3"
