@@ -5,23 +5,32 @@ use clotho_core::domain::types::{EntityId, EntityType};
 
 use crate::error::StoreError;
 
-/// Manages markdown content files under `.clotho/content/`.
+/// Manages markdown content files at the project root.
+///
+/// Content directories are visible and browsable (not hidden in .clotho/).
+/// Each entity type maps to a directory at the project root:
+/// programs/, responsibilities/, objectives/, workstreams/, tasks/,
+/// meetings/, reflections/, artifacts/, notes/, people/, derived/
 pub struct ContentStore {
-    content_root: PathBuf,
+    /// Project root path (parent of .clotho/).
+    project_root: PathBuf,
 }
 
 impl ContentStore {
-    /// Create a new ContentStore rooted at the workspace content directory.
-    pub fn new(workspace_path: &Path) -> Self {
+    /// Create a new ContentStore rooted at the project directory.
+    ///
+    /// The project root is the parent of .clotho/ — where visible
+    /// content directories live.
+    pub fn new(project_root: &Path) -> Self {
         Self {
-            content_root: workspace_path.join("content"),
+            project_root: project_root.to_path_buf(),
         }
     }
 
     /// Resolve the filesystem path for an entity's content file (no I/O).
     pub fn content_path(&self, entity_type: EntityType, id: &EntityId) -> PathBuf {
         let subdir = entity_type_to_subdir(entity_type);
-        self.content_root
+        self.project_root
             .join(subdir)
             .join(format!("{}.md", id))
     }
@@ -76,7 +85,7 @@ impl ContentStore {
     /// List all content files in a subdirectory for a given entity type.
     pub fn list_content(&self, entity_type: EntityType) -> Result<Vec<PathBuf>, StoreError> {
         let subdir = entity_type_to_subdir(entity_type);
-        let dir = self.content_root.join(subdir);
+        let dir = self.project_root.join(subdir);
 
         if !dir.exists() {
             return Ok(Vec::new());
@@ -94,22 +103,19 @@ impl ContentStore {
     }
 }
 
-/// Map an EntityType to its content subdirectory name.
+/// Map an EntityType to its visible content directory name at project root.
 fn entity_type_to_subdir(entity_type: EntityType) -> &'static str {
     match entity_type {
-        EntityType::Meeting | EntityType::Transcript => "meetings",
-        EntityType::Reflection => "reflections",
-        EntityType::Artifact => "artifacts",
-        EntityType::Note => "notes",
-        EntityType::Person => "people",
-        // Structural and execution entities get their own dirs
         EntityType::Program => "programs",
         EntityType::Responsibility => "responsibilities",
         EntityType::Objective => "objectives",
         EntityType::Workstream => "workstreams",
         EntityType::Task => "tasks",
-        // Derived entities don't typically have content files,
-        // but map them to a catch-all if needed
+        EntityType::Meeting | EntityType::Transcript => "meetings",
+        EntityType::Reflection => "reflections",
+        EntityType::Artifact => "artifacts",
+        EntityType::Note => "notes",
+        EntityType::Person => "people",
         EntityType::Decision
         | EntityType::Risk
         | EntityType::Blocker

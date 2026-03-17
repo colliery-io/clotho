@@ -54,7 +54,7 @@ pub fn run(args: IngestArgs, json: bool) -> Result<(), Box<dyn std::error::Error
     let now = Utc::now();
 
     // Store content file
-    let content_store = ContentStore::new(&ws.path);
+    let content_store = ContentStore::new(&ws.project_root());
     let content_path = content_store.write_content(entity_type, &id, &content)?;
 
     // Insert entity row

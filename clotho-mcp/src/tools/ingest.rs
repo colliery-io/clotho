@@ -60,7 +60,7 @@ impl IngestTool {
         let id = EntityId::new();
         let now = Utc::now();
 
-        let content_store = ContentStore::new(&ws.path);
+        let content_store = ContentStore::new(&ws.project_root());
         let content_path = content_store
             .write_content(entity_type, &id, &content)
             .map_err(|e| CallToolError::new(std::io::Error::other(e.to_string())))?;

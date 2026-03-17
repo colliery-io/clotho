@@ -32,7 +32,7 @@ fn test_init_creates_workspace() {
     let tmp = tempdir().unwrap();
     let ws = Workspace::init(tmp.path()).unwrap();
     assert!(ws.path.exists());
-    assert!(ws.content_path().join("notes").is_dir());
+    assert!(ws.project_root().join("notes").is_dir());
     assert!(ws.config_path().join("config.toml").is_file());
 }
 
@@ -57,7 +57,7 @@ fn test_ingest_stores_content_and_entity() {
     let id = EntityId::new();
     let now = chrono::Utc::now();
 
-    let content_store = ContentStore::new(&ws.path);
+    let content_store = ContentStore::new(&ws.project_root());
     let content_path = content_store.write_content(EntityType::Note, &id, &content).unwrap();
     assert!(content_path.exists());
 
@@ -235,7 +235,7 @@ fn test_reflect_creates_entity_and_content() {
     let now = chrono::Utc::now();
 
     // Create content
-    let content_store = ContentStore::new(&ws.path);
+    let content_store = ContentStore::new(&ws.project_root());
     let template = "# Weekly Reflection\n\n## Reflections\n\n## Key Takeaways\n";
     let path = content_store.write_content(EntityType::Reflection, &id, template).unwrap();
     assert!(path.exists());

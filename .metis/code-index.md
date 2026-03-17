@@ -1,6 +1,6 @@
 # Code Index
 
-> Generated: 2026-03-17T14:43:55Z | 73 files | Rust
+> Generated: 2026-03-17T18:59:54Z | 73 files | Rust
 
 ## Project Structure
 
@@ -999,15 +999,15 @@
 
 #### clotho-store/src/content.rs
 
-- pub `ContentStore` struct L9-11 — `{ content_root: PathBuf }` — Manages markdown content files under `.clotho/content/`.
-- pub `new` function L15-19 — `(workspace_path: &Path) -> Self` — Create a new ContentStore rooted at the workspace content directory.
-- pub `content_path` function L22-27 — `(&self, entity_type: EntityType, id: &EntityId) -> PathBuf` — Resolve the filesystem path for an entity's content file (no I/O).
-- pub `write_content` function L32-44 — `( &self, entity_type: EntityType, id: &EntityId, content: &str, ) -> Result<Path...` — Write markdown content for an entity.
-- pub `read_content` function L49-61 — `( &self, entity_type: EntityType, id: &EntityId, ) -> Result<Option<String>, Sto...` — Read markdown content for an entity.
-- pub `delete_content` function L64-74 — `( &self, entity_type: EntityType, id: &EntityId, ) -> Result<(), StoreError>` — Delete the content file for an entity.
-- pub `list_content` function L77-94 — `(&self, entity_type: EntityType) -> Result<Vec<PathBuf>, StoreError>` — List all content files in a subdirectory for a given entity type.
--  `ContentStore` type L13-95 — `= ContentStore`
--  `entity_type_to_subdir` function L98-119 — `(entity_type: EntityType) -> &'static str` — Map an EntityType to its content subdirectory name.
+- pub `ContentStore` struct L14-17 — `{ project_root: PathBuf }` — Manages markdown content files at the project root.
+- pub `new` function L24-28 — `(project_root: &Path) -> Self` — Create a new ContentStore rooted at the project directory.
+- pub `content_path` function L31-36 — `(&self, entity_type: EntityType, id: &EntityId) -> PathBuf` — Resolve the filesystem path for an entity's content file (no I/O).
+- pub `write_content` function L41-53 — `( &self, entity_type: EntityType, id: &EntityId, content: &str, ) -> Result<Path...` — Write markdown content for an entity.
+- pub `read_content` function L58-70 — `( &self, entity_type: EntityType, id: &EntityId, ) -> Result<Option<String>, Sto...` — Read markdown content for an entity.
+- pub `delete_content` function L73-83 — `( &self, entity_type: EntityType, id: &EntityId, ) -> Result<(), StoreError>` — Delete the content file for an entity.
+- pub `list_content` function L86-103 — `(&self, entity_type: EntityType) -> Result<Vec<PathBuf>, StoreError>` — List all content files in a subdirectory for a given entity type.
+-  `ContentStore` type L19-104 — `= ContentStore`
+-  `entity_type_to_subdir` function L107-125 — `(entity_type: EntityType) -> &'static str` — Map an EntityType to its visible content directory name at project root.
 
 #### clotho-store/src/error.rs
 
@@ -1065,21 +1065,24 @@
 - pub `SyncConfig` struct L16-20 — `{ auto_commit: bool, debounce_seconds: u64, shallow_history_limit: u32 }`
 - pub `OntologyConfig` struct L37-40 — `{ known_entities: Vec<String>, extraction: ExtractionConfig }` — Default ontology configuration.
 - pub `ExtractionConfig` struct L43-45 — `{ default_confidence_threshold: f32 }`
-- pub `Workspace` struct L59-62 — `{ path: PathBuf }` — A Clotho workspace rooted at a `.clotho/` directory.
-- pub `init` function L70-113 — `(base_path: &Path) -> Result<Self, StoreError>` — Initialize a new workspace at the given path.
-- pub `open` function L118-149 — `(base_path: &Path) -> Result<Self, StoreError>` — Open an existing workspace.
-- pub `content_path` function L152-154 — `(&self) -> PathBuf` — Path to the content directory.
-- pub `data_path` function L157-159 — `(&self) -> PathBuf` — Path to the data directory.
-- pub `graph_path` function L162-164 — `(&self) -> PathBuf` — Path to the graph directory.
-- pub `index_path` function L167-169 — `(&self) -> PathBuf` — Path to the index directory.
-- pub `config_path` function L172-174 — `(&self) -> PathBuf` — Path to the config directory.
-- pub `read_config` function L177-181 — `(&self) -> Result<WorkspaceConfig, StoreError>` — Read the workspace configuration.
-- pub `read_ontology` function L184-188 — `(&self) -> Result<OntologyConfig, StoreError>` — Read the ontology configuration.
+- pub `Workspace` struct L86-89 — `{ path: PathBuf }` — A Clotho workspace.
+- pub `init` function L96-130 — `(base_path: &Path) -> Result<Self, StoreError>` — Initialize a new workspace at the given path.
+- pub `open` function L135-164 — `(base_path: &Path) -> Result<Self, StoreError>` — Open an existing workspace.
+- pub `project_root` function L169-174 — `(&self) -> PathBuf` — Path to the project root (parent of .clotho/).
+- pub `data_path` function L177-179 — `(&self) -> PathBuf` — Path to the data directory (.clotho/data/).
+- pub `graph_path` function L182-184 — `(&self) -> PathBuf` — Path to the graph directory (.clotho/graph/).
+- pub `index_path` function L187-189 — `(&self) -> PathBuf` — Path to the index directory (.clotho/index/).
+- pub `inbox_path` function L192-194 — `(&self) -> PathBuf` — Path to the inbox directory (.clotho/inbox/).
+- pub `config_path` function L197-199 — `(&self) -> PathBuf` — Path to the config directory (.clotho/config/).
+- pub `read_config` function L202-206 — `(&self) -> Result<WorkspaceConfig, StoreError>` — Read the workspace configuration.
+- pub `read_ontology` function L209-213 — `(&self) -> Result<OntologyConfig, StoreError>` — Read the ontology configuration.
 -  `WorkspaceConfig` type L22-33 — `impl Default for WorkspaceConfig`
 -  `default` function L23-32 — `() -> Self`
 -  `OntologyConfig` type L47-56 — `impl Default for OntologyConfig`
 -  `default` function L48-55 — `() -> Self`
--  `Workspace` type L64-189 — `= Workspace`
+-  `VISIBLE_DIRS` variable L59-71 — `: &[&str]` — Visible content directories created at project root.
+-  `HIDDEN_DIRS` variable L74-80 — `: &[&str]` — Machine-managed directories created inside .clotho/.
+-  `Workspace` type L91-214 — `= Workspace`
 
 ### clotho-store/src/data
 
@@ -1193,17 +1196,17 @@
 
 - pub `SyncError` enum L9-24 — `GitError | NoRepository | SyncFailed | PruneFailed | Io` — Errors from sync operations.
 - pub `SyncResult` struct L28-35 — `{ committed: bool, pushed: bool, files_changed: usize }` — Result of a sync operation.
-- pub `SyncEngine` struct L47-49 — `{ repo: Repository }` — Git-based sync engine for Clotho workspaces.
-- pub `init` function L57-87 — `(workspace_path: &Path) -> Result<Self, SyncError>` — Initialize a git repository for a Clotho workspace.
-- pub `open` function L90-103 — `(workspace_path: &Path) -> Result<Self, SyncError>` — Open an existing git repository for a Clotho workspace.
-- pub `has_remote` function L106-108 — `(&self) -> bool` — Check whether the repository has a remote named "origin".
-- pub `repository` function L111-113 — `(&self) -> &Repository` — Access the underlying git2 Repository.
-- pub `sync` function L118-189 — `(&self) -> Result<SyncResult, SyncError>` — Sync the workspace: stage all changes, commit, and push (if remote).
-- pub `prune_history` function L217-295 — `(&self, keep: usize) -> Result<usize, SyncError>` — Prune history to keep only the most recent `keep` commits.
-- pub `commit_count` function L298-307 — `(&self) -> Result<usize, SyncError>` — Count the number of commits in the repository.
--  `GITIGNORE_CONTENT` variable L38-41 — `: &str` — .gitignore content for Clotho workspaces.
--  `SyncEngine` type L51-308 — `= SyncEngine`
--  `push` function L192-211 — `(&self) -> Result<bool, SyncError>` — Push to origin/main.
+- pub `SyncEngine` struct L49-51 — `{ repo: Repository }` — Git-based sync engine for Clotho workspaces.
+- pub `init` function L59-89 — `(workspace_path: &Path) -> Result<Self, SyncError>` — Initialize a git repository for a Clotho workspace.
+- pub `open` function L92-105 — `(workspace_path: &Path) -> Result<Self, SyncError>` — Open an existing git repository for a Clotho workspace.
+- pub `has_remote` function L108-110 — `(&self) -> bool` — Check whether the repository has a remote named "origin".
+- pub `repository` function L113-115 — `(&self) -> &Repository` — Access the underlying git2 Repository.
+- pub `sync` function L120-191 — `(&self) -> Result<SyncResult, SyncError>` — Sync the workspace: stage all changes, commit, and push (if remote).
+- pub `prune_history` function L219-297 — `(&self, keep: usize) -> Result<usize, SyncError>` — Prune history to keep only the most recent `keep` commits.
+- pub `commit_count` function L300-309 — `(&self) -> Result<usize, SyncError>` — Count the number of commits in the repository.
+-  `GITIGNORE_CONTENT` variable L38-43 — `: &str` — .gitignore content for Clotho workspaces.
+-  `SyncEngine` type L53-310 — `= SyncEngine`
+-  `push` function L194-213 — `(&self) -> Result<bool, SyncError>` — Push to origin/main.
 
 #### clotho-sync/src/lib.rs
 
@@ -1215,20 +1218,20 @@
 
 #### clotho-sync/tests/sync_tests.rs
 
--  `setup_workspace` function L8-17 — `(tmp: &tempfile::TempDir) -> std::path::PathBuf` — Helper: create a .clotho/ directory structure in a temp dir.
--  `init_creates_git_repo` function L24-31 — `()`
--  `init_creates_gitignore` function L34-41 — `()`
--  `init_is_idempotent` function L44-51 — `()`
--  `open_existing_repo` function L58-65 — `()`
--  `open_fails_without_git` function L68-74 — `()`
--  `sync_no_changes` function L81-94 — `()`
--  `sync_commits_new_file` function L97-111 — `()`
--  `sync_commits_modified_file` function L114-126 — `()`
--  `sync_has_remote_false` function L129-135 — `()`
--  `commit_count_tracks` function L142-159 — `()`
--  `prune_reduces_commit_count` function L166-183 — `()`
--  `prune_noop_when_under_limit` function L186-196 — `()`
--  `index_directory_not_committed` function L203-231 — `()`
+-  `setup_workspace` function L8-22 — `(tmp: &tempfile::TempDir) -> std::path::PathBuf` — Helper: create a .clotho/ directory structure + visible dirs in a temp dir.
+-  `init_creates_git_repo` function L29-36 — `()`
+-  `init_creates_gitignore` function L39-47 — `()`
+-  `init_is_idempotent` function L50-57 — `()`
+-  `open_existing_repo` function L64-71 — `()`
+-  `open_fails_without_git` function L74-80 — `()`
+-  `sync_no_changes` function L87-100 — `()`
+-  `sync_commits_new_file` function L103-117 — `()`
+-  `sync_commits_modified_file` function L120-132 — `()`
+-  `sync_has_remote_false` function L135-141 — `()`
+-  `commit_count_tracks` function L148-165 — `()`
+-  `prune_reduces_commit_count` function L172-189 — `()`
+-  `prune_noop_when_under_limit` function L192-202 — `()`
+-  `index_directory_not_committed` function L209-237 — `()`
 
 ### clotho-tests/tests
 

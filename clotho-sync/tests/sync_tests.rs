@@ -4,15 +4,20 @@ use tempfile::tempdir;
 
 use clotho_sync::SyncEngine;
 
-/// Helper: create a .clotho/ directory structure in a temp dir.
+/// Helper: create a .clotho/ directory structure + visible dirs in a temp dir.
 fn setup_workspace(tmp: &tempfile::TempDir) -> std::path::PathBuf {
     let ws = tmp.path().join(".clotho");
-    fs::create_dir_all(ws.join("content")).unwrap();
+    // Machine dirs in .clotho/
     fs::create_dir_all(ws.join("data")).unwrap();
     fs::create_dir_all(ws.join("graph")).unwrap();
     fs::create_dir_all(ws.join("index")).unwrap();
+    fs::create_dir_all(ws.join("inbox")).unwrap();
     fs::create_dir_all(ws.join("config")).unwrap();
     fs::write(ws.join("config/config.toml"), "[sync]\nauto_commit = true\n").unwrap();
+    // Visible content dirs at project root
+    for dir in &["programs", "tasks", "meetings", "notes", "people"] {
+        fs::create_dir_all(tmp.path().join(dir)).unwrap();
+    }
     ws
 }
 
@@ -38,6 +43,7 @@ fn init_creates_gitignore() {
     SyncEngine::init(&ws).unwrap();
     let gitignore = fs::read_to_string(tmp.path().join(".gitignore")).unwrap();
     assert!(gitignore.contains(".clotho/index/"));
+    assert!(gitignore.contains(".clotho/inbox/"));
 }
 
 #[test]
@@ -102,7 +108,7 @@ fn sync_commits_new_file() {
     engine.sync().unwrap(); // initial commit
 
     // Create a new file
-    fs::write(ws.join("content/test-note.md"), "# Hello").unwrap();
+    fs::write(tmp.path().join("notes/test-note.md"), "# Hello").unwrap();
 
     let result = engine.sync().unwrap();
     assert!(result.committed);
@@ -116,11 +122,11 @@ fn sync_commits_modified_file() {
     let ws = setup_workspace(&tmp);
 
     let engine = SyncEngine::init(&ws).unwrap();
-    fs::write(ws.join("content/note.md"), "version 1").unwrap();
+    fs::write(tmp.path().join("notes/note.md"), "version 1").unwrap();
     engine.sync().unwrap();
 
     // Modify the file
-    fs::write(ws.join("content/note.md"), "version 2").unwrap();
+    fs::write(tmp.path().join("notes/note.md"), "version 2").unwrap();
     let result = engine.sync().unwrap();
     assert!(result.committed);
 }
@@ -149,11 +155,11 @@ fn commit_count_tracks() {
     engine.sync().unwrap();
     assert_eq!(engine.commit_count().unwrap(), 1);
 
-    fs::write(ws.join("content/a.md"), "a").unwrap();
+    fs::write(tmp.path().join("notes/a.md"), "a").unwrap();
     engine.sync().unwrap();
     assert_eq!(engine.commit_count().unwrap(), 2);
 
-    fs::write(ws.join("content/b.md"), "b").unwrap();
+    fs::write(tmp.path().join("notes/b.md"), "b").unwrap();
     engine.sync().unwrap();
     assert_eq!(engine.commit_count().unwrap(), 3);
 }
@@ -171,7 +177,7 @@ fn prune_reduces_commit_count() {
 
     // Create 5 commits
     for i in 0..5 {
-        fs::write(ws.join(format!("content/note-{}.md", i)), format!("note {}", i)).unwrap();
+        fs::write(tmp.path().join(format!("notes/note-{}.md", i)), format!("note {}", i)).unwrap();
         engine.sync().unwrap();
     }
     assert_eq!(engine.commit_count().unwrap(), 5);
@@ -188,7 +194,7 @@ fn prune_noop_when_under_limit() {
     let ws = setup_workspace(&tmp);
 
     let engine = SyncEngine::init(&ws).unwrap();
-    fs::write(ws.join("content/a.md"), "a").unwrap();
+    fs::write(tmp.path().join("notes/a.md"), "a").unwrap();
     engine.sync().unwrap();
 
     let pruned = engine.prune_history(20).unwrap();
@@ -209,7 +215,7 @@ fn index_directory_not_committed() {
     // Create files in index/ (should be ignored)
     fs::write(ws.join("index/search.db"), "fake db").unwrap();
     // Create file in content/ (should be committed)
-    fs::write(ws.join("content/note.md"), "real content").unwrap();
+    fs::write(tmp.path().join("notes/note.md"), "real content").unwrap();
 
     let result = engine.sync().unwrap();
     assert!(result.committed);

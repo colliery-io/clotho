@@ -56,7 +56,7 @@ pub fn run(args: CreateArgs, json: bool) -> Result<(), Box<dyn std::error::Error
     let extraction_status = default_extraction;
 
     // Write content if provided or if entity is ContentBearing
-    let content_store = ContentStore::new(&ws.path);
+    let content_store = ContentStore::new(&ws.project_root());
     let content_text = args.content.unwrap_or_default();
     let content_path = if !content_text.is_empty() || is_content_bearing(entity_type) {
         let text = if content_text.is_empty() {

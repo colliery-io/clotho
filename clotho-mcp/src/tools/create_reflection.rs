@@ -51,7 +51,7 @@ impl CreateReflectionTool {
             title, self.period, now.format("%Y-%m-%d"),
         );
 
-        let content_store = ContentStore::new(&ws.path);
+        let content_store = ContentStore::new(&ws.project_root());
         let content_path = content_store
             .write_content(EntityType::Reflection, &id, &template)
             .map_err(|e| CallToolError::new(std::io::Error::other(e.to_string())))?;

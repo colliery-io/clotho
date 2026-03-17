@@ -38,6 +38,8 @@ pub struct SyncResult {
 const GITIGNORE_CONTENT: &str = "\
 # Clotho derived indexes (rebuilt on clone)
 .clotho/index/
+# Clotho inbox (transient staging area)
+.clotho/inbox/
 ";
 
 /// Git-based sync engine for Clotho workspaces.
@@ -73,7 +75,7 @@ impl SyncEngine {
         } else {
             // Ensure index/ is in .gitignore
             let existing = fs::read_to_string(&gitignore_path)?;
-            if !existing.contains(".clotho/index/") {
+            if !existing.contains(".clotho/index/") || !existing.contains(".clotho/inbox/") {
                 let mut content = existing;
                 if !content.ends_with('\n') {
                     content.push('\n');

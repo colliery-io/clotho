@@ -23,11 +23,11 @@ fn workspace_init_creates_structure() {
     let ws = Workspace::init(tmp.path()).unwrap();
 
     assert!(ws.path.exists());
-    assert!(ws.content_path().join("meetings").is_dir());
-    assert!(ws.content_path().join("reflections").is_dir());
-    assert!(ws.content_path().join("artifacts").is_dir());
-    assert!(ws.content_path().join("notes").is_dir());
-    assert!(ws.content_path().join("people").is_dir());
+    assert!(ws.project_root().join("meetings").is_dir());
+    assert!(ws.project_root().join("reflections").is_dir());
+    assert!(ws.project_root().join("artifacts").is_dir());
+    assert!(ws.project_root().join("notes").is_dir());
+    assert!(ws.project_root().join("people").is_dir());
     assert!(ws.data_path().is_dir());
     assert!(ws.graph_path().is_dir());
     assert!(ws.index_path().is_dir());
@@ -74,7 +74,7 @@ fn workspace_read_config() {
 fn content_write_read_delete() {
     let tmp = tempdir().unwrap();
     let ws = Workspace::init(tmp.path()).unwrap();
-    let store = ContentStore::new(&ws.path);
+    let store = ContentStore::new(&ws.project_root());
 
     let id = EntityId::new();
     let path = store
@@ -93,7 +93,7 @@ fn content_write_read_delete() {
 fn content_list() {
     let tmp = tempdir().unwrap();
     let ws = Workspace::init(tmp.path()).unwrap();
-    let store = ContentStore::new(&ws.path);
+    let store = ContentStore::new(&ws.project_root());
 
     store.write_content(EntityType::Note, &EntityId::new(), "Note 1").unwrap();
     store.write_content(EntityType::Note, &EntityId::new(), "Note 2").unwrap();
@@ -110,7 +110,7 @@ fn content_list() {
 fn content_read_nonexistent() {
     let tmp = tempdir().unwrap();
     let ws = Workspace::init(tmp.path()).unwrap();
-    let store = ContentStore::new(&ws.path);
+    let store = ContentStore::new(&ws.project_root());
 
     let result = store.read_content(EntityType::Note, &EntityId::new()).unwrap();
     assert!(result.is_none());
@@ -427,7 +427,7 @@ fn sync_save_entity_across_backends() {
     let tmp = tempdir().unwrap();
     let ws = Workspace::init(tmp.path()).unwrap();
 
-    let content_store = ContentStore::new(&ws.path);
+    let content_store = ContentStore::new(&ws.project_root());
     let entity_store = EntityStore::open(&ws.data_path().join("entities.db")).unwrap();
     let extraction_store = ExtractionStore::open(&ws.data_path().join("extractions.db")).unwrap();
     let event_store = EventStore::new(&ws.data_path());
@@ -477,7 +477,7 @@ fn sync_temporal_materialization() {
     let tmp = tempdir().unwrap();
     let ws = Workspace::init(tmp.path()).unwrap();
 
-    let content_store = ContentStore::new(&ws.path);
+    let content_store = ContentStore::new(&ws.project_root());
     let entity_store = EntityStore::open(&ws.data_path().join("entities.db")).unwrap();
     let extraction_store = ExtractionStore::open(&ws.data_path().join("extractions.db")).unwrap();
     let event_store = EventStore::new(&ws.data_path());

@@ -66,7 +66,7 @@ impl CreateEntityTool {
         let metadata = if meta.is_empty() { None } else { Some(serde_json::to_string(&meta).unwrap_or_default()) };
 
         // Content
-        let content_store = ContentStore::new(&ws.path);
+        let content_store = ContentStore::new(&ws.project_root());
         let content_text = self.content.clone().unwrap_or_default();
         let content_path = if !content_text.is_empty() || is_content_bearing(et) {
             let text = if content_text.is_empty() { format!("# {}\n", self.title) } else { content_text.clone() };

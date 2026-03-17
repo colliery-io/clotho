@@ -41,7 +41,7 @@ impl TestWorkspace {
     }
 
     fn content(&self) -> ContentStore {
-        ContentStore::new(&self.ws.path)
+        ContentStore::new(&self.ws.project_root())
     }
 
     fn graph(&self) -> GraphStore {
@@ -520,7 +520,7 @@ fn scenario_git_sync_lifecycle() {
     // Create more commits for pruning
     for i in 0..5 {
         fs::write(
-            tw.ws.path.join(format!("content/notes/note-{}.md", i)),
+            tw.ws.project_root().join(format!("notes/note-{}.md", i)),
             format!("# Note {}", i),
         ).unwrap();
         engine.sync().unwrap();

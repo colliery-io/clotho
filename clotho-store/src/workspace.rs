@@ -55,120 +55,145 @@ impl Default for OntologyConfig {
     }
 }
 
-/// A Clotho workspace rooted at a `.clotho/` directory.
+/// Visible content directories created at project root.
+const VISIBLE_DIRS: &[&str] = &[
+    "programs",
+    "responsibilities",
+    "objectives",
+    "workstreams",
+    "tasks",
+    "meetings",
+    "reflections",
+    "artifacts",
+    "notes",
+    "people",
+    "derived",
+];
+
+/// Machine-managed directories created inside .clotho/.
+const HIDDEN_DIRS: &[&str] = &[
+    "data",
+    "graph",
+    "index",
+    "inbox",
+    "config",
+];
+
+/// A Clotho workspace.
+///
+/// Content lives at the project root (visible, browsable).
+/// Machine data lives in `.clotho/` (hidden).
 pub struct Workspace {
-    /// Path to the `.clotho/` root.
+    /// Path to the `.clotho/` directory.
     pub path: PathBuf,
 }
 
 impl Workspace {
     /// Initialize a new workspace at the given path.
     ///
-    /// Creates the full directory tree and default config files.
-    /// The path should be where `.clotho/` will be created
-    /// (e.g., passing `/home/user/work` creates `/home/user/work/.clotho/`).
+    /// Creates visible content directories at the project root and
+    /// machine-managed directories inside `.clotho/`.
     pub fn init(base_path: &Path) -> Result<Self, StoreError> {
-        let workspace_path = base_path.join(".clotho");
+        let clotho_path = base_path.join(".clotho");
 
-        if workspace_path.exists() {
+        if clotho_path.exists() {
             return Err(StoreError::WorkspaceAlreadyExists(
-                workspace_path.display().to_string(),
+                clotho_path.display().to_string(),
             ));
         }
 
-        // Create directory tree
-        let dirs = [
-            "content/meetings",
-            "content/reflections",
-            "content/artifacts",
-            "content/notes",
-            "content/people",
-            "data",
-            "graph",
-            "index",
-            "config",
-        ];
+        // Create visible content directories at project root
+        for dir in VISIBLE_DIRS {
+            fs::create_dir_all(base_path.join(dir))?;
+        }
 
-        for dir in &dirs {
-            fs::create_dir_all(workspace_path.join(dir))?;
+        // Create hidden machine directories in .clotho/
+        for dir in HIDDEN_DIRS {
+            fs::create_dir_all(clotho_path.join(dir))?;
         }
 
         // Write default config.toml
         let config = WorkspaceConfig::default();
         let config_toml = toml::to_string_pretty(&config)?;
-        fs::write(workspace_path.join("config/config.toml"), config_toml)?;
+        fs::write(clotho_path.join("config/config.toml"), config_toml)?;
 
         // Write default ontology.toml
         let ontology = OntologyConfig::default();
         let ontology_toml = toml::to_string_pretty(&ontology)?;
-        fs::write(workspace_path.join("config/ontology.toml"), ontology_toml)?;
+        fs::write(clotho_path.join("config/ontology.toml"), ontology_toml)?;
 
         // Create empty JSONL files
-        fs::write(workspace_path.join("data/tags.jsonl"), "")?;
-        fs::write(workspace_path.join("data/events.jsonl"), "")?;
+        fs::write(clotho_path.join("data/tags.jsonl"), "")?;
+        fs::write(clotho_path.join("data/events.jsonl"), "")?;
 
-        Ok(Self {
-            path: workspace_path,
-        })
+        Ok(Self { path: clotho_path })
     }
 
     /// Open an existing workspace.
     ///
-    /// Validates that the directory structure is intact.
+    /// Validates that the .clotho/ directory and essential subdirs exist.
     pub fn open(base_path: &Path) -> Result<Self, StoreError> {
-        let workspace_path = base_path.join(".clotho");
+        let clotho_path = base_path.join(".clotho");
 
-        if !workspace_path.exists() {
+        if !clotho_path.exists() {
             return Err(StoreError::WorkspaceNotFound(
-                workspace_path.display().to_string(),
+                clotho_path.display().to_string(),
             ));
         }
 
-        // Validate essential directories exist
-        let required = ["content", "data", "graph", "config"];
+        // Validate essential .clotho/ directories exist
+        let required = ["data", "graph", "config"];
         for dir in &required {
-            let dir_path = workspace_path.join(dir);
+            let dir_path = clotho_path.join(dir);
             if !dir_path.is_dir() {
                 return Err(StoreError::InvalidWorkspace(format!(
-                    "missing directory: {}",
+                    "missing directory: .clotho/{}",
                     dir
                 )));
             }
         }
 
         // Validate config files exist
-        if !workspace_path.join("config/config.toml").is_file() {
+        if !clotho_path.join("config/config.toml").is_file() {
             return Err(StoreError::InvalidWorkspace(
-                "missing config/config.toml".to_string(),
+                "missing .clotho/config/config.toml".to_string(),
             ));
         }
 
-        Ok(Self {
-            path: workspace_path,
-        })
+        Ok(Self { path: clotho_path })
     }
 
-    /// Path to the content directory.
-    pub fn content_path(&self) -> PathBuf {
-        self.path.join("content")
+    /// Path to the project root (parent of .clotho/).
+    ///
+    /// This is where visible content directories live.
+    pub fn project_root(&self) -> PathBuf {
+        self.path
+            .parent()
+            .expect("workspace .clotho/ must have a parent")
+            .to_path_buf()
     }
 
-    /// Path to the data directory.
+    /// Path to the data directory (.clotho/data/).
     pub fn data_path(&self) -> PathBuf {
         self.path.join("data")
     }
 
-    /// Path to the graph directory.
+    /// Path to the graph directory (.clotho/graph/).
     pub fn graph_path(&self) -> PathBuf {
         self.path.join("graph")
     }
 
-    /// Path to the index directory.
+    /// Path to the index directory (.clotho/index/).
     pub fn index_path(&self) -> PathBuf {
         self.path.join("index")
     }
 
-    /// Path to the config directory.
+    /// Path to the inbox directory (.clotho/inbox/).
+    pub fn inbox_path(&self) -> PathBuf {
+        self.path.join("inbox")
+    }
+
+    /// Path to the config directory (.clotho/config/).
     pub fn config_path(&self) -> PathBuf {
         self.path.join("config")
     }

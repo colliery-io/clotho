@@ -54,7 +54,7 @@ pub fn run(args: ReflectArgs, json: bool) -> Result<(), Box<dyn std::error::Erro
     );
 
     // Write content
-    let content_store = ContentStore::new(&ws.path);
+    let content_store = ContentStore::new(&ws.project_root());
     let content_path = content_store.write_content(EntityType::Reflection, &id, &template)?;
 
     // Insert entity row
