@@ -1,0 +1,99 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  build:
+    name: Build (${{ matrix.target }})
+    strategy:
+      matrix:
+        include:
+          - os: macos-latest
+            target: aarch64-apple-darwin
+            cli_name: clotho-aarch64-apple-darwin
+            mcp_name: clotho-mcp-aarch64-apple-darwin
+          - os: macos-13
+            target: x86_64-apple-darwin
+            cli_name: clotho-x86_64-apple-darwin
+            mcp_name: clotho-mcp-x86_64-apple-darwin
+          - os: ubuntu-22.04
+            target: x86_64-unknown-linux-gnu
+            cli_name: clotho-x86_64-unknown-linux-gnu
+            mcp_name: clotho-mcp-x86_64-unknown-linux-gnu
+          - os: windows-latest
+            target: x86_64-pc-windows-msvc
+            cli_name: clotho-x86_64-pc-windows-msvc.exe
+            mcp_name: clotho-mcp-x86_64-pc-windows-msvc.exe
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.target }}
+
+      - name: Cache cargo
+        uses: Swatinem/rust-cache@v2
+
+      - name: Build release
+        run: cargo build --release --target ${{ matrix.target }}
+
+      - name: Rename binaries (unix)
+        if: runner.os != 'Windows'
+        run: |
+          cp target/${{ matrix.target }}/release/clotho ${{ matrix.cli_name }}
+          cp target/${{ matrix.target }}/release/clotho-mcp ${{ matrix.mcp_name }}
+
+      - name: Rename binaries (windows)
+        if: runner.os == 'Windows'
+        run: |
+          cp target/${{ matrix.target }}/release/clotho.exe ${{ matrix.cli_name }}
+          cp target/${{ matrix.target }}/release/clotho-mcp.exe ${{ matrix.mcp_name }}
+
+      - name: Upload CLI artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.cli_name }}
+          path: ${{ matrix.cli_name }}
+
+      - name: Upload MCP artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.mcp_name }}
+          path: ${{ matrix.mcp_name }}
+
+  release:
+    name: Create Release
+    needs: build
+    runs-on: ubuntu-22.04
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+
+      - name: Flatten artifacts
+        run: |
+          mkdir -p release
+          find artifacts -type f -exec cp {} release/ \;
+          ls -la release/
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          draft: true
+          generate_release_notes: true
+          files: release/*
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
