@@ -5,7 +5,7 @@ members = [
     "clotho-store",
     # "clotho-extract",
     "clotho-cli",
-    # "clotho-mcp",
+    "clotho-mcp",
     # "clotho-sync",
 ]
 resolver = "2"

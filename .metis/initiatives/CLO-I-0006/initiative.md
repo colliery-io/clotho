@@ -4,14 +4,14 @@ level: initiative
 title: "MCP Server (clotho-mcp)"
 short_code: "CLO-I-0006"
 created_at: 2026-03-16T13:23:16.462948+00:00
-updated_at: 2026-03-16T13:23:16.462948+00:00
+updated_at: 2026-03-17T12:54:16.889092+00:00
 parent: CLO-V-0001
 blocked_by: []
 archived: false
 
 tags:
   - "#initiative"
-  - "#phase/discovery"
+  - "#phase/completed"
 
 
 exit_criteria_met: false
@@ -58,18 +58,37 @@ The `clotho-mcp` crate exposes Clotho's capabilities as a Model Context Protocol
 
 ### Dependencies
 
-- `clotho-core`, `clotho-store`, `clotho-graph`, `clotho-extract`
-- MCP SDK for Rust (or manual JSON-RPC implementation)
+- `clotho-core`, `clotho-store`
+- `rust-mcp-sdk` 0.8.0 (same as Metis) with features: server, macros, stdio
+- `tokio`, `schemars`, `async-trait`
+
+### Architecture (follows Metis pattern)
+
+- `#[mcp_tool]` macro on tool structs with `JsonSchema` derive
+- Each tool has `call_tool(&self) -> Result<CallToolResult, CallToolError>`
+- `ServerHandler` impl dispatches by tool name
+- Stdio transport via `rust-mcp-sdk::StdioTransport`
+
+### MCP Tools (v1)
+
+- `clotho_init` — Initialize workspace
+- `clotho_ingest` — Ingest a file as content
+- `clotho_search` — FTS5 keyword search
+- `clotho_query` — Raw Cypher query
+- `clotho_list_entities` — List entities with filters
+- `clotho_read_entity` — Read entity by ID (metadata + content)
+- `clotho_create_note` — Create a note
+- `clotho_create_reflection` — Create a reflection
 
 ## Alternatives Considered
 
 - **REST API** — MCP is more natural for AI agent integration; REST could be added later
 - **gRPC** — Too heavy for single-user local tool; MCP's JSON-RPC is simpler
+- **Hand-rolled JSON-RPC** — Unnecessary; rust-mcp-sdk is proven in Metis
 
 ## Implementation Plan
 
-1. Set up MCP server skeleton with stdio transport
-2. Implement read-only tools (search, query, read, list)
-3. Implement write tools (ingest, create note/reflection)
-4. Implement draft management tools
-5. Test with Claude Code integration
+1. clotho-mcp crate scaffold + server skeleton (rust-mcp-sdk, stdio transport)
+2. Implement read-only tools (search, query, read_entity, list_entities)
+3. Implement write tools (init, ingest, create_note, create_reflection)
+4. Integration tests
