@@ -1,0 +1,9 @@
+{
+  "name": "clotho",
+  "version": "0.1.0",
+  "description": "Personal work and time management through reflection, transcripts, and sense-making. Provides MCP tools for capturing, extracting, and connecting the flow of work.",
+  "author": {
+    "name": "Colliery",
+    "email": "contact@colliery.io"
+  }
+}

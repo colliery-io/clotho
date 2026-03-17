@@ -1,0 +1,9 @@
+{
+  "plugins": [
+    {
+      "name": "clotho",
+      "description": "Personal work and time management through reflection, transcripts, and sense-making.",
+      "source": "./plugins/clotho"
+    }
+  ]
+}

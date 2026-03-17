@@ -1,0 +1,9 @@
+{
+  "mcpServers": {
+    "clotho": {
+      "command": "clotho-mcp",
+      "args": [],
+      "env": {}
+    }
+  }
+}
