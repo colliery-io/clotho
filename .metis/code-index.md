@@ -1,6 +1,6 @@
 # Code Index
 
-> Generated: 2026-03-16T20:01:12Z | 13 files | Rust
+> Generated: 2026-03-17T01:27:53Z | 18 files | Rust
 
 ## Project Structure
 
@@ -20,9 +20,15 @@
     │   │   ├── traits.rs
     │   │   └── types.rs
     │   ├── error.rs
+    │   ├── graph/
+    │   │   ├── edges.rs
+    │   │   ├── mod.rs
+    │   │   ├── nodes.rs
+    │   │   └── queries.rs
     │   └── lib.rs
     └── tests/
-        └── domain_tests.rs
+        ├── domain_tests.rs
+        └── graph_tests.rs
 ```
 
 ## Modules
@@ -35,15 +41,15 @@
 
 - pub `Meeting` struct L17-27 — `{ id: EntityId, title: String, created_at: DateTime<Utc>, updated_at: DateTime<U...` — Container entity for a meeting occurrence.
 - pub `new` function L30-43 — `(title: impl Into<String>, date: DateTime<Utc>) -> Self`
-- pub `Transcript` struct L104-113 — `{ id: EntityId, title: String, created_at: DateTime<Utc>, updated_at: DateTime<U...` — Raw meeting content, typically from a transcription service.
-- pub `new` function L116-127 — `(title: impl Into<String>, meeting_id: EntityId) -> Self`
-- pub `Note` struct L179-188 — `{ id: EntityId, title: String, created_at: DateTime<Utc>, updated_at: DateTime<U...` — Authored content, freeform.
-- pub `new` function L191-202 — `(title: impl Into<String>) -> Self`
-- pub `for_meeting` function L204-208 — `(title: impl Into<String>, meeting_id: EntityId) -> Self`
-- pub `Reflection` struct L261-274 — `{ id: EntityId, title: String, created_at: DateTime<Utc>, updated_at: DateTime<U...` — Time-period bound thinking.
-- pub `new` function L277-297 — `( title: impl Into<String>, period_type: PeriodType, period_start: DateTime<Utc>...`
-- pub `Artifact` struct L357-367 — `{ id: EntityId, title: String, created_at: DateTime<Utc>, updated_at: DateTime<U...` — Deliverable with external source link.
-- pub `new` function L370-382 — `(title: impl Into<String>, source_url: impl Into<String>) -> Self`
+- pub `Transcript` struct L106-115 — `{ id: EntityId, title: String, created_at: DateTime<Utc>, updated_at: DateTime<U...` — Raw meeting content, typically from a transcription service.
+- pub `new` function L118-129 — `(title: impl Into<String>, meeting_id: EntityId) -> Self`
+- pub `Note` struct L183-192 — `{ id: EntityId, title: String, created_at: DateTime<Utc>, updated_at: DateTime<U...` — Authored content, freeform.
+- pub `new` function L195-206 — `(title: impl Into<String>) -> Self`
+- pub `for_meeting` function L208-212 — `(title: impl Into<String>, meeting_id: EntityId) -> Self`
+- pub `Reflection` struct L267-280 — `{ id: EntityId, title: String, created_at: DateTime<Utc>, updated_at: DateTime<U...` — Time-period bound thinking.
+- pub `new` function L283-303 — `( title: impl Into<String>, period_type: PeriodType, period_start: DateTime<Utc>...`
+- pub `Artifact` struct L365-375 — `{ id: EntityId, title: String, created_at: DateTime<Utc>, updated_at: DateTime<U...` — Deliverable with external source link.
+- pub `new` function L378-390 — `(title: impl Into<String>, source_url: impl Into<String>) -> Self`
 -  `Meeting` type L29-44 — `= Meeting`
 -  `Meeting` type L46-52 — `impl Entity for Meeting`
 -  `id` function L47 — `(&self) -> &EntityId`
@@ -51,162 +57,162 @@
 -  `title` function L49 — `(&self) -> &str`
 -  `created_at` function L50 — `(&self) -> DateTime<Utc>`
 -  `updated_at` function L51 — `(&self) -> DateTime<Utc>`
--  `Meeting` type L54-57 — `impl Relatable for Meeting`
--  `relations` function L55 — `(&self, _graph: &Graph) -> Vec<Relation>`
--  `graph_label` function L56 — `(&self) -> &'static str`
--  `Meeting` type L59-74 — `impl Taggable for Meeting`
--  `tags` function L60 — `(&self) -> &[Tag]`
--  `add_tag` function L61-66 — `(&mut self, tag: Tag)`
--  `remove_tag` function L67-73 — `(&mut self, tag: &str)`
--  `Meeting` type L76-86 — `impl ContentBearing for Meeting`
--  `content` function L77 — `(&self) -> &str`
--  `set_content` function L78-81 — `(&mut self, content: String)`
--  `content_path` function L82-85 — `(&self) -> PathBuf`
--  `Meeting` type L88-94 — `impl HasSchedule for Meeting`
--  `scheduled_at` function L89 — `(&self) -> Option<DateTime<Utc>>`
--  `set_scheduled_at` function L90-93 — `(&mut self, at: Option<DateTime<Utc>>)`
--  `Transcript` type L115-128 — `= Transcript`
--  `Transcript` type L130-136 — `impl Entity for Transcript`
--  `id` function L131 — `(&self) -> &EntityId`
--  `entity_type` function L132 — `(&self) -> EntityType`
--  `title` function L133 — `(&self) -> &str`
--  `created_at` function L134 — `(&self) -> DateTime<Utc>`
--  `updated_at` function L135 — `(&self) -> DateTime<Utc>`
--  `Transcript` type L138-141 — `impl Relatable for Transcript`
--  `relations` function L139 — `(&self, _graph: &Graph) -> Vec<Relation>`
--  `graph_label` function L140 — `(&self) -> &'static str`
--  `Transcript` type L143-158 — `impl Taggable for Transcript`
--  `tags` function L144 — `(&self) -> &[Tag]`
--  `add_tag` function L145-150 — `(&mut self, tag: Tag)`
--  `remove_tag` function L151-157 — `(&mut self, tag: &str)`
--  `Transcript` type L160-169 — `impl ContentBearing for Transcript`
--  `content` function L161 — `(&self) -> &str`
--  `set_content` function L162-165 — `(&mut self, content: String)`
--  `content_path` function L166-168 — `(&self) -> PathBuf`
--  `Note` type L190-209 — `= Note`
--  `Note` type L211-217 — `impl Entity for Note`
--  `id` function L212 — `(&self) -> &EntityId`
--  `entity_type` function L213 — `(&self) -> EntityType`
--  `title` function L214 — `(&self) -> &str`
--  `created_at` function L215 — `(&self) -> DateTime<Utc>`
--  `updated_at` function L216 — `(&self) -> DateTime<Utc>`
--  `Note` type L219-222 — `impl Relatable for Note`
--  `relations` function L220 — `(&self, _graph: &Graph) -> Vec<Relation>`
--  `graph_label` function L221 — `(&self) -> &'static str`
--  `Note` type L224-239 — `impl Taggable for Note`
--  `tags` function L225 — `(&self) -> &[Tag]`
--  `add_tag` function L226-231 — `(&mut self, tag: Tag)`
--  `remove_tag` function L232-238 — `(&mut self, tag: &str)`
--  `Note` type L241-250 — `impl ContentBearing for Note`
--  `content` function L242 — `(&self) -> &str`
--  `set_content` function L243-246 — `(&mut self, content: String)`
--  `content_path` function L247-249 — `(&self) -> PathBuf`
--  `Reflection` type L276-298 — `= Reflection`
--  `Reflection` type L300-306 — `impl Entity for Reflection`
--  `id` function L301 — `(&self) -> &EntityId`
--  `entity_type` function L302 — `(&self) -> EntityType`
--  `title` function L303 — `(&self) -> &str`
--  `created_at` function L304 — `(&self) -> DateTime<Utc>`
--  `updated_at` function L305 — `(&self) -> DateTime<Utc>`
--  `Reflection` type L308-311 — `impl Relatable for Reflection`
--  `relations` function L309 — `(&self, _graph: &Graph) -> Vec<Relation>`
--  `graph_label` function L310 — `(&self) -> &'static str`
--  `Reflection` type L313-328 — `impl Taggable for Reflection`
--  `tags` function L314 — `(&self) -> &[Tag]`
--  `add_tag` function L315-320 — `(&mut self, tag: Tag)`
--  `remove_tag` function L321-327 — `(&mut self, tag: &str)`
--  `Reflection` type L330-346 — `impl ContentBearing for Reflection`
--  `content` function L331 — `(&self) -> &str`
--  `set_content` function L332-335 — `(&mut self, content: String)`
--  `content_path` function L336-345 — `(&self) -> PathBuf`
--  `Artifact` type L369-383 — `= Artifact`
--  `Artifact` type L385-391 — `impl Entity for Artifact`
--  `id` function L386 — `(&self) -> &EntityId`
--  `entity_type` function L387 — `(&self) -> EntityType`
--  `title` function L388 — `(&self) -> &str`
--  `created_at` function L389 — `(&self) -> DateTime<Utc>`
--  `updated_at` function L390 — `(&self) -> DateTime<Utc>`
--  `Artifact` type L393-396 — `impl Relatable for Artifact`
--  `relations` function L394 — `(&self, _graph: &Graph) -> Vec<Relation>`
--  `graph_label` function L395 — `(&self) -> &'static str`
--  `Artifact` type L398-413 — `impl Taggable for Artifact`
--  `tags` function L399 — `(&self) -> &[Tag]`
--  `add_tag` function L400-405 — `(&mut self, tag: Tag)`
--  `remove_tag` function L406-412 — `(&mut self, tag: &str)`
--  `Artifact` type L415-424 — `impl ContentBearing for Artifact`
--  `content` function L416 — `(&self) -> &str`
--  `set_content` function L417-420 — `(&mut self, content: String)`
--  `content_path` function L421-423 — `(&self) -> PathBuf`
--  `Artifact` type L426-432 — `impl HasDeadline for Artifact`
--  `deadline` function L427 — `(&self) -> Option<DateTime<Utc>>`
--  `set_deadline` function L428-431 — `(&mut self, deadline: Option<DateTime<Utc>>)`
-
-#### clotho-core/src/domain/entities/derived.rs
-
-- pub `Decision` struct L86-95 — `{ id: EntityId, title: String, created_at: DateTime<Utc>, updated_at: DateTime<U...` — Recorded decision point, extracted from transcripts.
-- pub `draft` function L98-110 — `(title: impl Into<String>, confidence: f32, source_span: Option<SourceSpan>) -> ...`
-- pub `Risk` struct L131-141 — `{ id: EntityId, title: String, created_at: DateTime<Utc>, updated_at: DateTime<U...` — Identified risk, extracted from transcripts.
-- pub `draft` function L144-157 — `(title: impl Into<String>, confidence: f32, source_span: Option<SourceSpan>) -> ...`
-- pub `Blocker` struct L186-196 — `{ id: EntityId, title: String, created_at: DateTime<Utc>, updated_at: DateTime<U...` — Impediment to progress, extracted from transcripts.
-- pub `draft` function L199-212 — `(title: impl Into<String>, confidence: f32, source_span: Option<SourceSpan>) -> ...`
-- pub `Question` struct L241-251 — `{ id: EntityId, title: String, created_at: DateTime<Utc>, updated_at: DateTime<U...` — Open question requiring resolution, extracted from transcripts.
-- pub `draft` function L254-267 — `(title: impl Into<String>, confidence: f32, source_span: Option<SourceSpan>) -> ...`
-- pub `Insight` struct L296-305 — `{ id: EntityId, title: String, created_at: DateTime<Utc>, updated_at: DateTime<U...` — Learning or observation worth preserving, extracted from transcripts.
-- pub `draft` function L308-320 — `(title: impl Into<String>, confidence: f32, source_span: Option<SourceSpan>) -> ...`
--  `impl_extractable` macro L13-48 — `-` — Common fields for all derived (extractable) entities.
--  `impl_relatable` macro L50-57 — `-`
--  `impl_taggable` macro L59-78 — `-`
--  `Decision` type L97-111 — `= Decision`
--  `Decision` type L113-119 — `impl Entity for Decision`
--  `id` function L114 — `(&self) -> &EntityId`
--  `entity_type` function L115 — `(&self) -> EntityType`
--  `title` function L116 — `(&self) -> &str`
--  `created_at` function L117 — `(&self) -> DateTime<Utc>`
--  `updated_at` function L118 — `(&self) -> DateTime<Utc>`
--  `Risk` type L143-158 — `= Risk`
--  `Risk` type L160-166 — `impl Entity for Risk`
--  `id` function L161 — `(&self) -> &EntityId`
--  `entity_type` function L162 — `(&self) -> EntityType`
--  `title` function L163 — `(&self) -> &str`
--  `created_at` function L164 — `(&self) -> DateTime<Utc>`
--  `updated_at` function L165 — `(&self) -> DateTime<Utc>`
--  `Risk` type L172-178 — `impl HasDeadline for Risk`
--  `deadline` function L173 — `(&self) -> Option<DateTime<Utc>>`
--  `set_deadline` function L174-177 — `(&mut self, deadline: Option<DateTime<Utc>>)`
--  `Blocker` type L198-213 — `= Blocker`
--  `Blocker` type L215-221 — `impl Entity for Blocker`
+-  `Meeting` type L54-59 — `impl Relatable for Meeting`
+-  `relations` function L55-57 — `(&self, graph: &GraphStore) -> Vec<Relation>`
+-  `graph_label` function L58 — `(&self) -> &'static str`
+-  `Meeting` type L61-76 — `impl Taggable for Meeting`
+-  `tags` function L62 — `(&self) -> &[Tag]`
+-  `add_tag` function L63-68 — `(&mut self, tag: Tag)`
+-  `remove_tag` function L69-75 — `(&mut self, tag: &str)`
+-  `Meeting` type L78-88 — `impl ContentBearing for Meeting`
+-  `content` function L79 — `(&self) -> &str`
+-  `set_content` function L80-83 — `(&mut self, content: String)`
+-  `content_path` function L84-87 — `(&self) -> PathBuf`
+-  `Meeting` type L90-96 — `impl HasSchedule for Meeting`
+-  `scheduled_at` function L91 — `(&self) -> Option<DateTime<Utc>>`
+-  `set_scheduled_at` function L92-95 — `(&mut self, at: Option<DateTime<Utc>>)`
+-  `Transcript` type L117-130 — `= Transcript`
+-  `Transcript` type L132-138 — `impl Entity for Transcript`
+-  `id` function L133 — `(&self) -> &EntityId`
+-  `entity_type` function L134 — `(&self) -> EntityType`
+-  `title` function L135 — `(&self) -> &str`
+-  `created_at` function L136 — `(&self) -> DateTime<Utc>`
+-  `updated_at` function L137 — `(&self) -> DateTime<Utc>`
+-  `Transcript` type L140-145 — `impl Relatable for Transcript`
+-  `relations` function L141-143 — `(&self, graph: &GraphStore) -> Vec<Relation>`
+-  `graph_label` function L144 — `(&self) -> &'static str`
+-  `Transcript` type L147-162 — `impl Taggable for Transcript`
+-  `tags` function L148 — `(&self) -> &[Tag]`
+-  `add_tag` function L149-154 — `(&mut self, tag: Tag)`
+-  `remove_tag` function L155-161 — `(&mut self, tag: &str)`
+-  `Transcript` type L164-173 — `impl ContentBearing for Transcript`
+-  `content` function L165 — `(&self) -> &str`
+-  `set_content` function L166-169 — `(&mut self, content: String)`
+-  `content_path` function L170-172 — `(&self) -> PathBuf`
+-  `Note` type L194-213 — `= Note`
+-  `Note` type L215-221 — `impl Entity for Note`
 -  `id` function L216 — `(&self) -> &EntityId`
 -  `entity_type` function L217 — `(&self) -> EntityType`
 -  `title` function L218 — `(&self) -> &str`
 -  `created_at` function L219 — `(&self) -> DateTime<Utc>`
 -  `updated_at` function L220 — `(&self) -> DateTime<Utc>`
--  `Blocker` type L227-233 — `impl HasDeadline for Blocker`
--  `deadline` function L228 — `(&self) -> Option<DateTime<Utc>>`
--  `set_deadline` function L229-232 — `(&mut self, deadline: Option<DateTime<Utc>>)`
--  `Question` type L253-268 — `= Question`
--  `Question` type L270-276 — `impl Entity for Question`
--  `id` function L271 — `(&self) -> &EntityId`
--  `entity_type` function L272 — `(&self) -> EntityType`
--  `title` function L273 — `(&self) -> &str`
--  `created_at` function L274 — `(&self) -> DateTime<Utc>`
--  `updated_at` function L275 — `(&self) -> DateTime<Utc>`
--  `Question` type L282-288 — `impl HasDeadline for Question`
--  `deadline` function L283 — `(&self) -> Option<DateTime<Utc>>`
--  `set_deadline` function L284-287 — `(&mut self, deadline: Option<DateTime<Utc>>)`
--  `Insight` type L307-321 — `= Insight`
--  `Insight` type L323-329 — `impl Entity for Insight`
--  `id` function L324 — `(&self) -> &EntityId`
--  `entity_type` function L325 — `(&self) -> EntityType`
--  `title` function L326 — `(&self) -> &str`
--  `created_at` function L327 — `(&self) -> DateTime<Utc>`
--  `updated_at` function L328 — `(&self) -> DateTime<Utc>`
+-  `Note` type L223-228 — `impl Relatable for Note`
+-  `relations` function L224-226 — `(&self, graph: &GraphStore) -> Vec<Relation>`
+-  `graph_label` function L227 — `(&self) -> &'static str`
+-  `Note` type L230-245 — `impl Taggable for Note`
+-  `tags` function L231 — `(&self) -> &[Tag]`
+-  `add_tag` function L232-237 — `(&mut self, tag: Tag)`
+-  `remove_tag` function L238-244 — `(&mut self, tag: &str)`
+-  `Note` type L247-256 — `impl ContentBearing for Note`
+-  `content` function L248 — `(&self) -> &str`
+-  `set_content` function L249-252 — `(&mut self, content: String)`
+-  `content_path` function L253-255 — `(&self) -> PathBuf`
+-  `Reflection` type L282-304 — `= Reflection`
+-  `Reflection` type L306-312 — `impl Entity for Reflection`
+-  `id` function L307 — `(&self) -> &EntityId`
+-  `entity_type` function L308 — `(&self) -> EntityType`
+-  `title` function L309 — `(&self) -> &str`
+-  `created_at` function L310 — `(&self) -> DateTime<Utc>`
+-  `updated_at` function L311 — `(&self) -> DateTime<Utc>`
+-  `Reflection` type L314-319 — `impl Relatable for Reflection`
+-  `relations` function L315-317 — `(&self, graph: &GraphStore) -> Vec<Relation>`
+-  `graph_label` function L318 — `(&self) -> &'static str`
+-  `Reflection` type L321-336 — `impl Taggable for Reflection`
+-  `tags` function L322 — `(&self) -> &[Tag]`
+-  `add_tag` function L323-328 — `(&mut self, tag: Tag)`
+-  `remove_tag` function L329-335 — `(&mut self, tag: &str)`
+-  `Reflection` type L338-354 — `impl ContentBearing for Reflection`
+-  `content` function L339 — `(&self) -> &str`
+-  `set_content` function L340-343 — `(&mut self, content: String)`
+-  `content_path` function L344-353 — `(&self) -> PathBuf`
+-  `Artifact` type L377-391 — `= Artifact`
+-  `Artifact` type L393-399 — `impl Entity for Artifact`
+-  `id` function L394 — `(&self) -> &EntityId`
+-  `entity_type` function L395 — `(&self) -> EntityType`
+-  `title` function L396 — `(&self) -> &str`
+-  `created_at` function L397 — `(&self) -> DateTime<Utc>`
+-  `updated_at` function L398 — `(&self) -> DateTime<Utc>`
+-  `Artifact` type L401-406 — `impl Relatable for Artifact`
+-  `relations` function L402-404 — `(&self, graph: &GraphStore) -> Vec<Relation>`
+-  `graph_label` function L405 — `(&self) -> &'static str`
+-  `Artifact` type L408-423 — `impl Taggable for Artifact`
+-  `tags` function L409 — `(&self) -> &[Tag]`
+-  `add_tag` function L410-415 — `(&mut self, tag: Tag)`
+-  `remove_tag` function L416-422 — `(&mut self, tag: &str)`
+-  `Artifact` type L425-434 — `impl ContentBearing for Artifact`
+-  `content` function L426 — `(&self) -> &str`
+-  `set_content` function L427-430 — `(&mut self, content: String)`
+-  `content_path` function L431-433 — `(&self) -> PathBuf`
+-  `Artifact` type L436-442 — `impl HasDeadline for Artifact`
+-  `deadline` function L437 — `(&self) -> Option<DateTime<Utc>>`
+-  `set_deadline` function L438-441 — `(&mut self, deadline: Option<DateTime<Utc>>)`
+
+#### clotho-core/src/domain/entities/derived.rs
+
+- pub `Decision` struct L88-97 — `{ id: EntityId, title: String, created_at: DateTime<Utc>, updated_at: DateTime<U...` — Recorded decision point, extracted from transcripts.
+- pub `draft` function L100-112 — `(title: impl Into<String>, confidence: f32, source_span: Option<SourceSpan>) -> ...`
+- pub `Risk` struct L133-143 — `{ id: EntityId, title: String, created_at: DateTime<Utc>, updated_at: DateTime<U...` — Identified risk, extracted from transcripts.
+- pub `draft` function L146-159 — `(title: impl Into<String>, confidence: f32, source_span: Option<SourceSpan>) -> ...`
+- pub `Blocker` struct L188-198 — `{ id: EntityId, title: String, created_at: DateTime<Utc>, updated_at: DateTime<U...` — Impediment to progress, extracted from transcripts.
+- pub `draft` function L201-214 — `(title: impl Into<String>, confidence: f32, source_span: Option<SourceSpan>) -> ...`
+- pub `Question` struct L243-253 — `{ id: EntityId, title: String, created_at: DateTime<Utc>, updated_at: DateTime<U...` — Open question requiring resolution, extracted from transcripts.
+- pub `draft` function L256-269 — `(title: impl Into<String>, confidence: f32, source_span: Option<SourceSpan>) -> ...`
+- pub `Insight` struct L298-307 — `{ id: EntityId, title: String, created_at: DateTime<Utc>, updated_at: DateTime<U...` — Learning or observation worth preserving, extracted from transcripts.
+- pub `draft` function L310-322 — `(title: impl Into<String>, confidence: f32, source_span: Option<SourceSpan>) -> ...`
+-  `impl_extractable` macro L13-48 — `-` — Common fields for all derived (extractable) entities.
+-  `impl_relatable` macro L50-59 — `-`
+-  `impl_taggable` macro L61-80 — `-`
+-  `Decision` type L99-113 — `= Decision`
+-  `Decision` type L115-121 — `impl Entity for Decision`
+-  `id` function L116 — `(&self) -> &EntityId`
+-  `entity_type` function L117 — `(&self) -> EntityType`
+-  `title` function L118 — `(&self) -> &str`
+-  `created_at` function L119 — `(&self) -> DateTime<Utc>`
+-  `updated_at` function L120 — `(&self) -> DateTime<Utc>`
+-  `Risk` type L145-160 — `= Risk`
+-  `Risk` type L162-168 — `impl Entity for Risk`
+-  `id` function L163 — `(&self) -> &EntityId`
+-  `entity_type` function L164 — `(&self) -> EntityType`
+-  `title` function L165 — `(&self) -> &str`
+-  `created_at` function L166 — `(&self) -> DateTime<Utc>`
+-  `updated_at` function L167 — `(&self) -> DateTime<Utc>`
+-  `Risk` type L174-180 — `impl HasDeadline for Risk`
+-  `deadline` function L175 — `(&self) -> Option<DateTime<Utc>>`
+-  `set_deadline` function L176-179 — `(&mut self, deadline: Option<DateTime<Utc>>)`
+-  `Blocker` type L200-215 — `= Blocker`
+-  `Blocker` type L217-223 — `impl Entity for Blocker`
+-  `id` function L218 — `(&self) -> &EntityId`
+-  `entity_type` function L219 — `(&self) -> EntityType`
+-  `title` function L220 — `(&self) -> &str`
+-  `created_at` function L221 — `(&self) -> DateTime<Utc>`
+-  `updated_at` function L222 — `(&self) -> DateTime<Utc>`
+-  `Blocker` type L229-235 — `impl HasDeadline for Blocker`
+-  `deadline` function L230 — `(&self) -> Option<DateTime<Utc>>`
+-  `set_deadline` function L231-234 — `(&mut self, deadline: Option<DateTime<Utc>>)`
+-  `Question` type L255-270 — `= Question`
+-  `Question` type L272-278 — `impl Entity for Question`
+-  `id` function L273 — `(&self) -> &EntityId`
+-  `entity_type` function L274 — `(&self) -> EntityType`
+-  `title` function L275 — `(&self) -> &str`
+-  `created_at` function L276 — `(&self) -> DateTime<Utc>`
+-  `updated_at` function L277 — `(&self) -> DateTime<Utc>`
+-  `Question` type L284-290 — `impl HasDeadline for Question`
+-  `deadline` function L285 — `(&self) -> Option<DateTime<Utc>>`
+-  `set_deadline` function L286-289 — `(&mut self, deadline: Option<DateTime<Utc>>)`
+-  `Insight` type L309-323 — `= Insight`
+-  `Insight` type L325-331 — `impl Entity for Insight`
+-  `id` function L326 — `(&self) -> &EntityId`
+-  `entity_type` function L327 — `(&self) -> EntityType`
+-  `title` function L328 — `(&self) -> &str`
+-  `created_at` function L329 — `(&self) -> DateTime<Utc>`
+-  `updated_at` function L330 — `(&self) -> DateTime<Utc>`
 
 #### clotho-core/src/domain/entities/execution.rs
 
 - pub `Workstream` struct L15-24 — `{ id: EntityId, title: String, created_at: DateTime<Utc>, updated_at: DateTime<U...` — Long-running work thread.
 - pub `new` function L27-39 — `(title: impl Into<String>) -> Self`
-- pub `Task` struct L111-122 — `{ id: EntityId, title: String, created_at: DateTime<Utc>, updated_at: DateTime<U...` — Discrete work item with a state machine lifecycle.
-- pub `new` function L125-139 — `(title: impl Into<String>) -> Self`
+- pub `Task` struct L113-124 — `{ id: EntityId, title: String, created_at: DateTime<Utc>, updated_at: DateTime<U...` — Discrete work item with a state machine lifecycle.
+- pub `new` function L127-141 — `(title: impl Into<String>) -> Self`
 -  `Workstream` type L26-40 — `= Workstream`
 -  `Workstream` type L42-48 — `impl Entity for Workstream`
 -  `id` function L43 — `(&self) -> &EntityId`
@@ -217,51 +223,51 @@
 -  `Workstream` type L50-56 — `impl Activatable for Workstream`
 -  `status` function L51 — `(&self) -> Status`
 -  `set_status` function L52-55 — `(&mut self, status: Status)`
--  `Workstream` type L58-61 — `impl Relatable for Workstream`
--  `relations` function L59 — `(&self, _graph: &Graph) -> Vec<Relation>`
--  `graph_label` function L60 — `(&self) -> &'static str`
--  `Workstream` type L63-78 — `impl Taggable for Workstream`
--  `tags` function L64 — `(&self) -> &[Tag]`
--  `add_tag` function L65-70 — `(&mut self, tag: Tag)`
--  `remove_tag` function L71-77 — `(&mut self, tag: &str)`
--  `Workstream` type L80-89 — `impl ContentBearing for Workstream`
--  `content` function L81 — `(&self) -> &str`
--  `set_content` function L82-85 — `(&mut self, content: String)`
--  `content_path` function L86-88 — `(&self) -> PathBuf`
--  `Workstream` type L91-97 — `impl HasCadence for Workstream`
--  `cadence` function L92 — `(&self) -> Option<&Cadence>`
--  `set_cadence` function L93-96 — `(&mut self, cadence: Option<Cadence>)`
--  `Task` type L124-140 — `= Task`
--  `Task` type L142-148 — `impl Entity for Task`
--  `id` function L143 — `(&self) -> &EntityId`
--  `entity_type` function L144 — `(&self) -> EntityType`
--  `title` function L145 — `(&self) -> &str`
--  `created_at` function L146 — `(&self) -> DateTime<Utc>`
--  `updated_at` function L147 — `(&self) -> DateTime<Utc>`
--  `Task` type L150-175 — `impl Taskable for Task`
--  `state` function L151 — `(&self) -> TaskState`
--  `transition` function L153-165 — `(&mut self, to: TaskState) -> Result<(), TransitionError>`
--  `valid_transitions` function L167-174 — `(&self) -> Vec<TaskState>`
--  `Task` type L177-180 — `impl Relatable for Task`
--  `relations` function L178 — `(&self, _graph: &Graph) -> Vec<Relation>`
--  `graph_label` function L179 — `(&self) -> &'static str`
--  `Task` type L182-197 — `impl Taggable for Task`
--  `tags` function L183 — `(&self) -> &[Tag]`
--  `add_tag` function L184-189 — `(&mut self, tag: Tag)`
--  `remove_tag` function L190-196 — `(&mut self, tag: &str)`
--  `Task` type L199-208 — `impl ContentBearing for Task`
--  `content` function L200 — `(&self) -> &str`
--  `set_content` function L201-204 — `(&mut self, content: String)`
--  `content_path` function L205-207 — `(&self) -> PathBuf`
--  `Task` type L210-216 — `impl HasCadence for Task`
--  `cadence` function L211 — `(&self) -> Option<&Cadence>`
--  `set_cadence` function L212-215 — `(&mut self, cadence: Option<Cadence>)`
--  `Task` type L218-224 — `impl HasDeadline for Task`
--  `deadline` function L219 — `(&self) -> Option<DateTime<Utc>>`
--  `set_deadline` function L220-223 — `(&mut self, deadline: Option<DateTime<Utc>>)`
--  `Task` type L226-232 — `impl HasSchedule for Task`
--  `scheduled_at` function L227 — `(&self) -> Option<DateTime<Utc>>`
--  `set_scheduled_at` function L228-231 — `(&mut self, at: Option<DateTime<Utc>>)`
+-  `Workstream` type L58-63 — `impl Relatable for Workstream`
+-  `relations` function L59-61 — `(&self, graph: &GraphStore) -> Vec<Relation>`
+-  `graph_label` function L62 — `(&self) -> &'static str`
+-  `Workstream` type L65-80 — `impl Taggable for Workstream`
+-  `tags` function L66 — `(&self) -> &[Tag]`
+-  `add_tag` function L67-72 — `(&mut self, tag: Tag)`
+-  `remove_tag` function L73-79 — `(&mut self, tag: &str)`
+-  `Workstream` type L82-91 — `impl ContentBearing for Workstream`
+-  `content` function L83 — `(&self) -> &str`
+-  `set_content` function L84-87 — `(&mut self, content: String)`
+-  `content_path` function L88-90 — `(&self) -> PathBuf`
+-  `Workstream` type L93-99 — `impl HasCadence for Workstream`
+-  `cadence` function L94 — `(&self) -> Option<&Cadence>`
+-  `set_cadence` function L95-98 — `(&mut self, cadence: Option<Cadence>)`
+-  `Task` type L126-142 — `= Task`
+-  `Task` type L144-150 — `impl Entity for Task`
+-  `id` function L145 — `(&self) -> &EntityId`
+-  `entity_type` function L146 — `(&self) -> EntityType`
+-  `title` function L147 — `(&self) -> &str`
+-  `created_at` function L148 — `(&self) -> DateTime<Utc>`
+-  `updated_at` function L149 — `(&self) -> DateTime<Utc>`
+-  `Task` type L152-177 — `impl Taskable for Task`
+-  `state` function L153 — `(&self) -> TaskState`
+-  `transition` function L155-167 — `(&mut self, to: TaskState) -> Result<(), TransitionError>`
+-  `valid_transitions` function L169-176 — `(&self) -> Vec<TaskState>`
+-  `Task` type L179-184 — `impl Relatable for Task`
+-  `relations` function L180-182 — `(&self, graph: &GraphStore) -> Vec<Relation>`
+-  `graph_label` function L183 — `(&self) -> &'static str`
+-  `Task` type L186-201 — `impl Taggable for Task`
+-  `tags` function L187 — `(&self) -> &[Tag]`
+-  `add_tag` function L188-193 — `(&mut self, tag: Tag)`
+-  `remove_tag` function L194-200 — `(&mut self, tag: &str)`
+-  `Task` type L203-212 — `impl ContentBearing for Task`
+-  `content` function L204 — `(&self) -> &str`
+-  `set_content` function L205-208 — `(&mut self, content: String)`
+-  `content_path` function L209-211 — `(&self) -> PathBuf`
+-  `Task` type L214-220 — `impl HasCadence for Task`
+-  `cadence` function L215 — `(&self) -> Option<&Cadence>`
+-  `set_cadence` function L216-219 — `(&mut self, cadence: Option<Cadence>)`
+-  `Task` type L222-228 — `impl HasDeadline for Task`
+-  `deadline` function L223 — `(&self) -> Option<DateTime<Utc>>`
+-  `set_deadline` function L224-227 — `(&mut self, deadline: Option<DateTime<Utc>>)`
+-  `Task` type L230-236 — `impl HasSchedule for Task`
+-  `scheduled_at` function L231 — `(&self) -> Option<DateTime<Utc>>`
+-  `set_scheduled_at` function L232-235 — `(&mut self, at: Option<DateTime<Utc>>)`
 
 #### clotho-core/src/domain/entities/mod.rs
 
@@ -283,26 +289,26 @@
 -  `title` function L47 — `(&self) -> &str`
 -  `created_at` function L48 — `(&self) -> DateTime<Utc>`
 -  `updated_at` function L49 — `(&self) -> DateTime<Utc>`
--  `Person` type L52-55 — `impl Relatable for Person`
--  `relations` function L53 — `(&self, _graph: &Graph) -> Vec<Relation>`
--  `graph_label` function L54 — `(&self) -> &'static str`
--  `Person` type L57-72 — `impl Taggable for Person`
--  `tags` function L58 — `(&self) -> &[Tag]`
--  `add_tag` function L59-64 — `(&mut self, tag: Tag)`
--  `remove_tag` function L65-71 — `(&mut self, tag: &str)`
--  `Person` type L74-83 — `impl ContentBearing for Person`
--  `content` function L75 — `(&self) -> &str`
--  `set_content` function L76-79 — `(&mut self, content: String)`
--  `content_path` function L80-82 — `(&self) -> PathBuf`
+-  `Person` type L52-57 — `impl Relatable for Person`
+-  `relations` function L53-55 — `(&self, graph: &GraphStore) -> Vec<Relation>`
+-  `graph_label` function L56 — `(&self) -> &'static str`
+-  `Person` type L59-74 — `impl Taggable for Person`
+-  `tags` function L60 — `(&self) -> &[Tag]`
+-  `add_tag` function L61-66 — `(&mut self, tag: Tag)`
+-  `remove_tag` function L67-73 — `(&mut self, tag: &str)`
+-  `Person` type L76-85 — `impl ContentBearing for Person`
+-  `content` function L77 — `(&self) -> &str`
+-  `set_content` function L78-81 — `(&mut self, content: String)`
+-  `content_path` function L82-84 — `(&self) -> PathBuf`
 
 #### clotho-core/src/domain/entities/structural.rs
 
 - pub `Program` struct L16-25 — `{ id: EntityId, title: String, created_at: DateTime<Utc>, updated_at: DateTime<U...` — Strategic initiative with explicit objectives.
 - pub `new` function L28-40 — `(title: impl Into<String>) -> Self`
-- pub `Responsibility` struct L108-117 — `{ id: EntityId, title: String, created_at: DateTime<Utc>, updated_at: DateTime<U...` — Ongoing role obligation that never "completes".
-- pub `new` function L120-132 — `(title: impl Into<String>) -> Self`
-- pub `Objective` struct L200-211 — `{ id: EntityId, title: String, created_at: DateTime<Utc>, updated_at: DateTime<U...` — Outcome within a Program.
-- pub `new` function L214-227 — `(title: impl Into<String>, program_id: EntityId) -> Self`
+- pub `Responsibility` struct L110-119 — `{ id: EntityId, title: String, created_at: DateTime<Utc>, updated_at: DateTime<U...` — Ongoing role obligation that never "completes".
+- pub `new` function L122-134 — `(title: impl Into<String>) -> Self`
+- pub `Objective` struct L204-215 — `{ id: EntityId, title: String, created_at: DateTime<Utc>, updated_at: DateTime<U...` — Outcome within a Program.
+- pub `new` function L218-231 — `(title: impl Into<String>, program_id: EntityId) -> Self`
 -  `Program` type L27-41 — `= Program`
 -  `Program` type L43-49 — `impl Entity for Program`
 -  `id` function L44 — `(&self) -> &EntityId`
@@ -313,68 +319,68 @@
 -  `Program` type L51-57 — `impl Activatable for Program`
 -  `status` function L52 — `(&self) -> Status`
 -  `set_status` function L53-56 — `(&mut self, status: Status)`
--  `Program` type L59-62 — `impl Relatable for Program`
--  `relations` function L60 — `(&self, _graph: &Graph) -> Vec<Relation>`
--  `graph_label` function L61 — `(&self) -> &'static str`
--  `Program` type L64-79 — `impl Taggable for Program`
--  `tags` function L65 — `(&self) -> &[Tag]`
--  `add_tag` function L66-71 — `(&mut self, tag: Tag)`
--  `remove_tag` function L72-78 — `(&mut self, tag: &str)`
--  `Program` type L81-90 — `impl ContentBearing for Program`
--  `content` function L82 — `(&self) -> &str`
--  `set_content` function L83-86 — `(&mut self, content: String)`
--  `content_path` function L87-89 — `(&self) -> PathBuf`
--  `Program` type L92-98 — `impl HasCadence for Program`
--  `cadence` function L93 — `(&self) -> Option<&Cadence>`
--  `set_cadence` function L94-97 — `(&mut self, cadence: Option<Cadence>)`
--  `Responsibility` type L119-133 — `= Responsibility`
--  `Responsibility` type L135-141 — `impl Entity for Responsibility`
--  `id` function L136 — `(&self) -> &EntityId`
--  `entity_type` function L137 — `(&self) -> EntityType`
--  `title` function L138 — `(&self) -> &str`
--  `created_at` function L139 — `(&self) -> DateTime<Utc>`
--  `updated_at` function L140 — `(&self) -> DateTime<Utc>`
--  `Responsibility` type L143-149 — `impl Activatable for Responsibility`
--  `status` function L144 — `(&self) -> Status`
--  `set_status` function L145-148 — `(&mut self, status: Status)`
--  `Responsibility` type L151-154 — `impl Relatable for Responsibility`
--  `relations` function L152 — `(&self, _graph: &Graph) -> Vec<Relation>`
--  `graph_label` function L153 — `(&self) -> &'static str`
--  `Responsibility` type L156-171 — `impl Taggable for Responsibility`
--  `tags` function L157 — `(&self) -> &[Tag]`
--  `add_tag` function L158-163 — `(&mut self, tag: Tag)`
--  `remove_tag` function L164-170 — `(&mut self, tag: &str)`
--  `Responsibility` type L173-182 — `impl ContentBearing for Responsibility`
--  `content` function L174 — `(&self) -> &str`
--  `set_content` function L175-178 — `(&mut self, content: String)`
--  `content_path` function L179-181 — `(&self) -> PathBuf`
--  `Responsibility` type L184-190 — `impl HasCadence for Responsibility`
--  `cadence` function L185 — `(&self) -> Option<&Cadence>`
--  `set_cadence` function L186-189 — `(&mut self, cadence: Option<Cadence>)`
--  `Objective` type L213-228 — `= Objective`
--  `Objective` type L230-236 — `impl Entity for Objective`
--  `id` function L231 — `(&self) -> &EntityId`
--  `entity_type` function L232 — `(&self) -> EntityType`
--  `title` function L233 — `(&self) -> &str`
--  `created_at` function L234 — `(&self) -> DateTime<Utc>`
--  `updated_at` function L235 — `(&self) -> DateTime<Utc>`
--  `Objective` type L238-244 — `impl Activatable for Objective`
--  `status` function L239 — `(&self) -> Status`
--  `set_status` function L240-243 — `(&mut self, status: Status)`
--  `Objective` type L246-249 — `impl Relatable for Objective`
--  `relations` function L247 — `(&self, _graph: &Graph) -> Vec<Relation>`
--  `graph_label` function L248 — `(&self) -> &'static str`
--  `Objective` type L251-266 — `impl Taggable for Objective`
--  `tags` function L252 — `(&self) -> &[Tag]`
--  `add_tag` function L253-258 — `(&mut self, tag: Tag)`
--  `remove_tag` function L259-265 — `(&mut self, tag: &str)`
--  `Objective` type L268-277 — `impl ContentBearing for Objective`
--  `content` function L269 — `(&self) -> &str`
--  `set_content` function L270-273 — `(&mut self, content: String)`
--  `content_path` function L274-276 — `(&self) -> PathBuf`
--  `Objective` type L279-285 — `impl HasDeadline for Objective`
--  `deadline` function L280 — `(&self) -> Option<DateTime<Utc>>`
--  `set_deadline` function L281-284 — `(&mut self, deadline: Option<DateTime<Utc>>)`
+-  `Program` type L59-64 — `impl Relatable for Program`
+-  `relations` function L60-62 — `(&self, graph: &GraphStore) -> Vec<Relation>`
+-  `graph_label` function L63 — `(&self) -> &'static str`
+-  `Program` type L66-81 — `impl Taggable for Program`
+-  `tags` function L67 — `(&self) -> &[Tag]`
+-  `add_tag` function L68-73 — `(&mut self, tag: Tag)`
+-  `remove_tag` function L74-80 — `(&mut self, tag: &str)`
+-  `Program` type L83-92 — `impl ContentBearing for Program`
+-  `content` function L84 — `(&self) -> &str`
+-  `set_content` function L85-88 — `(&mut self, content: String)`
+-  `content_path` function L89-91 — `(&self) -> PathBuf`
+-  `Program` type L94-100 — `impl HasCadence for Program`
+-  `cadence` function L95 — `(&self) -> Option<&Cadence>`
+-  `set_cadence` function L96-99 — `(&mut self, cadence: Option<Cadence>)`
+-  `Responsibility` type L121-135 — `= Responsibility`
+-  `Responsibility` type L137-143 — `impl Entity for Responsibility`
+-  `id` function L138 — `(&self) -> &EntityId`
+-  `entity_type` function L139 — `(&self) -> EntityType`
+-  `title` function L140 — `(&self) -> &str`
+-  `created_at` function L141 — `(&self) -> DateTime<Utc>`
+-  `updated_at` function L142 — `(&self) -> DateTime<Utc>`
+-  `Responsibility` type L145-151 — `impl Activatable for Responsibility`
+-  `status` function L146 — `(&self) -> Status`
+-  `set_status` function L147-150 — `(&mut self, status: Status)`
+-  `Responsibility` type L153-158 — `impl Relatable for Responsibility`
+-  `relations` function L154-156 — `(&self, graph: &GraphStore) -> Vec<Relation>`
+-  `graph_label` function L157 — `(&self) -> &'static str`
+-  `Responsibility` type L160-175 — `impl Taggable for Responsibility`
+-  `tags` function L161 — `(&self) -> &[Tag]`
+-  `add_tag` function L162-167 — `(&mut self, tag: Tag)`
+-  `remove_tag` function L168-174 — `(&mut self, tag: &str)`
+-  `Responsibility` type L177-186 — `impl ContentBearing for Responsibility`
+-  `content` function L178 — `(&self) -> &str`
+-  `set_content` function L179-182 — `(&mut self, content: String)`
+-  `content_path` function L183-185 — `(&self) -> PathBuf`
+-  `Responsibility` type L188-194 — `impl HasCadence for Responsibility`
+-  `cadence` function L189 — `(&self) -> Option<&Cadence>`
+-  `set_cadence` function L190-193 — `(&mut self, cadence: Option<Cadence>)`
+-  `Objective` type L217-232 — `= Objective`
+-  `Objective` type L234-240 — `impl Entity for Objective`
+-  `id` function L235 — `(&self) -> &EntityId`
+-  `entity_type` function L236 — `(&self) -> EntityType`
+-  `title` function L237 — `(&self) -> &str`
+-  `created_at` function L238 — `(&self) -> DateTime<Utc>`
+-  `updated_at` function L239 — `(&self) -> DateTime<Utc>`
+-  `Objective` type L242-248 — `impl Activatable for Objective`
+-  `status` function L243 — `(&self) -> Status`
+-  `set_status` function L244-247 — `(&mut self, status: Status)`
+-  `Objective` type L250-255 — `impl Relatable for Objective`
+-  `relations` function L251-253 — `(&self, graph: &GraphStore) -> Vec<Relation>`
+-  `graph_label` function L254 — `(&self) -> &'static str`
+-  `Objective` type L257-272 — `impl Taggable for Objective`
+-  `tags` function L258 — `(&self) -> &[Tag]`
+-  `add_tag` function L259-264 — `(&mut self, tag: Tag)`
+-  `remove_tag` function L265-271 — `(&mut self, tag: &str)`
+-  `Objective` type L274-283 — `impl ContentBearing for Objective`
+-  `content` function L275 — `(&self) -> &str`
+-  `set_content` function L276-279 — `(&mut self, content: String)`
+-  `content_path` function L280-282 — `(&self) -> PathBuf`
+-  `Objective` type L285-291 — `impl HasDeadline for Objective`
+-  `deadline` function L286 — `(&self) -> Option<DateTime<Utc>>`
+-  `set_deadline` function L287-290 — `(&mut self, deadline: Option<DateTime<Utc>>)`
 
 ### clotho-core/src/domain
 
@@ -411,19 +417,20 @@
 
 #### clotho-core/src/domain/traits.rs
 
-- pub `Graph` struct L13 — `-` — Placeholder for the graph database handle.
-- pub `Relation` struct L17-21 — `{ source_id: EntityId, target_id: EntityId, relation_type: RelationType }` — A typed relation between two entities.
-- pub `RelationType` enum L26-39 — `BelongsTo | RelatesTo | Delivers | SpawnedFrom | ExtractedFrom | HasDecision | H...` — Typed relation kinds per CLO-S-0005.
-- pub `Entity` interface L46-52 — `{ fn id(), fn entity_type(), fn title(), fn created_at(), fn updated_at() }` — Core identity for all entities.
-- pub `Activatable` interface L55-58 — `{ fn status(), fn set_status() }` — Entities with active/inactive lifecycle.
-- pub `Taskable` interface L67-71 — `{ fn state(), fn transition(), fn valid_transitions() }` — Entities with task-like workflow state machine.
-- pub `Extractable` interface L76-82 — `{ fn extraction_status(), fn source_span(), fn confidence(), fn promote(), fn di...` — Entities produced by AI extraction with a draft lifecycle.
-- pub `Relatable` interface L85-88 — `{ fn relations(), fn graph_label() }` — Entities that participate in the relation graph.
-- pub `Taggable` interface L91-95 — `{ fn tags(), fn add_tag(), fn remove_tag() }` — Entities with freeform tags.
-- pub `ContentBearing` interface L98-102 — `{ fn content(), fn set_content(), fn content_path() }` — Entities with markdown content stored as files.
-- pub `HasCadence` interface L114-117 — `{ fn cadence(), fn set_cadence() }` — Entities with a recurring schedule (e.g., "weekly sync every Monday").
-- pub `HasDeadline` interface L120-123 — `{ fn deadline(), fn set_deadline() }` — Entities with a hard due date.
-- pub `HasSchedule` interface L126-129 — `{ fn scheduled_at(), fn set_scheduled_at() }` — Entities scheduled at a specific date/time.
+- pub `Relation` struct L16-20 — `{ source_id: EntityId, target_id: EntityId, relation_type: RelationType }` — A typed relation between two entities (domain-level view of a graph edge).
+- pub `RelationType` enum L35-48 — `BelongsTo | RelatesTo | Delivers | SpawnedFrom | ExtractedFrom | HasDecision | H...` — Typed relation kinds per CLO-S-0005.
+- pub `Entity` interface L55-61 — `{ fn id(), fn entity_type(), fn title(), fn created_at(), fn updated_at() }` — Core identity for all entities.
+- pub `Activatable` interface L64-67 — `{ fn status(), fn set_status() }` — Entities with active/inactive lifecycle.
+- pub `Taskable` interface L76-80 — `{ fn state(), fn transition(), fn valid_transitions() }` — Entities with task-like workflow state machine.
+- pub `Extractable` interface L85-91 — `{ fn extraction_status(), fn source_span(), fn confidence(), fn promote(), fn di...` — Entities produced by AI extraction with a draft lifecycle.
+- pub `Relatable` interface L94-97 — `{ fn relations(), fn graph_label() }` — Entities that participate in the relation graph.
+- pub `Taggable` interface L100-104 — `{ fn tags(), fn add_tag(), fn remove_tag() }` — Entities with freeform tags.
+- pub `ContentBearing` interface L107-111 — `{ fn content(), fn set_content(), fn content_path() }` — Entities with markdown content stored as files.
+- pub `HasCadence` interface L123-126 — `{ fn cadence(), fn set_cadence() }` — Entities with a recurring schedule (e.g., "weekly sync every Monday").
+- pub `HasDeadline` interface L129-132 — `{ fn deadline(), fn set_deadline() }` — Entities with a hard due date.
+- pub `HasSchedule` interface L135-138 — `{ fn scheduled_at(), fn set_scheduled_at() }` — Entities scheduled at a specific date/time.
+-  `Relation` type L22-30 — `= Relation`
+-  `from` function L23-29 — `(edge: EdgeInfo) -> Self`
 
 #### clotho-core/src/domain/types.rs
 
@@ -465,14 +472,69 @@
 
 #### clotho-core/src/error.rs
 
-- pub `ClothoError` enum L5-11 — `Transition | Promotion`
-- pub `TransitionError` struct L16-19 — `{ from: TaskState, to: TaskState }` — Error when an invalid task state transition is attempted.
-- pub `PromotionError` struct L24-26 — `{ status: ExtractionStatus }` — Error when promoting a non-draft extraction.
+- pub `ClothoError` enum L5-14 — `Transition | Promotion | Graph`
+- pub `GraphError` enum L18-30 — `OpenFailed | QueryFailed | NodeNotFound | EdgeNotFound` — Errors from graph operations.
+- pub `TransitionError` struct L35-38 — `{ from: TaskState, to: TaskState }` — Error when an invalid task state transition is attempted.
+- pub `PromotionError` struct L43-45 — `{ status: ExtractionStatus }` — Error when promoting a non-draft extraction.
 
 #### clotho-core/src/lib.rs
 
 - pub `domain` module L1 — `-`
 - pub `error` module L2 — `-`
+- pub `graph` module L3 — `-`
+
+### clotho-core/src/graph
+
+> *Semantic summary to be generated by AI agent.*
+
+#### clotho-core/src/graph/edges.rs
+
+- pub `EdgeInfo` struct L10-14 — `{ source_id: EntityId, target_id: EntityId, relation_type: RelationType }` — Metadata about an edge in the graph.
+- pub `add_edge` function L20-35 — `( &self, source: &EntityId, target: &EntityId, rel_type: RelationType, ) -> Resu...` — Add a typed relation between two nodes.
+- pub `add_edge_with_props` function L38-53 — `( &self, source: &EntityId, target: &EntityId, rel_type: RelationType, props: Ve...` — Add a typed relation with properties (for temporal edges, etc.).
+- pub `remove_edge` function L56-69 — `( &self, source: &EntityId, target: &EntityId, rel_type: RelationType, ) -> Resu...` — Remove a typed relation between two nodes.
+- pub `has_edge` function L72-85 — `( &self, source: &EntityId, target: &EntityId, rel_type: RelationType, ) -> Resu...` — Check whether a typed relation exists between two nodes.
+- pub `get_edges_from` function L88-94 — `(&self, source: &EntityId) -> Result<Vec<EdgeInfo>, GraphError>` — Get all outgoing edges from a node.
+- pub `get_edges_by_type` function L97-109 — `( &self, source: &EntityId, rel_type: RelationType, ) -> Result<Vec<EdgeInfo>, G...` — Get outgoing edges of a specific type from a node.
+- pub `get_edges_to` function L112-118 — `(&self, target: &EntityId) -> Result<Vec<EdgeInfo>, GraphError>` — Get all incoming edges to a node.
+-  `GraphStore` type L16-148 — `= GraphStore`
+-  `query_edges` function L121-147 — `(&self, query: &str) -> Result<Vec<EdgeInfo>, GraphError>` — Internal helper to execute an edge query and parse results.
+-  `rel_type_to_string` function L151-166 — `(rel_type: RelationType) -> String` — Convert RelationType to the string used as graphqlite relationship type.
+-  `parse_relation_type` function L169-185 — `(s: &str) -> Option<RelationType>` — Parse a RelationType from its string representation.
+-  `parse_entity_id` function L188-190 — `(s: &str) -> Option<EntityId>` — Parse an EntityId from a UUID string.
+
+#### clotho-core/src/graph/mod.rs
+
+- pub `edges` module L1 — `-`
+- pub `nodes` module L2 — `-`
+- pub `queries` module L3 — `-`
+- pub `GraphStore` struct L15-17 — `{ inner: Graph }` — The core graph store wrapping graphqlite.
+- pub `open` function L21-24 — `(path: &Path) -> Result<Self, GraphError>` — Open a file-backed graph database.
+- pub `in_memory` function L27-31 — `() -> Result<Self, GraphError>` — Create an in-memory graph database (for tests).
+- pub `graph` function L34-36 — `(&self) -> &Graph` — Access the underlying graphqlite Graph for advanced operations.
+-  `GraphStore` type L19-37 — `= GraphStore`
+
+#### clotho-core/src/graph/nodes.rs
+
+- pub `NodeInfo` struct L9-13 — `{ id: EntityId, entity_type: EntityType, title: String }` — Metadata about a node in the graph.
+- pub `register_node` function L19-38 — `( &self, id: &EntityId, entity_type: EntityType, title: &str, ) -> Result<(), Gr...` — Register an entity as a node in the graph.
+- pub `remove_node` function L41-45 — `(&self, id: &EntityId) -> Result<(), GraphError>` — Remove a node and all its edges from the graph.
+- pub `get_node` function L48-74 — `(&self, id: &EntityId) -> Result<Option<NodeInfo>, GraphError>` — Get metadata about a node by querying with Cypher.
+- pub `has_node` function L77-81 — `(&self, id: &EntityId) -> Result<bool, GraphError>` — Check whether a node exists in the graph.
+-  `GraphStore` type L15-82 — `= GraphStore`
+-  `parse_entity_type` function L85-105 — `(s: &str) -> Option<EntityType>` — Parse an EntityType from its Display string.
+
+#### clotho-core/src/graph/queries.rs
+
+- pub `GraphStats` struct L12-15 — `{ node_count: usize, edge_count: usize }` — Summary statistics for the graph.
+- pub `get_neighbors` function L19-29 — `(&self, id: &EntityId) -> Result<Vec<NodeInfo>, GraphError>` — Get all nodes connected to a given node (regardless of direction or type).
+- pub `get_related_by_type` function L32-44 — `( &self, id: &EntityId, rel_type: RelationType, ) -> Result<Vec<NodeInfo>, Graph...` — Get nodes reached by outgoing edges of a specific type.
+- pub `get_incoming_by_type` function L47-59 — `( &self, id: &EntityId, rel_type: RelationType, ) -> Result<Vec<NodeInfo>, Graph...` — Get nodes with incoming edges of a specific type pointing to this node.
+- pub `get_entities_by_label` function L62-71 — `( &self, entity_type: EntityType, ) -> Result<Vec<NodeInfo>, GraphError>` — Get all nodes of a specific entity type.
+- pub `raw_cypher` function L74-79 — `(&self, query: &str) -> Result<CypherResult, GraphError>` — Execute a raw Cypher query.
+- pub `stats` function L82-91 — `(&self) -> Result<GraphStats, GraphError>` — Get node and edge counts.
+-  `GraphStore` type L17-120 — `= GraphStore`
+-  `query_nodes` function L94-119 — `(&self, query: &str) -> Result<Vec<NodeInfo>, GraphError>` — Internal helper to execute a node query and parse results.
 
 ### clotho-core/tests
 
@@ -527,4 +589,30 @@
 -  `trait_composition_capture` function L384-390 — `()`
 -  `trait_composition_derived` function L393-411 — `()`
 -  `trait_composition_person` function L414-417 — `()`
+
+#### clotho-core/tests/graph_tests.rs
+
+-  `setup` function L7-9 — `() -> GraphStore`
+-  `graph_store_in_memory_empty` function L16-21 — `()`
+-  `register_and_get_node` function L28-39 — `()`
+-  `has_node_false_for_missing` function L42-46 — `()`
+-  `get_node_returns_none_for_missing` function L49-53 — `()`
+-  `remove_node` function L56-64 — `()`
+-  `upsert_node_updates_title` function L67-79 — `()`
+-  `add_and_has_edge` function L86-95 — `()`
+-  `has_edge_false_when_missing` function L98-106 — `()`
+-  `remove_edge` function L109-121 — `()`
+-  `get_edges_from` function L124-139 — `()`
+-  `get_edges_by_type_filters` function L142-161 — `()`
+-  `get_edges_to` function L164-178 — `()`
+-  `add_edge_with_props` function L185-197 — `()`
+-  `relatable_returns_real_edges` function L204-217 — `()`
+-  `relatable_empty_when_no_edges` function L220-227 — `()`
+-  `get_neighbors` function L234-248 — `()`
+-  `get_related_by_type` function L251-266 — `()`
+-  `get_incoming_by_type` function L269-283 — `()`
+-  `get_entities_by_label` function L286-297 — `()`
+-  `raw_cypher_query` function L304-317 — `()`
+-  `remove_node_cascades_edges` function L324-337 — `()`
+-  `stats_counts` function L344-355 — `()`
 

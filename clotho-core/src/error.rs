@@ -8,6 +8,25 @@ pub enum ClothoError {
 
     #[error(transparent)]
     Promotion(#[from] PromotionError),
+
+    #[error(transparent)]
+    Graph(#[from] GraphError),
+}
+
+/// Errors from graph operations.
+#[derive(Debug, Error)]
+pub enum GraphError {
+    #[error("failed to open graph database: {0}")]
+    OpenFailed(String),
+
+    #[error("graph query failed: {0}")]
+    QueryFailed(String),
+
+    #[error("node not found: {0}")]
+    NodeNotFound(String),
+
+    #[error("edge not found: {0} -[{1}]-> {2}")]
+    EdgeNotFound(String, String, String),
 }
 
 /// Error when an invalid task state transition is attempted.

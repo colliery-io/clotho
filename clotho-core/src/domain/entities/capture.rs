@@ -52,7 +52,9 @@ impl Entity for Meeting {
 }
 
 impl Relatable for Meeting {
-    fn relations(&self, _graph: &Graph) -> Vec<Relation> { Vec::new() }
+    fn relations(&self, graph: &GraphStore) -> Vec<Relation> {
+        graph.get_edges_from(self.id()).unwrap_or_default().into_iter().map(Relation::from).collect()
+    }
     fn graph_label(&self) -> &'static str { "Meeting" }
 }
 
@@ -136,7 +138,9 @@ impl Entity for Transcript {
 }
 
 impl Relatable for Transcript {
-    fn relations(&self, _graph: &Graph) -> Vec<Relation> { Vec::new() }
+    fn relations(&self, graph: &GraphStore) -> Vec<Relation> {
+        graph.get_edges_from(self.id()).unwrap_or_default().into_iter().map(Relation::from).collect()
+    }
     fn graph_label(&self) -> &'static str { "Transcript" }
 }
 
@@ -217,7 +221,9 @@ impl Entity for Note {
 }
 
 impl Relatable for Note {
-    fn relations(&self, _graph: &Graph) -> Vec<Relation> { Vec::new() }
+    fn relations(&self, graph: &GraphStore) -> Vec<Relation> {
+        graph.get_edges_from(self.id()).unwrap_or_default().into_iter().map(Relation::from).collect()
+    }
     fn graph_label(&self) -> &'static str { "Note" }
 }
 
@@ -306,7 +312,9 @@ impl Entity for Reflection {
 }
 
 impl Relatable for Reflection {
-    fn relations(&self, _graph: &Graph) -> Vec<Relation> { Vec::new() }
+    fn relations(&self, graph: &GraphStore) -> Vec<Relation> {
+        graph.get_edges_from(self.id()).unwrap_or_default().into_iter().map(Relation::from).collect()
+    }
     fn graph_label(&self) -> &'static str { "Reflection" }
 }
 
@@ -391,7 +399,9 @@ impl Entity for Artifact {
 }
 
 impl Relatable for Artifact {
-    fn relations(&self, _graph: &Graph) -> Vec<Relation> { Vec::new() }
+    fn relations(&self, graph: &GraphStore) -> Vec<Relation> {
+        graph.get_edges_from(self.id()).unwrap_or_default().into_iter().map(Relation::from).collect()
+    }
     fn graph_label(&self) -> &'static str { "Artifact" }
 }
 

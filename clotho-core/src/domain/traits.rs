@@ -3,21 +3,30 @@ use std::path::PathBuf;
 
 use crate::domain::types::*;
 use crate::error::{PromotionError, TransitionError};
+// Re-exported so entity impls can use `GraphStore` via `use crate::domain::traits::*`
+pub use crate::graph::edges::EdgeInfo;
+pub use crate::graph::GraphStore;
 
 // ---------------------------------------------------------------------------
-// Graph placeholder types — will be fleshed out in clotho-graph work
+// Relation types
 // ---------------------------------------------------------------------------
 
-/// Placeholder for the graph database handle.
-/// Will be replaced with the real graphqlite wrapper.
-pub struct Graph;
-
-/// A typed relation between two entities.
+/// A typed relation between two entities (domain-level view of a graph edge).
 #[derive(Debug, Clone, PartialEq)]
 pub struct Relation {
     pub source_id: EntityId,
     pub target_id: EntityId,
     pub relation_type: RelationType,
+}
+
+impl From<EdgeInfo> for Relation {
+    fn from(edge: EdgeInfo) -> Self {
+        Self {
+            source_id: edge.source_id,
+            target_id: edge.target_id,
+            relation_type: edge.relation_type,
+        }
+    }
 }
 
 /// Typed relation kinds per CLO-S-0005.
@@ -83,7 +92,7 @@ pub trait Extractable: Entity {
 
 /// Entities that participate in the relation graph.
 pub trait Relatable: Entity {
-    fn relations(&self, graph: &Graph) -> Vec<Relation>;
+    fn relations(&self, graph: &GraphStore) -> Vec<Relation>;
     fn graph_label(&self) -> &'static str;
 }
 

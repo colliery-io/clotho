@@ -56,7 +56,9 @@ impl Activatable for Workstream {
 }
 
 impl Relatable for Workstream {
-    fn relations(&self, _graph: &Graph) -> Vec<Relation> { Vec::new() }
+    fn relations(&self, graph: &GraphStore) -> Vec<Relation> {
+        graph.get_edges_from(self.id()).unwrap_or_default().into_iter().map(Relation::from).collect()
+    }
     fn graph_label(&self) -> &'static str { "Workstream" }
 }
 
@@ -175,7 +177,9 @@ impl Taskable for Task {
 }
 
 impl Relatable for Task {
-    fn relations(&self, _graph: &Graph) -> Vec<Relation> { Vec::new() }
+    fn relations(&self, graph: &GraphStore) -> Vec<Relation> {
+        graph.get_edges_from(self.id()).unwrap_or_default().into_iter().map(Relation::from).collect()
+    }
     fn graph_label(&self) -> &'static str { "Task" }
 }
 

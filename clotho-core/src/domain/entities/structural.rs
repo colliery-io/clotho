@@ -57,7 +57,9 @@ impl Activatable for Program {
 }
 
 impl Relatable for Program {
-    fn relations(&self, _graph: &Graph) -> Vec<Relation> { Vec::new() }
+    fn relations(&self, graph: &GraphStore) -> Vec<Relation> {
+        graph.get_edges_from(self.id()).unwrap_or_default().into_iter().map(Relation::from).collect()
+    }
     fn graph_label(&self) -> &'static str { "Program" }
 }
 
@@ -149,7 +151,9 @@ impl Activatable for Responsibility {
 }
 
 impl Relatable for Responsibility {
-    fn relations(&self, _graph: &Graph) -> Vec<Relation> { Vec::new() }
+    fn relations(&self, graph: &GraphStore) -> Vec<Relation> {
+        graph.get_edges_from(self.id()).unwrap_or_default().into_iter().map(Relation::from).collect()
+    }
     fn graph_label(&self) -> &'static str { "Responsibility" }
 }
 
@@ -244,7 +248,9 @@ impl Activatable for Objective {
 }
 
 impl Relatable for Objective {
-    fn relations(&self, _graph: &Graph) -> Vec<Relation> { Vec::new() }
+    fn relations(&self, graph: &GraphStore) -> Vec<Relation> {
+        graph.get_edges_from(self.id()).unwrap_or_default().into_iter().map(Relation::from).collect()
+    }
     fn graph_label(&self) -> &'static str { "Objective" }
 }
 
