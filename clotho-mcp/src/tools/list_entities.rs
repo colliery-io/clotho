@@ -18,7 +18,7 @@ use std::path::Path;
 )]
 #[derive(Debug, Serialize, Deserialize, JsonSchema)]
 pub struct ListEntitiesTool {
-    /// Path to the directory containing .workspace/
+    /// Path to the directory containing .clotho/
     pub workspace_path: String,
     /// Filter by entity type (e.g., Task, Program, Note)
     pub entity_type: Option<String>,

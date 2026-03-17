@@ -17,7 +17,7 @@ struct Cli {
 
 #[derive(clap::Subcommand)]
 enum Commands {
-    /// Initialize a new .workspace/ directory.
+    /// Initialize a new .clotho/ directory.
     Init(commands::init::InitArgs),
 
     /// Create any entity type (program, task, person, etc.).

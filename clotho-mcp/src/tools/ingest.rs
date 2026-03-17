@@ -24,7 +24,7 @@ use std::path::Path;
 )]
 #[derive(Debug, Serialize, Deserialize, JsonSchema)]
 pub struct IngestTool {
-    /// Path to the directory containing .workspace/
+    /// Path to the directory containing .clotho/
     pub workspace_path: String,
     /// Path to the file to ingest
     pub file_path: String,

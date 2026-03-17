@@ -18,7 +18,7 @@ use std::path::Path;
 )]
 #[derive(Debug, Serialize, Deserialize, JsonSchema)]
 pub struct QueryTool {
-    /// Path to the directory containing .workspace/
+    /// Path to the directory containing .clotho/
     pub workspace_path: String,
     /// Cypher query to execute
     pub cypher: String,

@@ -18,7 +18,7 @@ use std::path::Path;
 )]
 #[derive(Debug, Serialize, Deserialize, JsonSchema)]
 pub struct SyncTool {
-    /// Path to the directory containing .workspace/
+    /// Path to the directory containing .clotho/
     pub workspace_path: String,
     /// Prune history after sync (keep last N commits, default 20)
     pub prune: Option<bool>,

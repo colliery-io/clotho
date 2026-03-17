@@ -9,7 +9,7 @@ use std::path::Path;
 
 #[mcp_tool(
     name = "clotho_init",
-    description = "Initialize a new Clotho workspace with the .workspace/ directory structure.",
+    description = "Initialize a new Clotho workspace with the .clotho/ directory structure.",
     idempotent_hint = false,
     destructive_hint = false,
     open_world_hint = false,
@@ -17,7 +17,7 @@ use std::path::Path;
 )]
 #[derive(Debug, Serialize, Deserialize, JsonSchema)]
 pub struct InitTool {
-    /// Path to the directory where .workspace/ will be created
+    /// Path to the directory where .clotho/ will be created
     pub path: String,
 }
 

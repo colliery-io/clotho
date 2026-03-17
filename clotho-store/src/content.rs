@@ -5,7 +5,7 @@ use clotho_core::domain::types::{EntityId, EntityType};
 
 use crate::error::StoreError;
 
-/// Manages markdown content files under `.workspace/content/`.
+/// Manages markdown content files under `.clotho/content/`.
 pub struct ContentStore {
     content_root: PathBuf,
 }

@@ -53,7 +53,7 @@ async fn test_init_tool() {
     };
     let result = tool.call_tool().await.unwrap();
     assert!(result.is_error.is_none());
-    assert!(tmp.path().join(".workspace").exists());
+    assert!(tmp.path().join(".clotho").exists());
 }
 
 #[tokio::test]

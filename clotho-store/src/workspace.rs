@@ -55,9 +55,9 @@ impl Default for OntologyConfig {
     }
 }
 
-/// A Clotho workspace rooted at a `.workspace/` directory.
+/// A Clotho workspace rooted at a `.clotho/` directory.
 pub struct Workspace {
-    /// Path to the `.workspace/` root.
+    /// Path to the `.clotho/` root.
     pub path: PathBuf,
 }
 
@@ -65,10 +65,10 @@ impl Workspace {
     /// Initialize a new workspace at the given path.
     ///
     /// Creates the full directory tree and default config files.
-    /// The path should be where `.workspace/` will be created
-    /// (e.g., passing `/home/user/work` creates `/home/user/work/.workspace/`).
+    /// The path should be where `.clotho/` will be created
+    /// (e.g., passing `/home/user/work` creates `/home/user/work/.clotho/`).
     pub fn init(base_path: &Path) -> Result<Self, StoreError> {
-        let workspace_path = base_path.join(".workspace");
+        let workspace_path = base_path.join(".clotho");
 
         if workspace_path.exists() {
             return Err(StoreError::WorkspaceAlreadyExists(
@@ -116,7 +116,7 @@ impl Workspace {
     ///
     /// Validates that the directory structure is intact.
     pub fn open(base_path: &Path) -> Result<Self, StoreError> {
-        let workspace_path = base_path.join(".workspace");
+        let workspace_path = base_path.join(".clotho");
 
         if !workspace_path.exists() {
             return Err(StoreError::WorkspaceNotFound(

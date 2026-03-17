@@ -4,9 +4,9 @@ use tempfile::tempdir;
 
 use clotho_sync::SyncEngine;
 
-/// Helper: create a .workspace/ directory structure in a temp dir.
+/// Helper: create a .clotho/ directory structure in a temp dir.
 fn setup_workspace(tmp: &tempfile::TempDir) -> std::path::PathBuf {
-    let ws = tmp.path().join(".workspace");
+    let ws = tmp.path().join(".clotho");
     fs::create_dir_all(ws.join("content")).unwrap();
     fs::create_dir_all(ws.join("data")).unwrap();
     fs::create_dir_all(ws.join("graph")).unwrap();
@@ -37,7 +37,7 @@ fn init_creates_gitignore() {
 
     SyncEngine::init(&ws).unwrap();
     let gitignore = fs::read_to_string(tmp.path().join(".gitignore")).unwrap();
-    assert!(gitignore.contains(".workspace/index/"));
+    assert!(gitignore.contains(".clotho/index/"));
 }
 
 #[test]

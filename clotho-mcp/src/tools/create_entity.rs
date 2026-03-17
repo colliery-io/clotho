@@ -24,7 +24,7 @@ use std::path::Path;
 )]
 #[derive(Debug, Serialize, Deserialize, JsonSchema)]
 pub struct CreateEntityTool {
-    /// Path to the directory containing .workspace/
+    /// Path to the directory containing .clotho/
     pub workspace_path: String,
     /// Entity type (program, responsibility, objective, workstream, task, meeting, transcript, note, reflection, artifact, decision, risk, blocker, question, insight, person)
     pub entity_type: String,

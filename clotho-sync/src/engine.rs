@@ -37,7 +37,7 @@ pub struct SyncResult {
 /// .gitignore content for Clotho workspaces.
 const GITIGNORE_CONTENT: &str = "\
 # Clotho derived indexes (rebuilt on clone)
-.workspace/index/
+.clotho/index/
 ";
 
 /// Git-based sync engine for Clotho workspaces.
@@ -52,10 +52,10 @@ impl SyncEngine {
     /// Initialize a git repository for a Clotho workspace.
     ///
     /// The git repo is created at the workspace's parent directory
-    /// (i.e., the directory containing `.workspace/`).
+    /// (i.e., the directory containing `.clotho/`).
     /// Writes a .gitignore to exclude `index/`.
     pub fn init(workspace_path: &Path) -> Result<Self, SyncError> {
-        // workspace_path is the .workspace/ dir, repo lives in parent
+        // workspace_path is the .clotho/ dir, repo lives in parent
         let repo_path = workspace_path
             .parent()
             .ok_or_else(|| SyncError::SyncFailed("workspace has no parent directory".into()))?;
@@ -73,7 +73,7 @@ impl SyncEngine {
         } else {
             // Ensure index/ is in .gitignore
             let existing = fs::read_to_string(&gitignore_path)?;
-            if !existing.contains(".workspace/index/") {
+            if !existing.contains(".clotho/index/") {
                 let mut content = existing;
                 if !content.ends_with('\n') {
                     content.push('\n');

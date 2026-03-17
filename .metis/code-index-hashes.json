@@ -70,6 +70,8 @@
     "clotho-store/tests/store_tests.rs": "048ebf796a6a0d70c71fe85ebff406b709cf89cdca3ffd9b9a19dd77b3652f1e",
     "clotho-sync/src/engine.rs": "963fa9c7a514563eac39cdb04b40450acb50b575bb6b5fe636bb5e1b95d6aa09",
     "clotho-sync/src/lib.rs": "a036200b2d0a80d2b5894f693c04a84195d07994951b513352d6d176a3c9e538",
-    "clotho-sync/tests/sync_tests.rs": "4c988ee33d8c3579f6a96cbf87c5124846d50c6018d7b0d4b39645f82079cf13"
+    "clotho-sync/tests/sync_tests.rs": "4c988ee33d8c3579f6a96cbf87c5124846d50c6018d7b0d4b39645f82079cf13",
+    "clotho-tests/src/lib.rs": "0201fb0c6acc0f331163524b213b91ea06361b64dae3aa486f34c76fe422d12d",
+    "clotho-tests/tests/e2e_workflows.rs": "f9533ee20d5d94c4eef389fe0e115276b5cb3adb4c2dc180a5406e6bc623919e"
   }
 }

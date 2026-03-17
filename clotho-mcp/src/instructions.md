@@ -15,4 +15,4 @@ Clotho is a personal work and time management system. Use these tools to interac
 
 ## Workspace Path
 
-All tools that operate on an existing workspace require a `workspace_path` parameter pointing to the directory containing `.workspace/`.
+All tools that operate on an existing workspace require a `workspace_path` parameter pointing to the directory containing `.clotho/`.
