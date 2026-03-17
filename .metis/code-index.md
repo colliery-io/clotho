@@ -1,6 +1,6 @@
 # Code Index
 
-> Generated: 2026-03-17T13:11:27Z | 66 files | Rust
+> Generated: 2026-03-17T13:39:29Z | 71 files | Rust
 
 ## Project Structure
 
@@ -19,6 +19,7 @@
 │   │   │   ├── reflect.rs
 │   │   │   ├── relate.rs
 │   │   │   ├── search.rs
+│   │   │   ├── sync.rs
 │   │   │   └── update.rs
 │   │   └── main.rs
 │   └── tests/
@@ -69,26 +70,33 @@
 │   │       ├── query.rs
 │   │       ├── read_entity.rs
 │   │       ├── search.rs
+│   │       ├── sync.rs
 │   │       └── update_entity.rs
 │   └── tests/
 │       ├── entity_mgmt_tests.rs
 │       └── mcp_tests.rs
-└── clotho-store/
+├── clotho-store/
+│   ├── src/
+│   │   ├── content.rs
+│   │   ├── data/
+│   │   │   ├── entities.rs
+│   │   │   ├── extractions.rs
+│   │   │   ├── jsonl.rs
+│   │   │   └── mod.rs
+│   │   ├── error.rs
+│   │   ├── federation.rs
+│   │   ├── index.rs
+│   │   ├── lib.rs
+│   │   ├── sync.rs
+│   │   └── workspace.rs
+│   └── tests/
+│       └── store_tests.rs
+└── clotho-sync/
     ├── src/
-    │   ├── content.rs
-    │   ├── data/
-    │   │   ├── entities.rs
-    │   │   ├── extractions.rs
-    │   │   ├── jsonl.rs
-    │   │   └── mod.rs
-    │   ├── error.rs
-    │   ├── federation.rs
-    │   ├── index.rs
-    │   ├── lib.rs
-    │   ├── sync.rs
-    │   └── workspace.rs
+    │   ├── engine.rs
+    │   └── lib.rs
     └── tests/
-        └── store_tests.rs
+        └── sync_tests.rs
 ```
 
 ## Modules
@@ -144,7 +152,8 @@
 - pub `reflect` module L8 — `-`
 - pub `relate` module L9 — `-`
 - pub `search` module L10 — `-`
-- pub `update` module L11 — `-`
+- pub `sync` module L11 — `-`
+- pub `update` module L12 — `-`
 
 #### clotho-cli/src/commands/query.rs
 
@@ -173,6 +182,11 @@
 - pub `SearchArgs` struct L7-14 — `{ query: String, limit: usize }`
 - pub `run` function L16-54 — `(args: SearchArgs, json: bool) -> Result<(), Box<dyn std::error::Error>>`
 
+#### clotho-cli/src/commands/sync.rs
+
+- pub `SyncArgs` struct L7-15 — `{ prune: bool, keep: usize }`
+- pub `run` function L17-57 — `(args: SyncArgs, json: bool) -> Result<(), Box<dyn std::error::Error>>`
+
 #### clotho-cli/src/commands/update.rs
 
 - pub `UpdateArgs` struct L9-24 — `{ id: String, title: Option<String>, status: Option<String>, state: Option<Strin...`
@@ -187,8 +201,8 @@
 
 -  `commands` module L1 — `-`
 -  `Cli` struct L9-16 — `{ json: bool, command: Commands }` — Clotho — Personal work and time management through reflection,
--  `Commands` enum L19-58 — `Init | Create | Get | Update | Delete | Ingest | List | Search | Query | Reflect...`
--  `main` function L60-88 — `()`
+-  `Commands` enum L19-61 — `Init | Create | Get | Update | Delete | Ingest | List | Search | Query | Reflect...`
+-  `main` function L63-92 — `()`
 
 ### clotho-cli/tests
 
@@ -817,9 +831,9 @@
 - pub `ClothoServerHandler` struct L17 — `-`
 - pub `new` function L20-23 — `() -> Self`
 -  `ClothoServerHandler` type L19-24 — `= ClothoServerHandler`
--  `ClothoServerHandler` type L27-123 — `impl ServerHandler for ClothoServerHandler`
+-  `ClothoServerHandler` type L27-128 — `impl ServerHandler for ClothoServerHandler`
 -  `handle_list_tools_request` function L28-38 — `( &self, _params: Option<PaginatedRequestParams>, _runtime: Arc<dyn McpServer>, ...`
--  `handle_call_tool_request` function L40-122 — `( &self, params: CallToolRequestParams, _runtime: Arc<dyn McpServer>, ) -> Resul...`
+-  `handle_call_tool_request` function L40-127 — `( &self, params: CallToolRequestParams, _runtime: Arc<dyn McpServer>, ) -> Resul...`
 
 ### clotho-mcp/src/tools
 
@@ -828,8 +842,8 @@
 #### clotho-mcp/src/tools/all_tools.rs
 
 - pub `ClothoTools` struct L10 — `-` — Registry of all Clotho MCP tools.
-- pub `tools` function L13-34 — `() -> Vec<Tool>`
--  `ClothoTools` type L12-35 — `= ClothoTools`
+- pub `tools` function L13-36 — `() -> Vec<Tool>`
+-  `ClothoTools` type L12-37 — `= ClothoTools`
 
 #### clotho-mcp/src/tools/create_entity.rs
 
@@ -914,7 +928,8 @@
 - pub `query` module L12 — `-`
 - pub `read_entity` module L13 — `-`
 - pub `search` module L14 — `-`
-- pub `update_entity` module L15 — `-`
+- pub `sync` module L15 — `-`
+- pub `update_entity` module L16 — `-`
 
 #### clotho-mcp/src/tools/query.rs
 
@@ -934,6 +949,12 @@
 - pub `call_tool` function L30-57 — `(&self) -> Result<CallToolResult, CallToolError>`
 -  `SearchTool` type L29-58 — `= SearchTool`
 
+#### clotho-mcp/src/tools/sync.rs
+
+- pub `SyncTool` struct L20-27 — `{ workspace_path: String, prune: Option<bool>, keep: Option<u32> }`
+- pub `call_tool` function L30-64 — `(&self) -> Result<CallToolResult, CallToolError>`
+-  `SyncTool` type L29-65 — `= SyncTool`
+
 #### clotho-mcp/src/tools/update_entity.rs
 
 - pub `UpdateEntityTool` struct L22-33 — `{ workspace_path: String, entity_id: String, title: Option<String>, status: Opti...`
@@ -946,7 +967,7 @@
 
 #### clotho-mcp/tests/entity_mgmt_tests.rs
 
--  `tools_now_fourteen` function L18-28 — `()`
+-  `tools_now_fifteen` function L18-28 — `()`
 -  `create_program` function L35-54 — `()`
 -  `create_responsibility` function L57-74 — `()`
 -  `create_objective_with_parent` function L77-112 — `()`
@@ -958,7 +979,7 @@
 
 #### clotho-mcp/tests/mcp_tests.rs
 
--  `list_tools_returns_all_fourteen` function L15-28 — `()`
+-  `list_tools_returns_all_fifteen` function L15-28 — `()`
 -  `all_tools_have_descriptions` function L31-40 — `()`
 -  `test_init_tool` function L47-57 — `()`
 -  `test_ingest_tool` function L60-83 — `()`
@@ -1158,4 +1179,49 @@
 -  `search_rebuild` function L407-419 — `()`
 -  `sync_save_entity_across_backends` function L426-469 — `()`
 -  `sync_temporal_materialization` function L476-510 — `()`
+
+### clotho-sync/src
+
+> *Semantic summary to be generated by AI agent.*
+
+#### clotho-sync/src/engine.rs
+
+- pub `SyncError` enum L9-24 — `GitError | NoRepository | SyncFailed | PruneFailed | Io` — Errors from sync operations.
+- pub `SyncResult` struct L28-35 — `{ committed: bool, pushed: bool, files_changed: usize }` — Result of a sync operation.
+- pub `SyncEngine` struct L47-49 — `{ repo: Repository }` — Git-based sync engine for Clotho workspaces.
+- pub `init` function L57-87 — `(workspace_path: &Path) -> Result<Self, SyncError>` — Initialize a git repository for a Clotho workspace.
+- pub `open` function L90-103 — `(workspace_path: &Path) -> Result<Self, SyncError>` — Open an existing git repository for a Clotho workspace.
+- pub `has_remote` function L106-108 — `(&self) -> bool` — Check whether the repository has a remote named "origin".
+- pub `repository` function L111-113 — `(&self) -> &Repository` — Access the underlying git2 Repository.
+- pub `sync` function L118-189 — `(&self) -> Result<SyncResult, SyncError>` — Sync the workspace: stage all changes, commit, and push (if remote).
+- pub `prune_history` function L217-295 — `(&self, keep: usize) -> Result<usize, SyncError>` — Prune history to keep only the most recent `keep` commits.
+- pub `commit_count` function L298-307 — `(&self) -> Result<usize, SyncError>` — Count the number of commits in the repository.
+-  `GITIGNORE_CONTENT` variable L38-41 — `: &str` — .gitignore content for Clotho workspaces.
+-  `SyncEngine` type L51-308 — `= SyncEngine`
+-  `push` function L192-211 — `(&self) -> Result<bool, SyncError>` — Push to origin/main.
+
+#### clotho-sync/src/lib.rs
+
+- pub `engine` module L1 — `-`
+
+### clotho-sync/tests
+
+> *Semantic summary to be generated by AI agent.*
+
+#### clotho-sync/tests/sync_tests.rs
+
+-  `setup_workspace` function L8-17 — `(tmp: &tempfile::TempDir) -> std::path::PathBuf` — Helper: create a .workspace/ directory structure in a temp dir.
+-  `init_creates_git_repo` function L24-31 — `()`
+-  `init_creates_gitignore` function L34-41 — `()`
+-  `init_is_idempotent` function L44-51 — `()`
+-  `open_existing_repo` function L58-65 — `()`
+-  `open_fails_without_git` function L68-74 — `()`
+-  `sync_no_changes` function L81-94 — `()`
+-  `sync_commits_new_file` function L97-111 — `()`
+-  `sync_commits_modified_file` function L114-126 — `()`
+-  `sync_has_remote_false` function L129-135 — `()`
+-  `commit_count_tracks` function L142-159 — `()`
+-  `prune_reduces_commit_count` function L166-183 — `()`
+-  `prune_noop_when_under_limit` function L186-196 — `()`
+-  `index_directory_not_committed` function L203-231 — `()`
 

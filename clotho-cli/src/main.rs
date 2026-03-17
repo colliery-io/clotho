@@ -47,6 +47,9 @@ enum Commands {
     /// Create a new reflection entry.
     Reflect(commands::reflect::ReflectArgs),
 
+    /// Sync workspace to git (commit + push).
+    Sync(commands::sync::SyncArgs),
+
     /// Create a typed relation between two entities.
     Relate(commands::relate::RelateArgs),
 
@@ -71,6 +74,7 @@ fn main() {
         Commands::Search(args) => commands::search::run(args, cli.json),
         Commands::Query(args) => commands::query::run(args, cli.json),
         Commands::Reflect(args) => commands::reflect::run(args, cli.json),
+        Commands::Sync(args) => commands::sync::run(args, cli.json),
         Commands::Relate(args) => commands::relate::run_relate(args, cli.json),
         Commands::Unrelate(args) => commands::relate::run_unrelate(args, cli.json),
         Commands::Relations(args) => commands::relate::run_relations(args, cli.json),

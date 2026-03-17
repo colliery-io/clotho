@@ -8,4 +8,5 @@ pub mod query;
 pub mod reflect;
 pub mod relate;
 pub mod search;
+pub mod sync;
 pub mod update;

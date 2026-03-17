@@ -16,6 +16,7 @@ path = "src/lib.rs"
 [dependencies]
 clotho-core = { path = "../clotho-core" }
 clotho-store = { path = "../clotho-store" }
+clotho-sync = { path = "../clotho-sync" }
 
 # MCP Server
 rust-mcp-sdk = { version = "0.8.0", default-features = false, features = [

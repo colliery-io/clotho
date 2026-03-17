@@ -12,6 +12,7 @@ path = "src/main.rs"
 [dependencies]
 clotho-core = { path = "../clotho-core" }
 clotho-store = { path = "../clotho-store" }
+clotho-sync = { path = "../clotho-sync" }
 chrono = { version = "0.4", features = ["serde"] }
 clap = { version = "4", features = ["derive"] }
 serde = { version = "1", features = ["derive"] }

@@ -12,6 +12,7 @@ pub mod list_entities;
 pub mod query;
 pub mod read_entity;
 pub mod search;
+pub mod sync;
 pub mod update_entity;
 
 pub use all_tools::ClothoTools;
@@ -28,4 +29,5 @@ pub use list_entities::*;
 pub use query::*;
 pub use read_entity::*;
 pub use search::*;
+pub use sync::*;
 pub use update_entity::*;
