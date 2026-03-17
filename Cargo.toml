@@ -4,7 +4,7 @@ members = [
     # "clotho-graph",
     "clotho-store",
     # "clotho-extract",
-    # "clotho-cli",
+    "clotho-cli",
     # "clotho-mcp",
     # "clotho-sync",
 ]

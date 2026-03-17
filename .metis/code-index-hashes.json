@@ -1,5 +1,14 @@
 {
   "files": {
+    "clotho-cli/src/commands/ingest.rs": "147e48a3b304132d1288c9953e7b95b6071a00f09d7c786f9a11761e970010fb",
+    "clotho-cli/src/commands/init.rs": "8cdb8bcfab176a9889a52a26bf22ef4b7fbec7ff40c91454084645e7cbbb2a4e",
+    "clotho-cli/src/commands/list.rs": "e5ec86b2acd298226f2a6767c1d1566ff33a27ab29de586a119ab45c815bbb03",
+    "clotho-cli/src/commands/mod.rs": "0f7c85fdd27c949238e19e9c3598364cb2945d8cef9522743c72c558f40b227e",
+    "clotho-cli/src/commands/query.rs": "0cedb9ed689dd632fbae3b9be4d74215734fe4982a00fc34c59374b7c088b036",
+    "clotho-cli/src/commands/reflect.rs": "bd32cf84c6a40701ddc57ad761d03ca0b8a2094360287f26a5c3efdfedd56a14",
+    "clotho-cli/src/commands/search.rs": "836fb5bc7e68cde70b230a4ecae3f37f283828ee159cbd4093fae001cee94232",
+    "clotho-cli/src/main.rs": "7ad93ea86180e948610400138bd2d4084a8d7e29cca8367c2a5c57a806efdf27",
+    "clotho-cli/tests/cli_tests.rs": "d22d0b25f458ffdeebcf4e1407cc356a6cd41b9cff51eb786710bc1fcf4a8647",
     "clotho-core/src/domain/entities/capture.rs": "bac37b6e88e67477b9de79021d0d2b26d2ade6264cc19302a3dd4e767c383341",
     "clotho-core/src/domain/entities/derived.rs": "762a75738fee3408eb784d3efcbf0785b5e6134135da36a1fb7410bfc5bb09fe",
     "clotho-core/src/domain/entities/execution.rs": "aa98027b047e44964bb00f49bc0a6c18faa2d2ea23baf794eba76f173165cc26",

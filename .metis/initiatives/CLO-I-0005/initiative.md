@@ -4,14 +4,14 @@ level: initiative
 title: "CLI Interface (clotho-cli)"
 short_code: "CLO-I-0005"
 created_at: 2026-03-16T13:23:16.455200+00:00
-updated_at: 2026-03-16T13:23:16.455200+00:00
+updated_at: 2026-03-17T02:32:55.582726+00:00
 parent: CLO-V-0001
 blocked_by: []
 archived: false
 
 tags:
   - "#initiative"
-  - "#phase/discovery"
+  - "#phase/completed"
 
 
 exit_criteria_met: false
@@ -27,38 +27,44 @@ The `clotho-cli` crate is the primary user interface. It provides the `clotho` c
 
 ## Goals & Non-Goals
 
-**Goals:**
+**Goals (v1):**
 - `clotho init` — Initialize a new .workspace/ directory
-- `clotho ingest transcript <file> --meeting <name>` — Ingest a transcript and trigger extraction
-- `clotho review` — Interactive review of draft extractions (promote/edit/discard)
-- `clotho query <cypher>` — Run Cypher queries against the relation graph
+- `clotho ingest <file> [--type meeting|note|artifact] [--title "..."]` — Ingest content (store only, no extraction)
+- `clotho query <cypher>` — Raw Cypher queries against the relation graph
+- `clotho search <query>` — FTS5 keyword search across all entities
+- `clotho list [--type X] [--status Y] [--state Z]` — List entities with filters
 - `clotho reflect --period <type>` — Create a new reflection entry
-- Human-friendly output with optional structured (JSON) output
+- `--json` flag for structured output across all commands
+
+**Deferred (needs clotho-extract):**
+- `clotho review` — Interactive review of draft extractions
+- Extraction triggering on ingest
+
+**Deferred (needs clotho-sync):**
+- Git sync triggers on workspace mutations
 
 **Non-Goals:**
 - GUI or web interface
-- Real-time watching/daemon mode (that's closer to clotho-sync territory)
+- Real-time watching/daemon mode
 - Direct database manipulation
 
 ## Detailed Design
 
-### Core Commands
+### Core Commands (v1)
 
 ```bash
-clotho init                                    # Initialize workspace
-clotho ingest transcript <file> --meeting "..."  # Ingest + extract
-clotho review                                  # Review draft extractions
-clotho query "<cypher>"                        # Query relation graph
-clotho reflect --period weekly                 # Create reflection
+clotho init                                          # Initialize workspace
+clotho ingest <file> --type note --title "My Note"   # Ingest content
+clotho query "MATCH (n:Task) RETURN n.title"          # Cypher query
+clotho search "deployment risk"                       # FTS5 keyword search
+clotho list --type Task --state doing                 # List entities
+clotho reflect --period weekly                        # Create reflection
 ```
 
 ### Dependencies
 
-- `clotho-core` — Entity types
-- `clotho-store` — Workspace operations
-- `clotho-graph` — Graph queries
-- `clotho-extract` — Extraction pipeline
-- `clotho-sync` — Git sync triggers
+- `clotho-core` — Entity types, graph
+- `clotho-store` — Workspace, content, data, search
 
 ### UX Principles
 
@@ -73,10 +79,11 @@ clotho reflect --period weekly                 # Create reflection
 
 ## Implementation Plan
 
-1. Set up clap command structure with subcommands
-2. Implement `init` (delegates to clotho-store)
-3. Implement `ingest` (delegates to clotho-store + clotho-extract)
-4. Implement `review` (interactive draft review loop)
-5. Implement `query` (delegates to clotho-graph)
-6. Implement `reflect` (delegates to clotho-store)
-7. Add `--json` output flag across commands
+1. clotho-cli crate scaffold + clap command structure
+2. Implement `init` (delegates to Workspace::init)
+3. Implement `ingest` (reads file, stores as content + entity row)
+4. Implement `list` (queries EntityStore with filters)
+5. Implement `search` (delegates to SearchIndex)
+6. Implement `query` (delegates to GraphStore::raw_cypher)
+7. Implement `reflect` (creates Reflection entity + content file)
+8. Add `--json` output flag across commands
