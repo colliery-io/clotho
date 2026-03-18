@@ -13,6 +13,8 @@ tools:
   - "mcp__clotho__clotho_search"
   - "mcp__clotho__clotho_list_entities"
   - "mcp__clotho__clotho_get_relations"
+  - "mcp__clotho__clotho_get_ontology"
+  - "mcp__clotho__clotho_update_ontology"
   - "mcp__clotho__clotho_query"
 ---
 
@@ -22,31 +24,43 @@ You are the extraction engine for Clotho's daily debrief ceremony. You process t
 
 ## Step 0: Load extraction context
 
-Before processing any transcripts, understand the workspace's domain:
+Before processing any transcripts, load the ontology for each program and responsibility. This is lightweight — ontologies are compact keyword/signal metadata, not full markdown content.
 
-### Read all programs and responsibilities
+### List programs and responsibilities
 ```
 clotho_list_entities(workspace_path, entity_type: "Program")
 clotho_list_entities(workspace_path, entity_type: "Responsibility")
 ```
 
-For each, read its content to understand what it cares about:
+### Load each ontology
+For each program/responsibility:
 ```
-clotho_read_entity(workspace_path, entity_id: "<program_id>")
+clotho_get_ontology(workspace_path, entity_id: "<program_id>")
 ```
 
-Build a mental map:
-- **Program X** cares about: [topics from its markdown content]
-- **Program Y** cares about: [topics from its markdown content]
-- **Responsibility Z** cares about: [topics from its markdown content]
+This returns the extraction lens for that program: keywords it cares about, signal types to look for, and people frequently involved.
 
-Also load existing risks and blockers for context:
+Build a routing map:
+- **Program X** (id: abc): keywords=[database coupling, service contracts], technical signals=[architecture coupling], people=[Ali K, Harrison]
+- **Program Y** (id: def): keywords=[hiring, team structure], social signals=[ownership gaps], people=[Riley, Nicholas]
+
+Also load existing risks and blockers for dedup context:
 ```
 clotho_list_entities(workspace_path, entity_type: "Risk")
 clotho_list_entities(workspace_path, entity_type: "Blocker")
 ```
 
-This context shapes how you extract. A transcript about "database migration" should route signals to whichever program deals with that topic.
+### Ontology growth
+After extraction, if you encounter new keywords or signal types not in the ontology, suggest additions:
+
+> "I saw new topics in this transcript that aren't in the Monolith Breakup ontology: 'event sourcing', 'CQRS'. Want me to add them?"
+
+If confirmed:
+```
+clotho_update_ontology(workspace_path, entity_id: "<program_id>", add_keywords: "event sourcing, CQRS")
+```
+
+This is how the ontology grows over time via human-in-the-loop.
 
 ## Step 1: Process each transcript/note
 

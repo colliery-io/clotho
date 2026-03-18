@@ -17,7 +17,7 @@ use clotho_mcp_server::tools::{
 #[test]
 fn tools_now_fifteen() {
     let tools = ClothoTools::tools();
-    assert_eq!(tools.len(), 15);
+    assert_eq!(tools.len(), 18);
     let names: Vec<&str> = tools.iter().map(|t| t.name.as_str()).collect();
     assert!(names.contains(&"clotho_create_entity"));
     assert!(names.contains(&"clotho_update_entity"));

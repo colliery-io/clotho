@@ -1,6 +1,6 @@
 # Code Index
 
-> Generated: 2026-03-17T18:59:54Z | 73 files | Rust
+> Generated: 2026-03-18T01:23:57Z | 75 files | Rust
 
 ## Project Structure
 
@@ -15,6 +15,7 @@
 │   │   │   ├── init.rs
 │   │   │   ├── list.rs
 │   │   │   ├── mod.rs
+│   │   │   ├── ontology.rs
 │   │   │   ├── query.rs
 │   │   │   ├── reflect.rs
 │   │   │   ├── relate.rs
@@ -67,6 +68,7 @@
 │   │       ├── init.rs
 │   │       ├── list_entities.rs
 │   │       ├── mod.rs
+│   │       ├── ontology.rs
 │   │       ├── query.rs
 │   │       ├── read_entity.rs
 │   │       ├── search.rs
@@ -153,12 +155,21 @@
 - pub `init` module L4 — `-`
 - pub `ingest` module L5 — `-`
 - pub `list` module L6 — `-`
-- pub `query` module L7 — `-`
-- pub `reflect` module L8 — `-`
-- pub `relate` module L9 — `-`
-- pub `search` module L10 — `-`
-- pub `sync` module L11 — `-`
-- pub `update` module L12 — `-`
+- pub `ontology` module L7 — `-`
+- pub `query` module L8 — `-`
+- pub `reflect` module L9 — `-`
+- pub `relate` module L10 — `-`
+- pub `search` module L11 — `-`
+- pub `sync` module L12 — `-`
+- pub `update` module L13 — `-`
+
+#### clotho-cli/src/commands/ontology.rs
+
+- pub `OntologyGetArgs` struct L7-10 — `{ id: String }`
+- pub `OntologySetArgs` struct L13-40 — `{ id: String, add_keywords: Option<String>, remove_keywords: Option<String>, add...`
+- pub `run_get` function L42-85 — `(args: OntologyGetArgs, json: bool) -> Result<(), Box<dyn std::error::Error>>`
+- pub `run_set` function L87-179 — `(args: OntologySetArgs, json: bool) -> Result<(), Box<dyn std::error::Error>>`
+-  `extract_ontology` function L181-191 — `(metadata: &Option<String>) -> serde_json::Value`
 
 #### clotho-cli/src/commands/query.rs
 
@@ -206,8 +217,8 @@
 
 -  `commands` module L1 — `-`
 -  `Cli` struct L9-16 — `{ json: bool, command: Commands }` — Clotho — Personal work and time management through reflection,
--  `Commands` enum L19-61 — `Init | Create | Get | Update | Delete | Ingest | List | Search | Query | Reflect...`
--  `main` function L63-92 — `()`
+-  `Commands` enum L19-67 — `Init | Create | Get | Update | Delete | Ingest | List | Search | Query | Reflect...`
+-  `main` function L69-100 — `()`
 
 ### clotho-cli/tests
 
@@ -833,12 +844,12 @@
 
 #### clotho-mcp/src/server.rs
 
-- pub `ClothoServerHandler` struct L17 — `-`
-- pub `new` function L20-23 — `() -> Self`
--  `ClothoServerHandler` type L19-24 — `= ClothoServerHandler`
--  `ClothoServerHandler` type L27-128 — `impl ServerHandler for ClothoServerHandler`
--  `handle_list_tools_request` function L28-38 — `( &self, _params: Option<PaginatedRequestParams>, _runtime: Arc<dyn McpServer>, ...`
--  `handle_call_tool_request` function L40-127 — `( &self, params: CallToolRequestParams, _runtime: Arc<dyn McpServer>, ) -> Resul...`
+- pub `ClothoServerHandler` struct L18 — `-`
+- pub `new` function L21-24 — `() -> Self`
+-  `ClothoServerHandler` type L20-25 — `= ClothoServerHandler`
+-  `ClothoServerHandler` type L28-139 — `impl ServerHandler for ClothoServerHandler`
+-  `handle_list_tools_request` function L29-39 — `( &self, _params: Option<PaginatedRequestParams>, _runtime: Arc<dyn McpServer>, ...`
+-  `handle_call_tool_request` function L41-138 — `( &self, params: CallToolRequestParams, _runtime: Arc<dyn McpServer>, ) -> Resul...`
 
 ### clotho-mcp/src/tools
 
@@ -846,9 +857,9 @@
 
 #### clotho-mcp/src/tools/all_tools.rs
 
-- pub `ClothoTools` struct L10 — `-` — Registry of all Clotho MCP tools.
-- pub `tools` function L13-36 — `() -> Vec<Tool>`
--  `ClothoTools` type L12-37 — `= ClothoTools`
+- pub `ClothoTools` struct L11 — `-` — Registry of all Clotho MCP tools.
+- pub `tools` function L14-40 — `() -> Vec<Tool>`
+-  `ClothoTools` type L13-41 — `= ClothoTools`
 
 #### clotho-mcp/src/tools/create_entity.rs
 
@@ -930,11 +941,24 @@
 - pub `ingest` module L9 — `-`
 - pub `init` module L10 — `-`
 - pub `list_entities` module L11 — `-`
-- pub `query` module L12 — `-`
-- pub `read_entity` module L13 — `-`
-- pub `search` module L14 — `-`
-- pub `sync` module L15 — `-`
-- pub `update_entity` module L16 — `-`
+- pub `ontology` module L12 — `-`
+- pub `query` module L13 — `-`
+- pub `read_entity` module L14 — `-`
+- pub `search` module L15 — `-`
+- pub `sync` module L16 — `-`
+- pub `update_entity` module L17 — `-`
+
+#### clotho-mcp/src/tools/ontology.rs
+
+- pub `GetOntologyTool` struct L20-25 — `{ workspace_path: String, entity_id: String }`
+- pub `call_tool` function L28-79 — `(&self) -> Result<CallToolResult, CallToolError>`
+- pub `UpdateOntologyTool` struct L91-108 — `{ workspace_path: String, entity_id: String, add_keywords: Option<String>, remov...`
+- pub `call_tool` function L111-153 — `(&self) -> Result<CallToolResult, CallToolError>`
+-  `GetOntologyTool` type L27-80 — `= GetOntologyTool`
+-  `UpdateOntologyTool` type L110-154 — `= UpdateOntologyTool`
+-  `extract_ontology` function L156-166 — `(metadata: &Option<String>) -> serde_json::Value`
+-  `add_to_array` function L168-177 — `(arr_val: &mut serde_json::Value, csv: &Option<String>)`
+-  `remove_from_array` function L179-186 — `(arr_val: &mut serde_json::Value, csv: &Option<String>)`
 
 #### clotho-mcp/src/tools/query.rs
 

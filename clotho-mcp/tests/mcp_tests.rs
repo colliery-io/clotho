@@ -14,7 +14,7 @@ use clotho_mcp_server::tools::ClothoTools;
 #[test]
 fn list_tools_returns_all_fifteen() {
     let tools = ClothoTools::tools();
-    assert_eq!(tools.len(), 15);
+    assert_eq!(tools.len(), 18);
 
     let names: Vec<&str> = tools.iter().map(|t| t.name.as_str()).collect();
     assert!(names.contains(&"clotho_search"));

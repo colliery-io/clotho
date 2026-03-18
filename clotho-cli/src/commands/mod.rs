@@ -4,6 +4,7 @@ pub mod get;
 pub mod init;
 pub mod ingest;
 pub mod list;
+pub mod ontology;
 pub mod query;
 pub mod reflect;
 pub mod relate;

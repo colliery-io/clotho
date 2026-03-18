@@ -58,6 +58,15 @@ enum Commands {
 
     /// Show all relations for an entity.
     Relations(commands::relate::RelationsArgs),
+
+    /// Get ontology for a program/responsibility.
+    OntologyGet(commands::ontology::OntologyGetArgs),
+
+    /// Update ontology for a program/responsibility.
+    OntologySet(commands::ontology::OntologySetArgs),
+
+    /// Search across all ontologies for a term.
+    OntologySearch(commands::ontology::OntologySearchArgs),
 }
 
 fn main() {
@@ -78,6 +87,9 @@ fn main() {
         Commands::Relate(args) => commands::relate::run_relate(args, cli.json),
         Commands::Unrelate(args) => commands::relate::run_unrelate(args, cli.json),
         Commands::Relations(args) => commands::relate::run_relations(args, cli.json),
+        Commands::OntologyGet(args) => commands::ontology::run_get(args, cli.json),
+        Commands::OntologySet(args) => commands::ontology::run_set(args, cli.json),
+        Commands::OntologySearch(args) => commands::ontology::run_search(args, cli.json),
     };
 
     if let Err(e) = result {
