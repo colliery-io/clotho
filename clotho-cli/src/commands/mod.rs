@@ -5,6 +5,7 @@ pub mod init;
 pub mod capture;
 pub mod list;
 pub mod ontology;
+pub mod processed;
 pub mod query;
 pub mod reflect;
 pub mod relate;

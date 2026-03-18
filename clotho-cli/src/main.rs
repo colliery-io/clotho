@@ -67,6 +67,12 @@ enum Commands {
 
     /// Search across all ontologies for a term.
     OntologySearch(commands::ontology::OntologySearchArgs),
+
+    /// Check processing history for an entity.
+    ProcessedCheck(commands::processed::ProcessedCheckArgs),
+
+    /// Mark an entity as processed.
+    ProcessedMark(commands::processed::ProcessedMarkArgs),
 }
 
 fn main() {
@@ -90,6 +96,8 @@ fn main() {
         Commands::OntologyGet(args) => commands::ontology::run_get(args, cli.json),
         Commands::OntologySet(args) => commands::ontology::run_set(args, cli.json),
         Commands::OntologySearch(args) => commands::ontology::run_search(args, cli.json),
+        Commands::ProcessedCheck(args) => commands::processed::run_check(args, cli.json),
+        Commands::ProcessedMark(args) => commands::processed::run_mark(args, cli.json),
     };
 
     if let Err(e) = result {

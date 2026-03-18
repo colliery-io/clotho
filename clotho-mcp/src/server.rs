@@ -1,8 +1,9 @@
 use crate::tools::{
-    ClothoTools, CreateEntityTool, CreateNoteTool, CreateReflectionTool, CreateRelationTool,
-    DeleteEntityTool, DeleteRelationTool, GetOntologyTool, GetRelationsTool, CaptureTool,
-    InitTool, ListEntitiesTool, QueryTool, ReadEntityTool, SearchOntologyTool, SearchTool,
-    SyncTool, UpdateEntityTool, UpdateOntologyTool,
+    CaptureTool, CheckProcessedTool, ClothoTools, CreateEntityTool, CreateNoteTool,
+    CreateReflectionTool, CreateRelationTool, DeleteEntityTool, DeleteRelationTool,
+    GetOntologyTool, GetRelationsTool, InitTool, ListEntitiesTool, MarkProcessedTool,
+    QueryTool, ReadEntityTool, SearchOntologyTool, SearchTool, SyncTool, UpdateEntityTool,
+    UpdateOntologyTool,
 };
 use async_trait::async_trait;
 use rust_mcp_sdk::{
@@ -133,6 +134,16 @@ impl ServerHandler for ClothoServerHandler {
             }
             "clotho_search_ontology" => {
                 let tool: SearchOntologyTool = serde_json::from_value(args)
+                    .map_err(rust_mcp_sdk::schema::schema_utils::CallToolError::new)?;
+                tool.call_tool().await
+            }
+            "clotho_check_processed" => {
+                let tool: CheckProcessedTool = serde_json::from_value(args)
+                    .map_err(rust_mcp_sdk::schema::schema_utils::CallToolError::new)?;
+                tool.call_tool().await
+            }
+            "clotho_mark_processed" => {
+                let tool: MarkProcessedTool = serde_json::from_value(args)
                     .map_err(rust_mcp_sdk::schema::schema_utils::CallToolError::new)?;
                 tool.call_tool().await
             }
