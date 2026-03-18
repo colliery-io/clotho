@@ -6,178 +6,229 @@
   Spin the raw threads of meetings, notes, and artifacts into a coherent narrative of your work.
 </div>
 
-## Overview
-
-Clotho is a personal knowledge management system designed for individuals who want to:
-
-- **Capture** the flow of work — meetings, transcripts, notes, reflections, and artifacts
-- **Extract** meaning from that flow — decisions, risks, blockers, insights, and action items
-- **Connect** everything into a queryable graph of relationships
-- **Reflect** on patterns across time periods and programs
-
-Named after the Greek Fate who spins the thread of life, Clotho takes raw material and weaves it into something you can follow.
-
-## Core Concepts
-
-### Structural Layer — "What You Do"
-
-| Entity | Purpose |
-|--------|---------|
-| **Responsibility** | Ongoing role obligations — mentorship, reporting, budgets. Never "complete." |
-| **Program** | Strategic initiatives with objectives — technical education, PMO establishment. |
-| **Objective** | Outcomes you're driving toward within a program. |
-
-### Execution Layer — "Work in Motion"
-
-| Entity | Purpose |
-|--------|---------|
-| **Workstream** | Long-running work threads. Active or inactive. |
-| **Task** | Discrete work items. States: `todo → doing → blocked → done` |
-| **Cadence** | Recurring schedule metadata (quarterly reviews, weekly syncs). |
-
-### Capture Layer — "Raw Material"
-
-| Entity | Purpose |
-|--------|---------|
-| **Meeting** | Container for transcripts and notes. |
-| **Transcript** | Raw meeting content, source for extraction. |
-| **Note** | Authored content, freeform. |
-| **Reflection** | Time-period bound thinking (daily, weekly, quarterly, adhoc). |
-| **Artifact** | Deliverables with links to source — docs, PRs, presentations. |
-
-### Derived Layer — "Sense-Making"
-
-| Entity | Purpose |
-|--------|---------|
-| **Decision** | Extracted decision point. |
-| **Risk** | Identified risk. |
-| **Blocker** | Impediment to progress. |
-| **Question** | Open question requiring resolution. |
-| **Insight** | Learning or observation worth preserving. |
-
-All derived entities start as **drafts** and require human review to promote, edit, or discard.
-
-## AI Extraction
-
-Clotho uses AI to extract structured information from transcripts:
-
-**Speech Acts:**
-- `Commit` — "I'll do X" → Draft Task (owned by speaker)
-- `Decide` — "We're going with X" → Draft Decision
-- `Risk` — "The concern is..." → Draft Risk
-- `Block` — "We're stuck on..." → Draft Blocker
-- `Question` — "We need to figure out..." → Draft Question
-- `Insight` — "What we learned..." → Draft Insight
-- `Delegate` — "Can you take this?" → Draft Task (owned by target)
-- `Request` — "I need X from you" → Draft Task (inbound)
-- `Update` — "Here's where we are..." → Annotation (no new entity)
-
-**Entity Resolution:**
-- Extracted mentions are fuzzy-matched against known entities
-- Unresolved mentions are flagged for human review
-- Review can link to existing, create new, or discard
-
-## Relations
-
-Clotho maintains a graph of typed relationships:
-
-```cypher
-// Structural
-(task)-[:BELONGS_TO]->(program)
-(artifact)-[:DELIVERS]->(objective)
-
-// Provenance  
-(note)-[:SPAWNED_FROM]->(meeting)
-(extraction)-[:EXTRACTED_FROM]->(transcript)
-
-// Semantic
-(meeting)-[:HAS_DECISION]->(decision)
-(task)-[:BLOCKED_BY]->(blocker)
-
-// Mentions
-(transcript)-[:MENTIONS]->(person)
-(note)-[:MENTIONS]->(program)
-```
-
-Query with Cypher via graphqlite:
-
-```cypher
-// What decisions came from PMO meetings?
-MATCH (p:Program {title: 'PMO Establishment'})<-[:RELATES_TO]-(m:Meeting)-[:HAS_DECISION]->(d:Decision)
-RETURN m.title, d.title
-
-// What's blocking the monolith breakup?
-MATCH (p:Program {title: 'Monolith Breakup'})<-[:BELONGS_TO]-(t:Task)-[:BLOCKED_BY]->(b:Blocker)
-RETURN t.title, b.title
-```
-
-## Storage
-
-```
-.workspace/
-├── content/           # Markdown (human-readable, git-synced)
-│   ├── meetings/
-│   ├── reflections/
-│   ├── artifacts/
-│   └── notes/
-├── data/              # JSONL (append-friendly, git-synced)
-│   ├── entities.jsonl
-│   ├── extractions.jsonl
-│   ├── tags.jsonl
-│   └── events.jsonl
-├── graph/             # graphqlite (git-synced)
-│   └── relations.db
-├── index/             # SQLite + FTS5 (gitignored, rebuilt)
-│   └── search.db
-└── config/            # TOML (git-synced)
-    ├── config.toml
-    └── ontology.toml
-```
-
-**Design principles:**
-- `content/` is what you browse in an editor
-- `data/` is machine-managed, append-friendly
-- `graph/` is the source of truth for relations
-- `index/` is derived and rebuilt on clone
-- Git as sync layer, not VCS — shallow history (~20 commits), silent auto-push
-
-## Installation
+## Install
 
 ```bash
-# Coming soon
-curl -fsSL https://raw.githubusercontent.com/colliery-io/clotho/main/scripts/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/colliery-io/clotho/main/scripts/install.sh | sh
 ```
 
-## Usage
+This installs two binaries to `~/.local/bin/`:
+- `clotho` — CLI for workspace management
+- `clotho-mcp` — MCP server for AI agent integration (Claude Code plugin)
+
+## Quick Start
+
+### 1. Initialize a workspace
 
 ```bash
-# Initialize a workspace
+mkdir my-work && cd my-work
 clotho init
-
-# Ingest a transcript
-clotho ingest transcript meeting-notes.md --meeting "2025-01-15 Standup"
-
-# Review draft extractions
-clotho review
-
-# Query the graph
-clotho query "MATCH (t:Task)-[:BLOCKED_BY]->(b) RETURN t.title, b.title"
-
-# Create a reflection
-clotho reflect --period weekly
 ```
+
+This creates:
+- Visible content directories at the project root: `programs/`, `responsibilities/`, `tasks/`, `meetings/`, `notes/`, etc.
+- Hidden machine data in `.clotho/`: databases, graph, search index, config
+
+### 2. Set up your work structure
+
+Create the programs and responsibilities that define your work:
+
+```bash
+clotho create program --title "Monolith Breakup"
+clotho create program --title "Technical Education"
+clotho create responsibility --title "Team Mentorship"
+clotho create responsibility --title "Budget Management"
+```
+
+Create objectives under programs:
+
+```bash
+clotho create objective --title "Extract user service" --parent <program-id>
+```
+
+Create people you work with:
+
+```bash
+clotho create person --title "Alice" --email "alice@example.com"
+clotho create person --title "Bob"
+```
+
+### 3. Configure extraction ontologies
+
+Each program has an ontology — keywords and signal types that guide AI extraction from transcripts:
+
+```bash
+clotho ontology-set <program-id> \
+  --add-keywords "database coupling, service contracts, strangler fig" \
+  --add-technical "architecture coupling, missing service layer" \
+  --add-social "team autonomy, ownership gaps" \
+  --add-people "Ali K, Harrison"
+```
+
+### 4. Capture your work
+
+**Ingest a transcript:**
+```bash
+clotho ingest meeting-transcript.md --type transcript --title "Architecture Review"
+```
+
+**Create a note:**
+```bash
+clotho create note --title "API design thoughts" --content "# API Design\n\nThinking about..."
+```
+
+**Create tasks:**
+```bash
+clotho create task --title "Write migration RFC"
+clotho create task --title "Review API contracts"
+```
+
+### 5. Connect everything with relations
+
+```bash
+# Task belongs to a program
+clotho relate <task-id> belongs_to <program-id>
+
+# Transcript mentions a person
+clotho relate <transcript-id> mentions <person-id>
+
+# Artifact delivers against an objective
+clotho relate <artifact-id> delivers <objective-id>
+
+# Task is blocked by a blocker
+clotho relate <task-id> blocked_by <blocker-id>
+```
+
+### 6. Query your work
+
+```bash
+# List all tasks
+clotho list --type Task
+
+# List blocked tasks
+clotho list --state blocked
+
+# Search across all content
+clotho search "migration strategy"
+
+# Cypher graph query
+clotho query "MATCH (t:Task)-[:BLOCKED_BY]->(b:Blocker) RETURN t.title, b.title"
+
+# View an entity
+clotho get <entity-id>
+
+# View relations
+clotho relations <entity-id>
+```
+
+### 7. Reflect and sync
+
+```bash
+# Create a weekly reflection
+clotho reflect --period weekly
+
+# Sync to git
+clotho sync
+```
+
+## Claude Code Plugin
+
+Clotho includes a Claude Code plugin with ceremony-driven workflows:
+
+### Install the plugin
+```bash
+claude plugin add /path/to/clotho/plugins/clotho
+```
+
+### Available ceremonies
+
+| Command | When | What it does |
+|---------|------|-------------|
+| `/daily-debrief` | End of day | Scans inbox, ingests materials, updates tasks, checks horizon, extracts from transcripts |
+| `/daily-brief` | Start of day | Prioritized view: blocked items, due dates, stale tasks, open risks |
+| `/weekly-review` | End of week | Guided reflection, pattern identification, problem areas |
+| `/report` | As needed | Audience-appropriate status reports (boss/stakeholders/team) |
+| `/period-review` | Quarterly+ | Deep retrospective with decision outcome tracking |
+
+### Available skills
+
+| Skill | Purpose |
+|-------|---------|
+| `clotho-workspace` | Entity CRUD, workspace management |
+| `clotho-graph` | Relations, Cypher queries |
+| `clotho-extraction` | In-session speech act extraction |
+| `clotho-reflection` | Guided reflection creation |
+| `clotho-transcript-ingestor` | Single transcript processing |
+
+### 18 MCP Tools
+
+**Read:** clotho_search, clotho_query, clotho_read_entity, clotho_list_entities, clotho_get_relations, clotho_get_ontology, clotho_search_ontology
+
+**Write:** clotho_init, clotho_ingest, clotho_create_entity, clotho_update_entity, clotho_delete_entity, clotho_create_note, clotho_create_reflection, clotho_create_relation, clotho_delete_relation, clotho_update_ontology, clotho_sync
+
+## Filesystem Layout
+
+```
+my-work/                          # Project root
+├── programs/                     # Visible — your strategic initiatives
+│   └── monolith-breakup.md
+├── responsibilities/             # Visible — your ongoing obligations
+│   └── team-mentorship.md
+├── objectives/                   # Visible — outcomes within programs
+├── workstreams/                  # Visible — long-running work threads
+├── tasks/                        # Visible — discrete work items
+├── meetings/                     # Visible — meeting notes + transcripts
+├── reflections/                  # Visible — time-period reflections
+├── artifacts/                    # Visible — deliverables
+├── notes/                        # Visible — freeform content
+├── people/                       # Visible — your contacts
+├── derived/                      # Visible — decisions, risks, blockers, etc.
+│
+└── .clotho/                      # Hidden — machine-managed
+    ├── data/                     # entities.db, extractions.db, tags, events
+    ├── graph/                    # relations.db (graphqlite)
+    ├── index/                    # search.db (FTS5, gitignored)
+    ├── inbox/                    # Landing zone for external integrations
+    └── config/                   # config.toml, ontology.toml
+```
+
+Content is browsable in any editor. Open `programs/` to see your portfolio. Open `tasks/` to see your work queue. Open `reflections/` to review your thinking over time.
+
+## Entity Types
+
+| Layer | Entities | Lifecycle |
+|-------|----------|-----------|
+| **Structural** | Program, Responsibility, Objective | active / inactive |
+| **Execution** | Workstream, Task | Task: todo → doing → blocked → done |
+| **Capture** | Meeting, Transcript, Note, Reflection, Artifact | — |
+| **Derived** | Decision, Risk, Blocker, Question, Insight | draft (from extraction) |
+| **Cross-cutting** | Person | — |
+
+## Relation Types
+
+| Relation | Meaning | Example |
+|----------|---------|---------|
+| `belongs_to` | Ownership | Task → Program |
+| `relates_to` | Topical connection | Workstream → Program |
+| `delivers` | Evidence of completion | Artifact → Objective |
+| `spawned_from` | Origin | Note → Meeting |
+| `extracted_from` | Extraction provenance | Decision → Transcript |
+| `has_decision` | Contains | Meeting → Decision |
+| `has_risk` | Flags | Program → Risk |
+| `blocked_by` | Impediment | Task → Blocker |
+| `mentions` | Reference | Transcript → Person |
 
 ## Architecture
 
 ```
 clotho/
-├── clotho-core       # Domain logic, entities, traits
-├── clotho-graph      # graphqlite integration
-├── clotho-store      # DAL for content/, data/, index/
-├── clotho-extract    # AI extraction pipeline
-├── clotho-cli        # Command-line interface
-├── clotho-mcp        # MCP server for AI agents
-└── clotho-sync       # Git sync layer
+├── clotho-core      # Domain model, traits, graph (graphqlite)
+├── clotho-store     # Storage: SQLite, JSONL, FTS5, content, federation
+├── clotho-cli       # 19 CLI commands
+├── clotho-mcp       # 18 MCP tools (rust-mcp-sdk)
+├── clotho-sync      # Git sync (libgit2)
+├── clotho-tests     # E2E integration tests
+└── plugins/clotho   # Claude Code plugin (skills, agents, hooks)
 ```
 
 ## License
