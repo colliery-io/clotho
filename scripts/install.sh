@@ -41,9 +41,6 @@ detect_platform() {
                 *)            error "Unsupported Linux architecture: $ARCH" ;;
             esac
             ;;
-        MINGW*|MSYS*|CYGWIN*)
-            TARGET="x86_64-pc-windows-msvc"
-            ;;
         *)
             error "Unsupported operating system: $OS"
             ;;
@@ -69,17 +66,8 @@ install() {
     TMPDIR=$(mktemp -d)
     trap 'rm -rf "$TMPDIR"' EXIT
 
-    # Determine binary names
-    case "$TARGET" in
-        *windows*)
-            CLI_NAME="clotho-${TARGET}.exe"
-            MCP_NAME="clotho-mcp-${TARGET}.exe"
-            ;;
-        *)
-            CLI_NAME="clotho-${TARGET}"
-            MCP_NAME="clotho-mcp-${TARGET}"
-            ;;
-    esac
+    CLI_NAME="clotho-${TARGET}"
+    MCP_NAME="clotho-mcp-${TARGET}"
 
     BASE_URL="https://github.com/$REPO/releases/download/v${VERSION}"
 
@@ -95,34 +83,22 @@ install() {
     [ -s "$TMPDIR/clotho" ] || error "Downloaded clotho is empty"
     [ -s "$TMPDIR/clotho-mcp" ] || error "Downloaded clotho-mcp is empty"
 
-    # Install based on platform
-    case "$OS" in
-        Darwin|Linux)
-            INSTALL_DIR="${CLOTHO_INSTALL_DIR:-$HOME/.local/bin}"
-            mkdir -p "$INSTALL_DIR"
+    INSTALL_DIR="${CLOTHO_INSTALL_DIR:-$HOME/.local/bin}"
+    mkdir -p "$INSTALL_DIR"
 
-            chmod +x "$TMPDIR/clotho" "$TMPDIR/clotho-mcp"
-            cp "$TMPDIR/clotho" "$INSTALL_DIR/clotho"
-            cp "$TMPDIR/clotho-mcp" "$INSTALL_DIR/clotho-mcp"
+    chmod +x "$TMPDIR/clotho" "$TMPDIR/clotho-mcp"
+    cp "$TMPDIR/clotho" "$INSTALL_DIR/clotho"
+    cp "$TMPDIR/clotho-mcp" "$INSTALL_DIR/clotho-mcp"
 
-            info "Installed to $INSTALL_DIR/"
+    info "Installed to $INSTALL_DIR/"
 
-            # Check if in PATH
-            case ":$PATH:" in
-                *":$INSTALL_DIR:"*) ;;
-                *)
-                    warn "$INSTALL_DIR is not in your PATH."
-                    warn "Add this to your shell profile:"
-                    warn "  export PATH=\"$INSTALL_DIR:\$PATH\""
-                    ;;
-            esac
-            ;;
-        MINGW*|MSYS*|CYGWIN*)
-            INSTALL_DIR="${CLOTHO_INSTALL_DIR:-$HOME/bin}"
-            mkdir -p "$INSTALL_DIR"
-            cp "$TMPDIR/clotho" "$INSTALL_DIR/clotho.exe"
-            cp "$TMPDIR/clotho-mcp" "$INSTALL_DIR/clotho-mcp.exe"
-            info "Installed to $INSTALL_DIR/"
+    # Check if in PATH
+    case ":$PATH:" in
+        *":$INSTALL_DIR:"*) ;;
+        *)
+            warn "$INSTALL_DIR is not in your PATH."
+            warn "Add this to your shell profile:"
+            warn "  export PATH=\"$INSTALL_DIR:\$PATH\""
             ;;
     esac
 
