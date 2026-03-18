@@ -1,6 +1,6 @@
 # Code Index
 
-> Generated: 2026-03-18T01:23:57Z | 75 files | Rust
+> Generated: 2026-03-18T01:32:17Z | 76 files | Rust
 
 ## Project Structure
 
@@ -84,7 +84,8 @@
 │   │   │   ├── entities.rs
 │   │   │   ├── extractions.rs
 │   │   │   ├── jsonl.rs
-│   │   │   └── mod.rs
+│   │   │   ├── mod.rs
+│   │   │   └── ontology.rs
 │   │   ├── error.rs
 │   │   ├── federation.rs
 │   │   ├── index.rs
@@ -165,11 +166,12 @@
 
 #### clotho-cli/src/commands/ontology.rs
 
-- pub `OntologyGetArgs` struct L7-10 — `{ id: String }`
-- pub `OntologySetArgs` struct L13-40 — `{ id: String, add_keywords: Option<String>, remove_keywords: Option<String>, add...`
-- pub `run_get` function L42-85 — `(args: OntologyGetArgs, json: bool) -> Result<(), Box<dyn std::error::Error>>`
-- pub `run_set` function L87-179 — `(args: OntologySetArgs, json: bool) -> Result<(), Box<dyn std::error::Error>>`
--  `extract_ontology` function L181-191 — `(metadata: &Option<String>) -> serde_json::Value`
+- pub `OntologyGetArgs` struct L11-14 — `{ id: String }`
+- pub `OntologySetArgs` struct L17-44 — `{ id: String, add_keywords: Option<String>, remove_keywords: Option<String>, add...`
+- pub `OntologySearchArgs` struct L47-50 — `{ query: String }`
+- pub `run_get` function L52-87 — `(args: OntologyGetArgs, json: bool) -> Result<(), Box<dyn std::error::Error>>`
+- pub `run_set` function L89-139 — `(args: OntologySetArgs, json: bool) -> Result<(), Box<dyn std::error::Error>>`
+- pub `run_search` function L141-168 — `(args: OntologySearchArgs, json: bool) -> Result<(), Box<dyn std::error::Error>>`
 
 #### clotho-cli/src/commands/query.rs
 
@@ -217,8 +219,8 @@
 
 -  `commands` module L1 — `-`
 -  `Cli` struct L9-16 — `{ json: bool, command: Commands }` — Clotho — Personal work and time management through reflection,
--  `Commands` enum L19-67 — `Init | Create | Get | Update | Delete | Ingest | List | Search | Query | Reflect...`
--  `main` function L69-100 — `()`
+-  `Commands` enum L19-70 — `Init | Create | Get | Update | Delete | Ingest | List | Search | Query | Reflect...`
+-  `main` function L72-104 — `()`
 
 ### clotho-cli/tests
 
@@ -847,9 +849,9 @@
 - pub `ClothoServerHandler` struct L18 — `-`
 - pub `new` function L21-24 — `() -> Self`
 -  `ClothoServerHandler` type L20-25 — `= ClothoServerHandler`
--  `ClothoServerHandler` type L28-139 — `impl ServerHandler for ClothoServerHandler`
+-  `ClothoServerHandler` type L28-144 — `impl ServerHandler for ClothoServerHandler`
 -  `handle_list_tools_request` function L29-39 — `( &self, _params: Option<PaginatedRequestParams>, _runtime: Arc<dyn McpServer>, ...`
--  `handle_call_tool_request` function L41-138 — `( &self, params: CallToolRequestParams, _runtime: Arc<dyn McpServer>, ) -> Resul...`
+-  `handle_call_tool_request` function L41-143 — `( &self, params: CallToolRequestParams, _runtime: Arc<dyn McpServer>, ) -> Resul...`
 
 ### clotho-mcp/src/tools
 
@@ -858,8 +860,8 @@
 #### clotho-mcp/src/tools/all_tools.rs
 
 - pub `ClothoTools` struct L11 — `-` — Registry of all Clotho MCP tools.
-- pub `tools` function L14-40 — `() -> Vec<Tool>`
--  `ClothoTools` type L13-41 — `= ClothoTools`
+- pub `tools` function L14-41 — `() -> Vec<Tool>`
+-  `ClothoTools` type L13-42 — `= ClothoTools`
 
 #### clotho-mcp/src/tools/create_entity.rs
 
@@ -950,15 +952,15 @@
 
 #### clotho-mcp/src/tools/ontology.rs
 
-- pub `GetOntologyTool` struct L20-25 — `{ workspace_path: String, entity_id: String }`
-- pub `call_tool` function L28-79 — `(&self) -> Result<CallToolResult, CallToolError>`
-- pub `UpdateOntologyTool` struct L91-108 — `{ workspace_path: String, entity_id: String, add_keywords: Option<String>, remov...`
-- pub `call_tool` function L111-153 — `(&self) -> Result<CallToolResult, CallToolError>`
--  `GetOntologyTool` type L27-80 — `= GetOntologyTool`
--  `UpdateOntologyTool` type L110-154 — `= UpdateOntologyTool`
--  `extract_ontology` function L156-166 — `(metadata: &Option<String>) -> serde_json::Value`
--  `add_to_array` function L168-177 — `(arr_val: &mut serde_json::Value, csv: &Option<String>)`
--  `remove_from_array` function L179-186 — `(arr_val: &mut serde_json::Value, csv: &Option<String>)`
+- pub `GetOntologyTool` struct L24-29 — `{ workspace_path: String, entity_id: String }`
+- pub `call_tool` function L32-69 — `(&self) -> Result<CallToolResult, CallToolError>`
+- pub `UpdateOntologyTool` struct L81-100 — `{ workspace_path: String, entity_id: String, add_keywords: Option<String>, remov...`
+- pub `call_tool` function L103-146 — `(&self) -> Result<CallToolResult, CallToolError>`
+- pub `SearchOntologyTool` struct L158-163 — `{ workspace_path: String, query: String }`
+- pub `call_tool` function L166-189 — `(&self) -> Result<CallToolResult, CallToolError>`
+-  `GetOntologyTool` type L31-70 — `= GetOntologyTool`
+-  `UpdateOntologyTool` type L102-147 — `= UpdateOntologyTool`
+-  `SearchOntologyTool` type L165-190 — `= SearchOntologyTool`
 
 #### clotho-mcp/src/tools/query.rs
 
@@ -1174,6 +1176,26 @@
 - pub `entities` module L1 — `-`
 - pub `extractions` module L2 — `-`
 - pub `jsonl` module L3 — `-`
+- pub `ontology` module L4 — `-`
+
+#### clotho-store/src/data/ontology.rs
+
+- pub `CATEGORY_KEYWORD` variable L26 — `: &str` — Valid ontology categories.
+- pub `CATEGORY_SIGNAL_TECHNICAL` variable L27 — `: &str`
+- pub `CATEGORY_SIGNAL_SOCIAL` variable L28 — `: &str`
+- pub `CATEGORY_PERSON` variable L29 — `: &str`
+- pub `OntologyEntry` struct L33-40 — `{ id: i64, entity_id: String, category: String, value: String, added_at: String,...` — A single ontology entry.
+- pub `Ontology` struct L44-50 — `{ entity_id: String, keywords: Vec<String>, signal_technical: Vec<String>, signa...` — The full ontology for an entity, grouped by category.
+- pub `OntologyStore` struct L53-55 — `{ conn: Connection }` — Ontology store backed by a table in entities.db.
+- pub `open` function L60-64 — `(path: &Path) -> Result<Self, StoreError>` — Open the ontology store, creating the table if needed.
+- pub `in_memory` function L67-71 — `() -> Result<Self, StoreError>` — Open an in-memory store (for tests).
+- pub `get` function L74-106 — `(&self, entity_id: &str) -> Result<Ontology, StoreError>` — Get the full ontology for an entity, grouped by category.
+- pub `add` function L109-128 — `( &self, entity_id: &str, category: &str, values: &[&str], added_by: Option<&str...` — Add entries to an entity's ontology.
+- pub `remove` function L131-146 — `( &self, entity_id: &str, category: &str, values: &[&str], ) -> Result<usize, St...` — Remove entries from an entity's ontology.
+- pub `search` function L150-170 — `(&self, value: &str) -> Result<Vec<OntologyEntry>, StoreError>` — Find which entities have a specific value in their ontology.
+- pub `list` function L173-192 — `(&self, entity_id: &str) -> Result<Vec<OntologyEntry>, StoreError>` — Get all entries for an entity as a flat list.
+-  `SCHEMA` variable L9-23 — `: &str`
+-  `OntologyStore` type L57-193 — `= OntologyStore`
 
 ### clotho-store/tests
 
