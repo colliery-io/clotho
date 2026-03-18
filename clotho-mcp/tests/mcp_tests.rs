@@ -1,3 +1,4 @@
+use serial_test::serial;
 use std::fs;
 
 use tempfile::tempdir;
@@ -6,6 +7,7 @@ use clotho_store::data::entities::EntityStore;
 use clotho_store::workspace::Workspace;
 
 use clotho_mcp_server::tools::ClothoTools;
+use clotho_mcp_server::workspace_resolver;
 
 // ===========================================================================
 // Tool listing
@@ -14,7 +16,7 @@ use clotho_mcp_server::tools::ClothoTools;
 #[test]
 fn list_tools_returns_all_fifteen() {
     let tools = ClothoTools::tools();
-    assert_eq!(tools.len(), 20);
+    assert_eq!(tools.len(), 21);
 
     let names: Vec<&str> = tools.iter().map(|t| t.name.as_str()).collect();
     assert!(names.contains(&"clotho_search"));
@@ -43,6 +45,7 @@ fn all_tools_have_descriptions() {
 // Tool execution (direct call_tool invocation)
 // ===========================================================================
 
+#[serial]
 #[tokio::test]
 async fn test_init_tool() {
     use clotho_mcp_server::tools::InitTool;
@@ -56,18 +59,19 @@ async fn test_init_tool() {
     assert!(tmp.path().join(".clotho").exists());
 }
 
+#[serial]
 #[tokio::test]
 async fn test_capture_tool() {
     use clotho_mcp_server::tools::CaptureTool;
 
     let tmp = tempdir().unwrap();
     Workspace::init(tmp.path()).unwrap();
+    workspace_resolver::set_workspace(tmp.path().display().to_string());
 
     let file_path = tmp.path().join("test-note.md");
     fs::write(&file_path, "# Test Note\n\nSome interesting content about architecture.").unwrap();
 
     let tool = CaptureTool {
-        workspace_path: tmp.path().display().to_string(),
         file_path: file_path.display().to_string(),
         entity_type: Some("note".to_string()),
         title: Some("Test Note".to_string()),
@@ -82,15 +86,16 @@ async fn test_capture_tool() {
     assert_eq!(all[0].title, "Test Note");
 }
 
+#[serial]
 #[tokio::test]
 async fn test_create_note_tool() {
     use clotho_mcp_server::tools::CreateNoteTool;
 
     let tmp = tempdir().unwrap();
     Workspace::init(tmp.path()).unwrap();
+    workspace_resolver::set_workspace(tmp.path().display().to_string());
 
     let tool = CreateNoteTool {
-        workspace_path: tmp.path().display().to_string(),
         title: "Architecture Thoughts".to_string(),
         content: "# Architecture\n\nThinking about microservices vs monolith.".to_string(),
     };
@@ -104,15 +109,16 @@ async fn test_create_note_tool() {
     assert_eq!(notes[0].title, "Architecture Thoughts");
 }
 
+#[serial]
 #[tokio::test]
 async fn test_create_reflection_tool() {
     use clotho_mcp_server::tools::CreateReflectionTool;
 
     let tmp = tempdir().unwrap();
     Workspace::init(tmp.path()).unwrap();
+    workspace_resolver::set_workspace(tmp.path().display().to_string());
 
     let tool = CreateReflectionTool {
-        workspace_path: tmp.path().display().to_string(),
         period: "weekly".to_string(),
         title: None,
         program_id: None,
@@ -127,22 +133,22 @@ async fn test_create_reflection_tool() {
     assert!(reflections[0].title.contains("weekly"));
 }
 
+#[serial]
 #[tokio::test]
 async fn test_search_tool_finds_content() {
     use clotho_mcp_server::tools::{CreateNoteTool, SearchTool};
 
     let tmp = tempdir().unwrap();
     Workspace::init(tmp.path()).unwrap();
+    workspace_resolver::set_workspace(tmp.path().display().to_string());
 
     let create = CreateNoteTool {
-        workspace_path: tmp.path().display().to_string(),
         title: "Deployment Strategy".to_string(),
         content: "Blue-green deployment with rolling updates and canary releases.".to_string(),
     };
     create.call_tool().await.unwrap();
 
     let search = SearchTool {
-        workspace_path: tmp.path().display().to_string(),
         query: "canary".to_string(),
         limit: None,
     };
@@ -153,16 +159,17 @@ async fn test_search_tool_finds_content() {
     assert!(text.contains("Deployment Strategy"));
 }
 
+#[serial]
 #[tokio::test]
 async fn test_list_entities_tool() {
     use clotho_mcp_server::tools::{CreateNoteTool, ListEntitiesTool};
 
     let tmp = tempdir().unwrap();
     Workspace::init(tmp.path()).unwrap();
+    workspace_resolver::set_workspace(tmp.path().display().to_string());
 
     for title in &["Note A", "Note B"] {
         let tool = CreateNoteTool {
-            workspace_path: tmp.path().display().to_string(),
             title: title.to_string(),
             content: "Content".to_string(),
         };
@@ -170,7 +177,6 @@ async fn test_list_entities_tool() {
     }
 
     let list = ListEntitiesTool {
-        workspace_path: tmp.path().display().to_string(),
         entity_type: Some("Note".to_string()),
         status: None,
         state: None,

@@ -1,6 +1,7 @@
 pub mod formatting;
 pub mod server;
 pub mod tools;
+pub mod workspace_resolver;
 
 pub use server::ClothoServerHandler;
 
@@ -25,6 +26,13 @@ pub async fn run() -> AnyhowResult<()> {
         .try_init();
 
     info!("Starting Clotho MCP Server");
+
+    // Try to auto-detect workspace from cwd
+    if let Some(path) = workspace_resolver::detect_and_set() {
+        info!("Auto-detected workspace at: {}", path);
+    } else {
+        info!("No workspace detected. Use clotho_set_workspace to set one.");
+    }
 
     let server_details = InitializeResult {
         server_info: Implementation {

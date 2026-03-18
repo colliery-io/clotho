@@ -14,6 +14,7 @@ pub mod processing;
 pub mod query;
 pub mod read_entity;
 pub mod search;
+pub mod set_workspace;
 pub mod sync;
 pub mod update_entity;
 
@@ -33,5 +34,6 @@ pub use processing::*;
 pub use query::*;
 pub use read_entity::*;
 pub use search::*;
+pub use set_workspace::*;
 pub use sync::*;
 pub use update_entity::*;

@@ -1,4 +1,5 @@
 use crate::formatting::text_result;
+use crate::workspace_resolver;
 use clotho_store::data::entities::EntityStore;
 use clotho_store::data::ontology::{
     OntologyStore, CATEGORY_KEYWORD, CATEGORY_PERSON, CATEGORY_SIGNAL_SOCIAL,
@@ -22,15 +23,15 @@ use std::path::Path;
 )]
 #[derive(Debug, Serialize, Deserialize, JsonSchema)]
 pub struct GetOntologyTool {
-    /// Path to the directory containing .clotho/
-    pub workspace_path: String,
     /// Entity ID (Program or Responsibility UUID)
     pub entity_id: String,
 }
 
 impl GetOntologyTool {
     pub async fn call_tool(&self) -> Result<CallToolResult, CallToolError> {
-        let ws = Workspace::open(Path::new(&self.workspace_path))
+        let ws_path = workspace_resolver::require_workspace()
+            .map_err(|e| CallToolError::new(std::io::Error::other(e)))?;
+        let ws = Workspace::open(Path::new(&ws_path))
             .map_err(|e| CallToolError::new(std::io::Error::other(e.to_string())))?;
         let entity_store = EntityStore::open(&ws.data_path().join("entities.db"))
             .map_err(|e| CallToolError::new(std::io::Error::other(e.to_string())))?;
@@ -79,8 +80,6 @@ impl GetOntologyTool {
 )]
 #[derive(Debug, Serialize, Deserialize, JsonSchema)]
 pub struct UpdateOntologyTool {
-    /// Path to the directory containing .clotho/
-    pub workspace_path: String,
     /// Entity ID (Program or Responsibility UUID)
     pub entity_id: String,
     /// Keywords to add (comma-separated)
@@ -101,7 +100,9 @@ pub struct UpdateOntologyTool {
 
 impl UpdateOntologyTool {
     pub async fn call_tool(&self) -> Result<CallToolResult, CallToolError> {
-        let ws = Workspace::open(Path::new(&self.workspace_path))
+        let ws_path = workspace_resolver::require_workspace()
+            .map_err(|e| CallToolError::new(std::io::Error::other(e)))?;
+        let ws = Workspace::open(Path::new(&ws_path))
             .map_err(|e| CallToolError::new(std::io::Error::other(e.to_string())))?;
         let ontology_store = OntologyStore::open(&ws.data_path().join("entities.db"))
             .map_err(|e| CallToolError::new(std::io::Error::other(e.to_string())))?;
@@ -156,15 +157,15 @@ impl UpdateOntologyTool {
 )]
 #[derive(Debug, Serialize, Deserialize, JsonSchema)]
 pub struct SearchOntologyTool {
-    /// Path to the directory containing .clotho/
-    pub workspace_path: String,
     /// Search term
     pub query: String,
 }
 
 impl SearchOntologyTool {
     pub async fn call_tool(&self) -> Result<CallToolResult, CallToolError> {
-        let ws = Workspace::open(Path::new(&self.workspace_path))
+        let ws_path = workspace_resolver::require_workspace()
+            .map_err(|e| CallToolError::new(std::io::Error::other(e)))?;
+        let ws = Workspace::open(Path::new(&ws_path))
             .map_err(|e| CallToolError::new(std::io::Error::other(e.to_string())))?;
         let ontology_store = OntologyStore::open(&ws.data_path().join("entities.db"))
             .map_err(|e| CallToolError::new(std::io::Error::other(e.to_string())))?;

@@ -1,4 +1,5 @@
 use crate::formatting::text_result;
+use crate::workspace_resolver;
 use clotho_store::index::SearchIndex;
 use clotho_store::workspace::Workspace;
 use rust_mcp_sdk::{
@@ -18,8 +19,6 @@ use std::path::Path;
 )]
 #[derive(Debug, Serialize, Deserialize, JsonSchema)]
 pub struct SearchTool {
-    /// Path to the directory containing .clotho/
-    pub workspace_path: String,
     /// Search query (FTS5 keywords)
     pub query: String,
     /// Maximum number of results (default 10)
@@ -28,7 +27,9 @@ pub struct SearchTool {
 
 impl SearchTool {
     pub async fn call_tool(&self) -> Result<CallToolResult, CallToolError> {
-        let ws = Workspace::open(Path::new(&self.workspace_path))
+        let ws_path = workspace_resolver::require_workspace()
+            .map_err(|e| CallToolError::new(std::io::Error::other(e)))?;
+        let ws = Workspace::open(Path::new(&ws_path))
             .map_err(|e| CallToolError::new(std::io::Error::other(e.to_string())))?;
 
         let index = SearchIndex::open(&ws.index_path().join("search.db"))

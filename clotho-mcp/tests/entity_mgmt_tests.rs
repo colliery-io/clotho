@@ -1,3 +1,4 @@
+use serial_test::serial;
 use tempfile::tempdir;
 
 use clotho_core::domain::types::EntityId;
@@ -9,6 +10,7 @@ use clotho_mcp_server::tools::{
     ClothoTools, CreateEntityTool, CreateRelationTool, DeleteEntityTool, GetRelationsTool,
     UpdateEntityTool,
 };
+use clotho_mcp_server::workspace_resolver;
 
 // ===========================================================================
 // Tool count
@@ -17,7 +19,7 @@ use clotho_mcp_server::tools::{
 #[test]
 fn tools_now_fifteen() {
     let tools = ClothoTools::tools();
-    assert_eq!(tools.len(), 20);
+    assert_eq!(tools.len(), 21);
     let names: Vec<&str> = tools.iter().map(|t| t.name.as_str()).collect();
     assert!(names.contains(&"clotho_create_entity"));
     assert!(names.contains(&"clotho_update_entity"));
@@ -31,13 +33,14 @@ fn tools_now_fifteen() {
 // Create entity - structural types
 // ===========================================================================
 
+#[serial]
 #[tokio::test]
 async fn create_program() {
     let tmp = tempdir().unwrap();
     Workspace::init(tmp.path()).unwrap();
+    workspace_resolver::set_workspace(tmp.path().display().to_string());
 
     let tool = CreateEntityTool {
-        workspace_path: tmp.path().display().to_string(),
         entity_type: "program".to_string(),
         title: "Technical Education".to_string(),
         status: None, state: None, email: None, parent_id: None, content: None,
@@ -53,13 +56,14 @@ async fn create_program() {
     assert_eq!(programs[0].status.as_deref(), Some("active"));
 }
 
+#[serial]
 #[tokio::test]
 async fn create_responsibility() {
     let tmp = tempdir().unwrap();
     Workspace::init(tmp.path()).unwrap();
+    workspace_resolver::set_workspace(tmp.path().display().to_string());
 
     let tool = CreateEntityTool {
-        workspace_path: tmp.path().display().to_string(),
         entity_type: "responsibility".to_string(),
         title: "Team Mentorship".to_string(),
         status: None, state: None, email: None, parent_id: None, content: None,
@@ -73,14 +77,15 @@ async fn create_responsibility() {
     assert_eq!(items[0].status.as_deref(), Some("active"));
 }
 
+#[serial]
 #[tokio::test]
 async fn create_objective_with_parent() {
     let tmp = tempdir().unwrap();
     Workspace::init(tmp.path()).unwrap();
+    workspace_resolver::set_workspace(tmp.path().display().to_string());
 
     // Create program first
     let prog = CreateEntityTool {
-        workspace_path: tmp.path().display().to_string(),
         entity_type: "program".to_string(),
         title: "PMO".to_string(),
         status: None, state: None, email: None, parent_id: None, content: None,
@@ -94,7 +99,6 @@ async fn create_objective_with_parent() {
 
     // Create objective under program
     let obj = CreateEntityTool {
-        workspace_path: tmp.path().display().to_string(),
         entity_type: "objective".to_string(),
         title: "Reduce deploy time".to_string(),
         status: None, state: None, email: None,
@@ -115,13 +119,14 @@ async fn create_objective_with_parent() {
 // Create task with state
 // ===========================================================================
 
+#[serial]
 #[tokio::test]
 async fn create_task_defaults_to_todo() {
     let tmp = tempdir().unwrap();
     Workspace::init(tmp.path()).unwrap();
+    workspace_resolver::set_workspace(tmp.path().display().to_string());
 
     let tool = CreateEntityTool {
-        workspace_path: tmp.path().display().to_string(),
         entity_type: "task".to_string(),
         title: "Write RFC".to_string(),
         status: None, state: None, email: None, parent_id: None, content: None,
@@ -138,13 +143,14 @@ async fn create_task_defaults_to_todo() {
 // Create person with email
 // ===========================================================================
 
+#[serial]
 #[tokio::test]
 async fn create_person_with_email() {
     let tmp = tempdir().unwrap();
     Workspace::init(tmp.path()).unwrap();
+    workspace_resolver::set_workspace(tmp.path().display().to_string());
 
     let tool = CreateEntityTool {
-        workspace_path: tmp.path().display().to_string(),
         entity_type: "person".to_string(),
         title: "Alice".to_string(),
         status: None, state: None,
@@ -164,13 +170,14 @@ async fn create_person_with_email() {
 // Update entity
 // ===========================================================================
 
+#[serial]
 #[tokio::test]
 async fn update_entity_title() {
     let tmp = tempdir().unwrap();
     Workspace::init(tmp.path()).unwrap();
+    workspace_resolver::set_workspace(tmp.path().display().to_string());
 
     let create = CreateEntityTool {
-        workspace_path: tmp.path().display().to_string(),
         entity_type: "program".to_string(),
         title: "Original".to_string(),
         status: None, state: None, email: None, parent_id: None, content: None,
@@ -182,7 +189,6 @@ async fn update_entity_title() {
     let id = store.list_all().unwrap()[0].id.clone();
 
     let update = UpdateEntityTool {
-        workspace_path: tmp.path().display().to_string(),
         entity_id: id.clone(),
         title: Some("Updated".to_string()),
         status: None, state: None,
@@ -197,13 +203,14 @@ async fn update_entity_title() {
 // Delete entity
 // ===========================================================================
 
+#[serial]
 #[tokio::test]
 async fn delete_entity_removes_from_all() {
     let tmp = tempdir().unwrap();
     Workspace::init(tmp.path()).unwrap();
+    workspace_resolver::set_workspace(tmp.path().display().to_string());
 
     let create = CreateEntityTool {
-        workspace_path: tmp.path().display().to_string(),
         entity_type: "note".to_string(),
         title: "Doomed Note".to_string(),
         status: None, state: None, email: None, parent_id: None,
@@ -216,7 +223,6 @@ async fn delete_entity_removes_from_all() {
     let id = store.list_all().unwrap()[0].id.clone();
 
     let delete = DeleteEntityTool {
-        workspace_path: tmp.path().display().to_string(),
         entity_id: id.clone(),
     };
     delete.call_tool().await.unwrap();
@@ -232,15 +238,16 @@ async fn delete_entity_removes_from_all() {
 // Relations
 // ===========================================================================
 
+#[serial]
 #[tokio::test]
 async fn create_and_get_relations() {
     let tmp = tempdir().unwrap();
     Workspace::init(tmp.path()).unwrap();
+    workspace_resolver::set_workspace(tmp.path().display().to_string());
 
     // Create two entities
     for (t, title) in &[("program", "PMO"), ("task", "Review docs")] {
         let tool = CreateEntityTool {
-            workspace_path: tmp.path().display().to_string(),
             entity_type: t.to_string(),
             title: title.to_string(),
             status: None, state: None, email: None, parent_id: None, content: None,
@@ -256,7 +263,6 @@ async fn create_and_get_relations() {
 
     // Create relation
     let relate = CreateRelationTool {
-        workspace_path: tmp.path().display().to_string(),
         source_id: task_id.clone(),
         relation_type: "belongs_to".to_string(),
         target_id: prog_id.clone(),
@@ -265,7 +271,6 @@ async fn create_and_get_relations() {
 
     // Get relations
     let rels = GetRelationsTool {
-        workspace_path: tmp.path().display().to_string(),
         entity_id: task_id.clone(),
     };
     let result = rels.call_tool().await.unwrap();

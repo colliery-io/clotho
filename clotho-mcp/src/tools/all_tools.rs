@@ -4,7 +4,8 @@ use super::{
     CaptureTool, CheckProcessedTool, CreateEntityTool, CreateNoteTool, CreateReflectionTool,
     CreateRelationTool, DeleteEntityTool, DeleteRelationTool, GetOntologyTool, GetRelationsTool,
     InitTool, ListEntitiesTool, MarkProcessedTool, QueryTool, ReadEntityTool,
-    SearchOntologyTool, SearchTool, SyncTool, UpdateEntityTool, UpdateOntologyTool,
+    SearchOntologyTool, SearchTool, SetWorkspaceTool, SyncTool, UpdateEntityTool,
+    UpdateOntologyTool,
 };
 
 /// Registry of all Clotho MCP tools.
@@ -13,6 +14,8 @@ pub struct ClothoTools;
 impl ClothoTools {
     pub fn tools() -> Vec<Tool> {
         vec![
+            // Session
+            SetWorkspaceTool::tool(),
             // Read-only
             SearchTool::tool(),
             QueryTool::tool(),

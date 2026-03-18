@@ -1,4 +1,5 @@
 use crate::formatting::text_result;
+use crate::workspace_resolver;
 use clotho_core::domain::traits::RelationType;
 use clotho_core::domain::types::EntityId;
 use clotho_core::graph::GraphStore;
@@ -20,8 +21,6 @@ use std::path::Path;
 )]
 #[derive(Debug, Serialize, Deserialize, JsonSchema)]
 pub struct CreateRelationTool {
-    /// Path to the directory containing .clotho/
-    pub workspace_path: String,
     /// Source entity ID (UUID)
     pub source_id: String,
     /// Relation type (belongs_to, relates_to, delivers, spawned_from, extracted_from, has_decision, has_risk, blocked_by, mentions, has_cadence, has_deadline, has_schedule)
@@ -32,7 +31,9 @@ pub struct CreateRelationTool {
 
 impl CreateRelationTool {
     pub async fn call_tool(&self) -> Result<CallToolResult, CallToolError> {
-        let ws = Workspace::open(Path::new(&self.workspace_path))
+        let ws_path = workspace_resolver::require_workspace()
+            .map_err(|e| CallToolError::new(std::io::Error::other(e)))?;
+        let ws = Workspace::open(Path::new(&ws_path))
             .map_err(|e| CallToolError::new(std::io::Error::other(e.to_string())))?;
         let graph = GraphStore::open(&ws.graph_path().join("relations.db"))
             .map_err(|e| CallToolError::new(std::io::Error::other(e.to_string())))?;

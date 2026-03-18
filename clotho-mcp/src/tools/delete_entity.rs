@@ -1,4 +1,5 @@
 use crate::formatting::text_result;
+use crate::workspace_resolver;
 use chrono::Utc;
 use clotho_core::domain::types::EntityId;
 use clotho_core::graph::GraphStore;
@@ -23,15 +24,15 @@ use std::path::Path;
 )]
 #[derive(Debug, Serialize, Deserialize, JsonSchema)]
 pub struct DeleteEntityTool {
-    /// Path to the directory containing .clotho/
-    pub workspace_path: String,
     /// Entity ID (UUID)
     pub entity_id: String,
 }
 
 impl DeleteEntityTool {
     pub async fn call_tool(&self) -> Result<CallToolResult, CallToolError> {
-        let ws = Workspace::open(Path::new(&self.workspace_path))
+        let ws_path = workspace_resolver::require_workspace()
+            .map_err(|e| CallToolError::new(std::io::Error::other(e)))?;
+        let ws = Workspace::open(Path::new(&ws_path))
             .map_err(|e| CallToolError::new(std::io::Error::other(e.to_string())))?;
         let store = EntityStore::open(&ws.data_path().join("entities.db"))
             .map_err(|e| CallToolError::new(std::io::Error::other(e.to_string())))?;

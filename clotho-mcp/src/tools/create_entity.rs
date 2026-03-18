@@ -1,4 +1,5 @@
 use crate::formatting::text_result;
+use crate::workspace_resolver;
 use chrono::Utc;
 use clotho_core::domain::types::{EntityId, EntityType};
 use clotho_core::graph::GraphStore;
@@ -24,8 +25,6 @@ use std::path::Path;
 )]
 #[derive(Debug, Serialize, Deserialize, JsonSchema)]
 pub struct CreateEntityTool {
-    /// Path to the directory containing .clotho/
-    pub workspace_path: String,
     /// Entity type (program, responsibility, objective, workstream, task, meeting, transcript, note, reflection, artifact, decision, risk, blocker, question, insight, person)
     pub entity_type: String,
     /// Title of the entity
@@ -44,7 +43,9 @@ pub struct CreateEntityTool {
 
 impl CreateEntityTool {
     pub async fn call_tool(&self) -> Result<CallToolResult, CallToolError> {
-        let ws = Workspace::open(Path::new(&self.workspace_path))
+        let ws_path = workspace_resolver::require_workspace()
+            .map_err(|e| CallToolError::new(std::io::Error::other(e)))?;
+        let ws = Workspace::open(Path::new(&ws_path))
             .map_err(|e| CallToolError::new(std::io::Error::other(e.to_string())))?;
 
         let et = parse_entity_type(&self.entity_type)?;

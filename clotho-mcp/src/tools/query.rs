@@ -1,4 +1,5 @@
 use crate::formatting::text_result;
+use crate::workspace_resolver;
 use clotho_core::graph::GraphStore;
 use clotho_store::workspace::Workspace;
 use rust_mcp_sdk::{
@@ -18,15 +19,15 @@ use std::path::Path;
 )]
 #[derive(Debug, Serialize, Deserialize, JsonSchema)]
 pub struct QueryTool {
-    /// Path to the directory containing .clotho/
-    pub workspace_path: String,
     /// Cypher query to execute
     pub cypher: String,
 }
 
 impl QueryTool {
     pub async fn call_tool(&self) -> Result<CallToolResult, CallToolError> {
-        let ws = Workspace::open(Path::new(&self.workspace_path))
+        let ws_path = workspace_resolver::require_workspace()
+            .map_err(|e| CallToolError::new(std::io::Error::other(e)))?;
+        let ws = Workspace::open(Path::new(&ws_path))
             .map_err(|e| CallToolError::new(std::io::Error::other(e.to_string())))?;
 
         let graph = GraphStore::open(&ws.graph_path().join("relations.db"))

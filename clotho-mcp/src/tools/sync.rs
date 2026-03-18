@@ -1,4 +1,5 @@
 use crate::formatting::text_result;
+use crate::workspace_resolver;
 use clotho_store::workspace::Workspace;
 use clotho_sync::SyncEngine;
 use rust_mcp_sdk::{
@@ -18,8 +19,6 @@ use std::path::Path;
 )]
 #[derive(Debug, Serialize, Deserialize, JsonSchema)]
 pub struct SyncTool {
-    /// Path to the directory containing .clotho/
-    pub workspace_path: String,
     /// Prune history after sync (keep last N commits, default 20)
     pub prune: Option<bool>,
     /// Number of commits to keep when pruning
@@ -28,7 +27,9 @@ pub struct SyncTool {
 
 impl SyncTool {
     pub async fn call_tool(&self) -> Result<CallToolResult, CallToolError> {
-        let ws = Workspace::open(Path::new(&self.workspace_path))
+        let ws_path = workspace_resolver::require_workspace()
+            .map_err(|e| CallToolError::new(std::io::Error::other(e)))?;
+        let ws = Workspace::open(Path::new(&ws_path))
             .map_err(|e| CallToolError::new(std::io::Error::other(e.to_string())))?;
 
         let engine = match SyncEngine::open(&ws.path) {

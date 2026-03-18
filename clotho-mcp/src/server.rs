@@ -2,8 +2,8 @@ use crate::tools::{
     CaptureTool, CheckProcessedTool, ClothoTools, CreateEntityTool, CreateNoteTool,
     CreateReflectionTool, CreateRelationTool, DeleteEntityTool, DeleteRelationTool,
     GetOntologyTool, GetRelationsTool, InitTool, ListEntitiesTool, MarkProcessedTool,
-    QueryTool, ReadEntityTool, SearchOntologyTool, SearchTool, SyncTool, UpdateEntityTool,
-    UpdateOntologyTool,
+    QueryTool, ReadEntityTool, SearchOntologyTool, SearchTool, SetWorkspaceTool, SyncTool,
+    UpdateEntityTool, UpdateOntologyTool,
 };
 use async_trait::async_trait;
 use rust_mcp_sdk::{
@@ -47,6 +47,11 @@ impl ServerHandler for ClothoServerHandler {
         let args = serde_json::Value::Object(params.arguments.unwrap_or_default());
 
         match params.name.as_str() {
+            "clotho_set_workspace" => {
+                let tool: SetWorkspaceTool = serde_json::from_value(args)
+                    .map_err(rust_mcp_sdk::schema::schema_utils::CallToolError::new)?;
+                tool.call_tool().await
+            }
             "clotho_search" => {
                 let tool: SearchTool = serde_json::from_value(args)
                     .map_err(rust_mcp_sdk::schema::schema_utils::CallToolError::new)?;

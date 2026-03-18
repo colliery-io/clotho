@@ -1,6 +1,6 @@
 # Code Index
 
-> Generated: 2026-03-18T14:25:05Z | 76 files | Rust
+> Generated: 2026-03-18T14:34:27Z | 79 files | Rust
 
 ## Project Structure
 
@@ -16,6 +16,7 @@
 │   │   │   ├── list.rs
 │   │   │   ├── mod.rs
 │   │   │   ├── ontology.rs
+│   │   │   ├── processed.rs
 │   │   │   ├── query.rs
 │   │   │   ├── reflect.rs
 │   │   │   ├── relate.rs
@@ -69,6 +70,7 @@
 │   │       ├── list_entities.rs
 │   │       ├── mod.rs
 │   │       ├── ontology.rs
+│   │       ├── processing.rs
 │   │       ├── query.rs
 │   │       ├── read_entity.rs
 │   │       ├── search.rs
@@ -85,7 +87,8 @@
 │   │   │   ├── extractions.rs
 │   │   │   ├── jsonl.rs
 │   │   │   ├── mod.rs
-│   │   │   └── ontology.rs
+│   │   │   ├── ontology.rs
+│   │   │   └── processing.rs
 │   │   ├── error.rs
 │   │   ├── federation.rs
 │   │   ├── index.rs
@@ -157,12 +160,13 @@
 - pub `capture` module L5 — `-`
 - pub `list` module L6 — `-`
 - pub `ontology` module L7 — `-`
-- pub `query` module L8 — `-`
-- pub `reflect` module L9 — `-`
-- pub `relate` module L10 — `-`
-- pub `search` module L11 — `-`
-- pub `sync` module L12 — `-`
-- pub `update` module L13 — `-`
+- pub `processed` module L8 — `-`
+- pub `query` module L9 — `-`
+- pub `reflect` module L10 — `-`
+- pub `relate` module L11 — `-`
+- pub `search` module L12 — `-`
+- pub `sync` module L13 — `-`
+- pub `update` module L14 — `-`
 
 #### clotho-cli/src/commands/ontology.rs
 
@@ -172,6 +176,13 @@
 - pub `run_get` function L52-87 — `(args: OntologyGetArgs, json: bool) -> Result<(), Box<dyn std::error::Error>>`
 - pub `run_set` function L89-139 — `(args: OntologySetArgs, json: bool) -> Result<(), Box<dyn std::error::Error>>`
 - pub `run_search` function L141-168 — `(args: OntologySearchArgs, json: bool) -> Result<(), Box<dyn std::error::Error>>`
+
+#### clotho-cli/src/commands/processed.rs
+
+- pub `ProcessedCheckArgs` struct L7-14 — `{ id: String, process: Option<String> }`
+- pub `ProcessedMarkArgs` struct L17-40 — `{ id: String, process: String, ontology_ids: Option<String>, by: Option<String>,...`
+- pub `run_check` function L42-80 — `(args: ProcessedCheckArgs, json: bool) -> Result<(), Box<dyn std::error::Error>>`
+- pub `run_mark` function L82-111 — `(args: ProcessedMarkArgs, json: bool) -> Result<(), Box<dyn std::error::Error>>`
 
 #### clotho-cli/src/commands/query.rs
 
@@ -219,8 +230,8 @@
 
 -  `commands` module L1 — `-`
 -  `Cli` struct L9-16 — `{ json: bool, command: Commands }` — Clotho — Personal work and time management through reflection,
--  `Commands` enum L19-70 — `Init | Create | Get | Update | Delete | Capture | List | Search | Query | Reflec...`
--  `main` function L72-104 — `()`
+-  `Commands` enum L19-76 — `Init | Create | Get | Update | Delete | Capture | List | Search | Query | Reflec...`
+-  `main` function L78-112 — `()`
 
 ### clotho-cli/tests
 
@@ -846,12 +857,12 @@
 
 #### clotho-mcp/src/server.rs
 
-- pub `ClothoServerHandler` struct L18 — `-`
-- pub `new` function L21-24 — `() -> Self`
--  `ClothoServerHandler` type L20-25 — `= ClothoServerHandler`
--  `ClothoServerHandler` type L28-144 — `impl ServerHandler for ClothoServerHandler`
--  `handle_list_tools_request` function L29-39 — `( &self, _params: Option<PaginatedRequestParams>, _runtime: Arc<dyn McpServer>, ...`
--  `handle_call_tool_request` function L41-143 — `( &self, params: CallToolRequestParams, _runtime: Arc<dyn McpServer>, ) -> Resul...`
+- pub `ClothoServerHandler` struct L19 — `-`
+- pub `new` function L22-25 — `() -> Self`
+-  `ClothoServerHandler` type L21-26 — `= ClothoServerHandler`
+-  `ClothoServerHandler` type L29-155 — `impl ServerHandler for ClothoServerHandler`
+-  `handle_list_tools_request` function L30-40 — `( &self, _params: Option<PaginatedRequestParams>, _runtime: Arc<dyn McpServer>, ...`
+-  `handle_call_tool_request` function L42-154 — `( &self, params: CallToolRequestParams, _runtime: Arc<dyn McpServer>, ) -> Resul...`
 
 ### clotho-mcp/src/tools
 
@@ -860,8 +871,8 @@
 #### clotho-mcp/src/tools/all_tools.rs
 
 - pub `ClothoTools` struct L11 — `-` — Registry of all Clotho MCP tools.
-- pub `tools` function L14-41 — `() -> Vec<Tool>`
--  `ClothoTools` type L13-42 — `= ClothoTools`
+- pub `tools` function L14-44 — `() -> Vec<Tool>`
+-  `ClothoTools` type L13-45 — `= ClothoTools`
 
 #### clotho-mcp/src/tools/capture.rs
 
@@ -944,11 +955,12 @@
 - pub `init` module L10 — `-`
 - pub `list_entities` module L11 — `-`
 - pub `ontology` module L12 — `-`
-- pub `query` module L13 — `-`
-- pub `read_entity` module L14 — `-`
-- pub `search` module L15 — `-`
-- pub `sync` module L16 — `-`
-- pub `update_entity` module L17 — `-`
+- pub `processing` module L13 — `-`
+- pub `query` module L14 — `-`
+- pub `read_entity` module L15 — `-`
+- pub `search` module L16 — `-`
+- pub `sync` module L17 — `-`
+- pub `update_entity` module L18 — `-`
 
 #### clotho-mcp/src/tools/ontology.rs
 
@@ -961,6 +973,15 @@
 -  `GetOntologyTool` type L31-70 — `= GetOntologyTool`
 -  `UpdateOntologyTool` type L102-147 — `= UpdateOntologyTool`
 -  `SearchOntologyTool` type L165-190 — `= SearchOntologyTool`
+
+#### clotho-mcp/src/tools/processing.rs
+
+- pub `CheckProcessedTool` struct L20-27 — `{ workspace_path: String, entity_id: String, process_name: Option<String> }`
+- pub `call_tool` function L30-61 — `(&self) -> Result<CallToolResult, CallToolError>`
+- pub `MarkProcessedTool` struct L73-88 — `{ workspace_path: String, entity_id: String, process_name: String, ontology_ids:...`
+- pub `call_tool` function L91-111 — `(&self) -> Result<CallToolResult, CallToolError>`
+-  `CheckProcessedTool` type L29-62 — `= CheckProcessedTool`
+-  `MarkProcessedTool` type L90-112 — `= MarkProcessedTool`
 
 #### clotho-mcp/src/tools/query.rs
 
@@ -1177,6 +1198,7 @@
 - pub `extractions` module L2 — `-`
 - pub `jsonl` module L3 — `-`
 - pub `ontology` module L4 — `-`
+- pub `processing` module L5 — `-`
 
 #### clotho-store/src/data/ontology.rs
 
@@ -1196,6 +1218,20 @@
 - pub `list` function L173-192 — `(&self, entity_id: &str) -> Result<Vec<OntologyEntry>, StoreError>` — Get all entries for an entity as a flat list.
 -  `SCHEMA` variable L9-23 — `: &str`
 -  `OntologyStore` type L57-193 — `= OntologyStore`
+
+#### clotho-store/src/data/processing.rs
+
+- pub `ProcessingRecord` struct L28-42 — `{ id: i64, entity_id: String, process_name: String, ontology_ids: Option<String>...` — A record of a process that was run against an entity.
+- pub `ProcessingLog` struct L45-47 — `{ conn: Connection }` — Processing log backed by a table in entities.db.
+- pub `open` function L51-55 — `(path: &Path) -> Result<Self, StoreError>` — Open the processing log, creating the table if needed.
+- pub `in_memory` function L58-62 — `() -> Result<Self, StoreError>` — Open an in-memory store (for tests).
+- pub `record` function L66-82 — `( &self, entity_id: &str, process_name: &str, ontology_ids: Option<&str>, proces...` — Record that a process was run against an entity.
+- pub `was_processed` function L85-92 — `(&self, entity_id: &str, process_name: &str) -> Result<bool, StoreError>` — Check if an entity has been processed by a specific process.
+- pub `was_processed_with_ontology` function L95-107 — `( &self, entity_id: &str, process_name: &str, ontology_id: &str, ) -> Result<boo...` — Check if an entity has been processed with a specific ontology.
+- pub `get_history` function L110-130 — `(&self, entity_id: &str) -> Result<Vec<ProcessingRecord>, StoreError>` — Get all processing records for an entity.
+- pub `get_unprocessed` function L133-145 — `( &self, process_name: &str, entity_ids: &[&str], ) -> Result<Vec<String>, Store...` — Get all unprocessed entities of a given type (entities with no processing record for a given process).
+-  `SCHEMA` variable L9-24 — `: &str`
+-  `ProcessingLog` type L49-146 — `= ProcessingLog`
 
 ### clotho-store/tests
 
