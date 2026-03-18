@@ -1,6 +1,6 @@
 # Code Index
 
-> Generated: 2026-03-18T14:34:27Z | 79 files | Rust
+> Generated: 2026-03-18T17:03:35Z | 81 files | Rust
 
 ## Project Structure
 
@@ -56,26 +56,28 @@
 │   │   ├── lib.rs
 │   │   ├── main.rs
 │   │   ├── server.rs
-│   │   └── tools/
-│   │       ├── all_tools.rs
-│   │       ├── capture.rs
-│   │       ├── create_entity.rs
-│   │       ├── create_note.rs
-│   │       ├── create_reflection.rs
-│   │       ├── create_relation.rs
-│   │       ├── delete_entity.rs
-│   │       ├── delete_relation.rs
-│   │       ├── get_relations.rs
-│   │       ├── init.rs
-│   │       ├── list_entities.rs
-│   │       ├── mod.rs
-│   │       ├── ontology.rs
-│   │       ├── processing.rs
-│   │       ├── query.rs
-│   │       ├── read_entity.rs
-│   │       ├── search.rs
-│   │       ├── sync.rs
-│   │       └── update_entity.rs
+│   │   ├── tools/
+│   │   │   ├── all_tools.rs
+│   │   │   ├── capture.rs
+│   │   │   ├── create_entity.rs
+│   │   │   ├── create_note.rs
+│   │   │   ├── create_reflection.rs
+│   │   │   ├── create_relation.rs
+│   │   │   ├── delete_entity.rs
+│   │   │   ├── delete_relation.rs
+│   │   │   ├── get_relations.rs
+│   │   │   ├── init.rs
+│   │   │   ├── list_entities.rs
+│   │   │   ├── mod.rs
+│   │   │   ├── ontology.rs
+│   │   │   ├── processing.rs
+│   │   │   ├── query.rs
+│   │   │   ├── read_entity.rs
+│   │   │   ├── search.rs
+│   │   │   ├── set_workspace.rs
+│   │   │   ├── sync.rs
+│   │   │   └── update_entity.rs
+│   │   └── workspace_resolver.rs
 │   └── tests/
 │       ├── entity_mgmt_tests.rs
 │       └── mcp_tests.rs
@@ -849,7 +851,8 @@
 - pub `formatting` module L1 — `-`
 - pub `server` module L2 — `-`
 - pub `tools` module L3 — `-`
-- pub `run` function L19-70 — `() -> AnyhowResult<()>` — Run the Clotho MCP server on stdio transport.
+- pub `workspace_resolver` module L4 — `-`
+- pub `run` function L20-78 — `() -> AnyhowResult<()>` — Run the Clotho MCP server on stdio transport.
 
 #### clotho-mcp/src/main.rs
 
@@ -860,9 +863,17 @@
 - pub `ClothoServerHandler` struct L19 — `-`
 - pub `new` function L22-25 — `() -> Self`
 -  `ClothoServerHandler` type L21-26 — `= ClothoServerHandler`
--  `ClothoServerHandler` type L29-155 — `impl ServerHandler for ClothoServerHandler`
+-  `ClothoServerHandler` type L29-160 — `impl ServerHandler for ClothoServerHandler`
 -  `handle_list_tools_request` function L30-40 — `( &self, _params: Option<PaginatedRequestParams>, _runtime: Arc<dyn McpServer>, ...`
--  `handle_call_tool_request` function L42-154 — `( &self, params: CallToolRequestParams, _runtime: Arc<dyn McpServer>, ) -> Resul...`
+-  `handle_call_tool_request` function L42-159 — `( &self, params: CallToolRequestParams, _runtime: Arc<dyn McpServer>, ) -> Resul...`
+
+#### clotho-mcp/src/workspace_resolver.rs
+
+- pub `set_workspace` function L9-12 — `(path: String)` — Set the workspace path.
+- pub `get_workspace` function L15-17 — `() -> Option<String>` — Get the workspace path.
+- pub `require_workspace` function L20-24 — `() -> Result<String, String>` — Get the workspace path or error.
+- pub `detect_and_set` function L28-43 — `() -> Option<String>` — Try to detect a workspace by walking up from cwd.
+-  `WORKSPACE_PATH` variable L6 — `: Lazy<Mutex<Option<String>>>` — Session-level workspace path.
 
 ### clotho-mcp/src/tools
 
@@ -870,64 +881,64 @@
 
 #### clotho-mcp/src/tools/all_tools.rs
 
-- pub `ClothoTools` struct L11 — `-` — Registry of all Clotho MCP tools.
-- pub `tools` function L14-44 — `() -> Vec<Tool>`
--  `ClothoTools` type L13-45 — `= ClothoTools`
+- pub `ClothoTools` struct L12 — `-` — Registry of all Clotho MCP tools.
+- pub `tools` function L15-47 — `() -> Vec<Tool>`
+-  `ClothoTools` type L14-48 — `= ClothoTools`
 
 #### clotho-mcp/src/tools/capture.rs
 
-- pub `CaptureTool` struct L26-35 — `{ workspace_path: String, file_path: String, entity_type: Option<String>, title:...`
-- pub `call_tool` function L38-115 — `(&self) -> Result<CallToolResult, CallToolError>`
--  `CaptureTool` type L37-116 — `= CaptureTool`
--  `parse_entity_type` function L118-128 — `(s: &str) -> Result<EntityType, CallToolError>`
+- pub `CaptureTool` struct L27-34 — `{ file_path: String, entity_type: Option<String>, title: Option<String> }`
+- pub `call_tool` function L37-116 — `(&self) -> Result<CallToolResult, CallToolError>`
+-  `CaptureTool` type L36-117 — `= CaptureTool`
+-  `parse_entity_type` function L119-129 — `(s: &str) -> Result<EntityType, CallToolError>`
 
 #### clotho-mcp/src/tools/create_entity.rs
 
-- pub `CreateEntityTool` struct L26-43 — `{ workspace_path: String, entity_type: String, title: String, status: Option<Str...`
-- pub `call_tool` function L46-113 — `(&self) -> Result<CallToolResult, CallToolError>`
--  `CreateEntityTool` type L45-114 — `= CreateEntityTool`
--  `parse_entity_type` function L116-128 — `(s: &str) -> Result<EntityType, CallToolError>`
--  `defaults_for_type` function L130-137 — `(et: EntityType) -> (Option<String>, Option<String>, Option<String>)`
--  `is_content_bearing` function L139-141 — `(et: EntityType) -> bool`
+- pub `CreateEntityTool` struct L27-42 — `{ entity_type: String, title: String, status: Option<String>, state: Option<Stri...`
+- pub `call_tool` function L45-114 — `(&self) -> Result<CallToolResult, CallToolError>`
+-  `CreateEntityTool` type L44-115 — `= CreateEntityTool`
+-  `parse_entity_type` function L117-129 — `(s: &str) -> Result<EntityType, CallToolError>`
+-  `defaults_for_type` function L131-138 — `(et: EntityType) -> (Option<String>, Option<String>, Option<String>)`
+-  `is_content_bearing` function L140-142 — `(et: EntityType) -> bool`
 
 #### clotho-mcp/src/tools/create_note.rs
 
-- pub `CreateNoteTool` struct L26-33 — `{ workspace_path: String, title: String, content: String }`
-- pub `call_tool` function L36-94 — `(&self) -> Result<CallToolResult, CallToolError>`
--  `CreateNoteTool` type L35-95 — `= CreateNoteTool`
+- pub `CreateNoteTool` struct L27-32 — `{ title: String, content: String }`
+- pub `call_tool` function L35-95 — `(&self) -> Result<CallToolResult, CallToolError>`
+-  `CreateNoteTool` type L34-96 — `= CreateNoteTool`
 
 #### clotho-mcp/src/tools/create_reflection.rs
 
-- pub `CreateReflectionTool` struct L26-35 — `{ workspace_path: String, period: String, title: Option<String>, program_id: Opt...`
-- pub `call_tool` function L38-111 — `(&self) -> Result<CallToolResult, CallToolError>`
--  `CreateReflectionTool` type L37-112 — `= CreateReflectionTool`
+- pub `CreateReflectionTool` struct L27-34 — `{ period: String, title: Option<String>, program_id: Option<String> }`
+- pub `call_tool` function L37-112 — `(&self) -> Result<CallToolResult, CallToolError>`
+-  `CreateReflectionTool` type L36-113 — `= CreateReflectionTool`
 
 #### clotho-mcp/src/tools/create_relation.rs
 
-- pub `CreateRelationTool` struct L22-31 — `{ workspace_path: String, source_id: String, relation_type: String, target_id: S...`
-- pub `call_tool` function L34-51 — `(&self) -> Result<CallToolResult, CallToolError>`
--  `CreateRelationTool` type L33-52 — `= CreateRelationTool`
--  `parse_id` function L54-58 — `(s: &str) -> Result<EntityId, CallToolError>`
--  `parse_relation_type` function L60-76 — `(s: &str) -> Result<RelationType, CallToolError>`
+- pub `CreateRelationTool` struct L23-30 — `{ source_id: String, relation_type: String, target_id: String }`
+- pub `call_tool` function L33-52 — `(&self) -> Result<CallToolResult, CallToolError>`
+-  `CreateRelationTool` type L32-53 — `= CreateRelationTool`
+-  `parse_id` function L55-59 — `(s: &str) -> Result<EntityId, CallToolError>`
+-  `parse_relation_type` function L61-77 — `(s: &str) -> Result<RelationType, CallToolError>`
 
 #### clotho-mcp/src/tools/delete_entity.rs
 
-- pub `DeleteEntityTool` struct L25-30 — `{ workspace_path: String, entity_id: String }`
-- pub `call_tool` function L33-72 — `(&self) -> Result<CallToolResult, CallToolError>`
--  `DeleteEntityTool` type L32-73 — `= DeleteEntityTool`
+- pub `DeleteEntityTool` struct L26-29 — `{ entity_id: String }`
+- pub `call_tool` function L32-73 — `(&self) -> Result<CallToolResult, CallToolError>`
+-  `DeleteEntityTool` type L31-74 — `= DeleteEntityTool`
 
 #### clotho-mcp/src/tools/delete_relation.rs
 
-- pub `DeleteRelationTool` struct L22-31 — `{ workspace_path: String, source_id: String, relation_type: String, target_id: S...`
-- pub `call_tool` function L34-51 — `(&self) -> Result<CallToolResult, CallToolError>`
--  `DeleteRelationTool` type L33-52 — `= DeleteRelationTool`
--  `parse_rel` function L54-64 — `(s: &str) -> Result<RelationType, CallToolError>`
+- pub `DeleteRelationTool` struct L23-30 — `{ source_id: String, relation_type: String, target_id: String }`
+- pub `call_tool` function L33-52 — `(&self) -> Result<CallToolResult, CallToolError>`
+-  `DeleteRelationTool` type L32-53 — `= DeleteRelationTool`
+-  `parse_rel` function L55-65 — `(s: &str) -> Result<RelationType, CallToolError>`
 
 #### clotho-mcp/src/tools/get_relations.rs
 
-- pub `GetRelationsTool` struct L21-26 — `{ workspace_path: String, entity_id: String }`
-- pub `call_tool` function L29-67 — `(&self) -> Result<CallToolResult, CallToolError>`
--  `GetRelationsTool` type L28-68 — `= GetRelationsTool`
+- pub `GetRelationsTool` struct L22-25 — `{ entity_id: String }`
+- pub `call_tool` function L28-68 — `(&self) -> Result<CallToolResult, CallToolError>`
+-  `GetRelationsTool` type L27-69 — `= GetRelationsTool`
 
 #### clotho-mcp/src/tools/init.rs
 
@@ -937,9 +948,9 @@
 
 #### clotho-mcp/src/tools/list_entities.rs
 
-- pub `ListEntitiesTool` struct L20-29 — `{ workspace_path: String, entity_type: Option<String>, status: Option<String>, s...`
-- pub `call_tool` function L32-73 — `(&self) -> Result<CallToolResult, CallToolError>`
--  `ListEntitiesTool` type L31-74 — `= ListEntitiesTool`
+- pub `ListEntitiesTool` struct L21-28 — `{ entity_type: Option<String>, status: Option<String>, state: Option<String> }`
+- pub `call_tool` function L31-74 — `(&self) -> Result<CallToolResult, CallToolError>`
+-  `ListEntitiesTool` type L30-75 — `= ListEntitiesTool`
 
 #### clotho-mcp/src/tools/mod.rs
 
@@ -959,59 +970,66 @@
 - pub `query` module L14 — `-`
 - pub `read_entity` module L15 — `-`
 - pub `search` module L16 — `-`
-- pub `sync` module L17 — `-`
-- pub `update_entity` module L18 — `-`
+- pub `set_workspace` module L17 — `-`
+- pub `sync` module L18 — `-`
+- pub `update_entity` module L19 — `-`
 
 #### clotho-mcp/src/tools/ontology.rs
 
-- pub `GetOntologyTool` struct L24-29 — `{ workspace_path: String, entity_id: String }`
-- pub `call_tool` function L32-69 — `(&self) -> Result<CallToolResult, CallToolError>`
-- pub `UpdateOntologyTool` struct L81-100 — `{ workspace_path: String, entity_id: String, add_keywords: Option<String>, remov...`
-- pub `call_tool` function L103-146 — `(&self) -> Result<CallToolResult, CallToolError>`
-- pub `SearchOntologyTool` struct L158-163 — `{ workspace_path: String, query: String }`
-- pub `call_tool` function L166-189 — `(&self) -> Result<CallToolResult, CallToolError>`
--  `GetOntologyTool` type L31-70 — `= GetOntologyTool`
--  `UpdateOntologyTool` type L102-147 — `= UpdateOntologyTool`
--  `SearchOntologyTool` type L165-190 — `= SearchOntologyTool`
+- pub `GetOntologyTool` struct L25-28 — `{ entity_id: String }`
+- pub `call_tool` function L31-70 — `(&self) -> Result<CallToolResult, CallToolError>`
+- pub `UpdateOntologyTool` struct L82-99 — `{ entity_id: String, add_keywords: Option<String>, remove_keywords: Option<Strin...`
+- pub `call_tool` function L102-147 — `(&self) -> Result<CallToolResult, CallToolError>`
+- pub `SearchOntologyTool` struct L159-162 — `{ query: String }`
+- pub `call_tool` function L165-190 — `(&self) -> Result<CallToolResult, CallToolError>`
+-  `GetOntologyTool` type L30-71 — `= GetOntologyTool`
+-  `UpdateOntologyTool` type L101-148 — `= UpdateOntologyTool`
+-  `SearchOntologyTool` type L164-191 — `= SearchOntologyTool`
 
 #### clotho-mcp/src/tools/processing.rs
 
-- pub `CheckProcessedTool` struct L20-27 — `{ workspace_path: String, entity_id: String, process_name: Option<String> }`
-- pub `call_tool` function L30-61 — `(&self) -> Result<CallToolResult, CallToolError>`
-- pub `MarkProcessedTool` struct L73-88 — `{ workspace_path: String, entity_id: String, process_name: String, ontology_ids:...`
-- pub `call_tool` function L91-111 — `(&self) -> Result<CallToolResult, CallToolError>`
--  `CheckProcessedTool` type L29-62 — `= CheckProcessedTool`
--  `MarkProcessedTool` type L90-112 — `= MarkProcessedTool`
+- pub `CheckProcessedTool` struct L21-26 — `{ entity_id: String, process_name: Option<String> }`
+- pub `call_tool` function L29-62 — `(&self) -> Result<CallToolResult, CallToolError>`
+- pub `MarkProcessedTool` struct L74-87 — `{ entity_id: String, process_name: String, ontology_ids: Option<String>, process...`
+- pub `call_tool` function L90-112 — `(&self) -> Result<CallToolResult, CallToolError>`
+-  `CheckProcessedTool` type L28-63 — `= CheckProcessedTool`
+-  `MarkProcessedTool` type L89-113 — `= MarkProcessedTool`
 
 #### clotho-mcp/src/tools/query.rs
 
-- pub `QueryTool` struct L20-25 — `{ workspace_path: String, cypher: String }`
-- pub `call_tool` function L28-63 — `(&self) -> Result<CallToolResult, CallToolError>`
--  `QueryTool` type L27-64 — `= QueryTool`
+- pub `QueryTool` struct L21-24 — `{ cypher: String }`
+- pub `call_tool` function L27-64 — `(&self) -> Result<CallToolResult, CallToolError>`
+-  `QueryTool` type L26-65 — `= QueryTool`
 
 #### clotho-mcp/src/tools/read_entity.rs
 
-- pub `ReadEntityTool` struct L20-25 — `{ workspace_path: String, entity_id: String }`
-- pub `call_tool` function L28-74 — `(&self) -> Result<CallToolResult, CallToolError>`
--  `ReadEntityTool` type L27-75 — `= ReadEntityTool`
+- pub `ReadEntityTool` struct L21-24 — `{ entity_id: String }`
+- pub `call_tool` function L27-75 — `(&self) -> Result<CallToolResult, CallToolError>`
+-  `ReadEntityTool` type L26-76 — `= ReadEntityTool`
 
 #### clotho-mcp/src/tools/search.rs
 
-- pub `SearchTool` struct L20-27 — `{ workspace_path: String, query: String, limit: Option<u32> }`
-- pub `call_tool` function L30-57 — `(&self) -> Result<CallToolResult, CallToolError>`
--  `SearchTool` type L29-58 — `= SearchTool`
+- pub `SearchTool` struct L21-26 — `{ query: String, limit: Option<u32> }`
+- pub `call_tool` function L29-58 — `(&self) -> Result<CallToolResult, CallToolError>`
+-  `SearchTool` type L28-59 — `= SearchTool`
+
+#### clotho-mcp/src/tools/set_workspace.rs
+
+- pub `SetWorkspaceTool` struct L19-22 — `{ path: String }`
+- pub `call_tool` function L25-40 — `(&self) -> Result<CallToolResult, CallToolError>`
+-  `SetWorkspaceTool` type L24-41 — `= SetWorkspaceTool`
 
 #### clotho-mcp/src/tools/sync.rs
 
-- pub `SyncTool` struct L20-27 — `{ workspace_path: String, prune: Option<bool>, keep: Option<u32> }`
-- pub `call_tool` function L30-64 — `(&self) -> Result<CallToolResult, CallToolError>`
--  `SyncTool` type L29-65 — `= SyncTool`
+- pub `SyncTool` struct L21-26 — `{ prune: Option<bool>, keep: Option<u32> }`
+- pub `call_tool` function L29-65 — `(&self) -> Result<CallToolResult, CallToolError>`
+-  `SyncTool` type L28-66 — `= SyncTool`
 
 #### clotho-mcp/src/tools/update_entity.rs
 
-- pub `UpdateEntityTool` struct L22-33 — `{ workspace_path: String, entity_id: String, title: Option<String>, status: Opti...`
-- pub `call_tool` function L36-58 — `(&self) -> Result<CallToolResult, CallToolError>`
--  `UpdateEntityTool` type L35-59 — `= UpdateEntityTool`
+- pub `UpdateEntityTool` struct L23-32 — `{ entity_id: String, title: Option<String>, status: Option<String>, state: Optio...`
+- pub `call_tool` function L35-59 — `(&self) -> Result<CallToolResult, CallToolError>`
+-  `UpdateEntityTool` type L34-60 — `= UpdateEntityTool`
 
 ### clotho-mcp/tests
 
@@ -1019,26 +1037,26 @@
 
 #### clotho-mcp/tests/entity_mgmt_tests.rs
 
--  `tools_now_fifteen` function L18-28 — `()`
--  `create_program` function L35-54 — `()`
--  `create_responsibility` function L57-74 — `()`
--  `create_objective_with_parent` function L77-112 — `()`
--  `create_task_defaults_to_todo` function L119-135 — `()`
--  `create_person_with_email` function L142-161 — `()`
--  `update_entity_title` function L168-194 — `()`
--  `delete_entity_removes_from_all` function L201-229 — `()`
--  `create_and_get_relations` function L236-274 — `()`
+-  `tools_now_fifteen` function L20-30 — `()`
+-  `create_program` function L38-57 — `()`
+-  `create_responsibility` function L61-78 — `()`
+-  `create_objective_with_parent` function L82-116 — `()`
+-  `create_task_defaults_to_todo` function L124-140 — `()`
+-  `create_person_with_email` function L148-167 — `()`
+-  `update_entity_title` function L175-200 — `()`
+-  `delete_entity_removes_from_all` function L208-235 — `()`
+-  `create_and_get_relations` function L243-279 — `()`
 
 #### clotho-mcp/tests/mcp_tests.rs
 
--  `list_tools_returns_all_fifteen` function L15-28 — `()`
--  `all_tools_have_descriptions` function L31-40 — `()`
--  `test_init_tool` function L47-57 — `()`
--  `test_capture_tool` function L60-83 — `()`
--  `test_create_note_tool` function L86-105 — `()`
--  `test_create_reflection_tool` function L108-128 — `()`
--  `test_search_tool_finds_content` function L131-154 — `()`
--  `test_list_entities_tool` function L157-184 — `()`
+-  `list_tools_returns_all_fifteen` function L17-30 — `()`
+-  `all_tools_have_descriptions` function L33-42 — `()`
+-  `test_init_tool` function L50-60 — `()`
+-  `test_capture_tool` function L64-87 — `()`
+-  `test_create_note_tool` function L91-110 — `()`
+-  `test_create_reflection_tool` function L114-134 — `()`
+-  `test_search_tool_finds_content` function L138-160 — `()`
+-  `test_list_entities_tool` function L164-190 — `()`
 
 ### clotho-store/src
 
