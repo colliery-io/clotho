@@ -15,7 +15,7 @@ Clotho organizes work in four layers:
 | Entity | Purpose | Default Status |
 |--------|---------|---------------|
 | **Program** | Strategic initiative with objectives (e.g., "Monolith Breakup") | active |
-| **Responsibility** | Ongoing role obligation that never completes (e.g., "Team Mentorship") | active |
+| **Responsibility** | Ongoing role obligation that never completes. Includes work obligations (e.g., "Budget Management"), people/HR obligations (e.g., "Direct Reports", "1:1s"), and practice obligations (e.g., "Team Mentorship", "Hiring"). | active |
 | **Objective** | Outcome within a program. Use `parent_id` to link to its Program. | active |
 
 ### Execution Layer — "Work in motion"
