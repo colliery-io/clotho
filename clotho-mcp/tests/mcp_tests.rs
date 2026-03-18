@@ -22,7 +22,7 @@ fn list_tools_returns_all_fifteen() {
     assert!(names.contains(&"clotho_read_entity"));
     assert!(names.contains(&"clotho_list_entities"));
     assert!(names.contains(&"clotho_init"));
-    assert!(names.contains(&"clotho_ingest"));
+    assert!(names.contains(&"clotho_capture"));
     assert!(names.contains(&"clotho_create_note"));
     assert!(names.contains(&"clotho_create_reflection"));
 }
@@ -57,8 +57,8 @@ async fn test_init_tool() {
 }
 
 #[tokio::test]
-async fn test_ingest_tool() {
-    use clotho_mcp_server::tools::IngestTool;
+async fn test_capture_tool() {
+    use clotho_mcp_server::tools::CaptureTool;
 
     let tmp = tempdir().unwrap();
     Workspace::init(tmp.path()).unwrap();
@@ -66,7 +66,7 @@ async fn test_ingest_tool() {
     let file_path = tmp.path().join("test-note.md");
     fs::write(&file_path, "# Test Note\n\nSome interesting content about architecture.").unwrap();
 
-    let tool = IngestTool {
+    let tool = CaptureTool {
         workspace_path: tmp.path().display().to_string(),
         file_path: file_path.display().to_string(),
         entity_type: Some("note".to_string()),

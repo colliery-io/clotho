@@ -30,12 +30,12 @@ End-of-day ceremony. Your job is to get the user's entire day captured, structur
 3. Present to user:
    > "Here's what I already have from today: [list meetings/transcripts/notes]. Your inbox has N unprocessed files."
 
-### Step 2: Ingest inbox
+### Step 2: Capture inbox
 
 For each file in `.clotho/inbox/`:
 - Infer type from filename/extension (.transcript.md → transcript, .md → note, .ics → meeting)
-- Ingest: `clotho_ingest(workspace_path, file_path, entity_type, title)`
-- After ingesting, move the file out of inbox (or note it's been processed)
+- Capture: `clotho_capture(workspace_path, file_path, entity_type, title)`
+- After capturing, move the file out of inbox (or note it's been processed)
 
 ### Step 3: Gather additional materials
 
@@ -47,7 +47,7 @@ Ask the user:
 
 For each material provided:
 - Pasted text → `clotho_create_note(workspace_path, title, content)` or `clotho_create_entity(workspace_path, entity_type: "transcript", title, content)`
-- File reference → `clotho_ingest(workspace_path, file_path, entity_type)`
+- File reference → `clotho_capture(workspace_path, file_path, entity_type)`
 - Verbal description → `clotho_create_note(workspace_path, title: "EOD note: <topic>", content: <what they said>)`
 
 Keep asking until the user says they're done.

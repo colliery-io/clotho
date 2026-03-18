@@ -2,7 +2,7 @@ use rust_mcp_sdk::schema::Tool;
 
 use super::{
     CreateEntityTool, CreateNoteTool, CreateReflectionTool, CreateRelationTool, DeleteEntityTool,
-    DeleteRelationTool, GetOntologyTool, GetRelationsTool, IngestTool, InitTool,
+    DeleteRelationTool, GetOntologyTool, GetRelationsTool, CaptureTool, InitTool,
     ListEntitiesTool, QueryTool, ReadEntityTool, SearchOntologyTool, SearchTool, SyncTool,
     UpdateEntityTool, UpdateOntologyTool,
 };
@@ -21,7 +21,7 @@ impl ClothoTools {
             GetRelationsTool::tool(),
             // Write - workspace
             InitTool::tool(),
-            IngestTool::tool(),
+            CaptureTool::tool(),
             CreateNoteTool::tool(),
             CreateReflectionTool::tool(),
             // Write - entity CRUD

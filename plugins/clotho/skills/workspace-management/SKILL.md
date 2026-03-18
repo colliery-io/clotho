@@ -1,6 +1,6 @@
 ---
 name: clotho-workspace
-description: "Use when the user asks to 'init clotho', 'create a workspace', 'ingest a file', 'create a program', 'create a task', 'add a person', 'list entities', 'delete entity', 'update entity', or any entity CRUD operation in a Clotho workspace."
+description: "Use when the user asks to 'init clotho', 'create a workspace', 'capture a file', 'create a program', 'create a task', 'add a person', 'list entities', 'delete entity', 'update entity', or any entity CRUD operation in a Clotho workspace."
 ---
 
 # Clotho Workspace Management
@@ -34,7 +34,7 @@ clotho_create_entity(workspace_path, entity_type: "task", title: "Write RFC")
 ```
 clotho_create_note(workspace_path, title: "Meeting Notes", content: "# Notes\n...")
 clotho_create_reflection(workspace_path, period: "weekly")
-clotho_ingest(workspace_path, file_path: "/path/to/transcript.md", entity_type: "transcript")
+clotho_capture(workspace_path, file_path: "/path/to/transcript.md", entity_type: "transcript")
 ```
 
 ### People

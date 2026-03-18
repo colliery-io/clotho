@@ -1,6 +1,6 @@
 use crate::tools::{
     ClothoTools, CreateEntityTool, CreateNoteTool, CreateReflectionTool, CreateRelationTool,
-    DeleteEntityTool, DeleteRelationTool, GetOntologyTool, GetRelationsTool, IngestTool,
+    DeleteEntityTool, DeleteRelationTool, GetOntologyTool, GetRelationsTool, CaptureTool,
     InitTool, ListEntitiesTool, QueryTool, ReadEntityTool, SearchOntologyTool, SearchTool,
     SyncTool, UpdateEntityTool, UpdateOntologyTool,
 };
@@ -71,8 +71,8 @@ impl ServerHandler for ClothoServerHandler {
                     .map_err(rust_mcp_sdk::schema::schema_utils::CallToolError::new)?;
                 tool.call_tool().await
             }
-            "clotho_ingest" => {
-                let tool: IngestTool = serde_json::from_value(args)
+            "clotho_capture" => {
+                let tool: CaptureTool = serde_json::from_value(args)
                     .map_err(rust_mcp_sdk::schema::schema_utils::CallToolError::new)?;
                 tool.call_tool().await
             }

@@ -2,7 +2,7 @@ pub mod create;
 pub mod delete;
 pub mod get;
 pub mod init;
-pub mod ingest;
+pub mod capture;
 pub mod list;
 pub mod ontology;
 pub mod query;

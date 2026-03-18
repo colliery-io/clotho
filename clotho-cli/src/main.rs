@@ -32,8 +32,8 @@ enum Commands {
     /// Delete an entity from all backends.
     Delete(commands::delete::DeleteArgs),
 
-    /// Ingest a file as content (note, meeting, transcript, artifact).
-    Ingest(commands::ingest::IngestArgs),
+    /// Capture a file as content (note, meeting, transcript, artifact).
+    Capture(commands::capture::CaptureArgs),
 
     /// List entities with optional filters.
     List(commands::list::ListArgs),
@@ -78,7 +78,7 @@ fn main() {
         Commands::Get(args) => commands::get::run(args, cli.json),
         Commands::Update(args) => commands::update::run(args, cli.json),
         Commands::Delete(args) => commands::delete::run(args, cli.json),
-        Commands::Ingest(args) => commands::ingest::run(args, cli.json),
+        Commands::Capture(args) => commands::capture::run(args, cli.json),
         Commands::List(args) => commands::list::run(args, cli.json),
         Commands::Search(args) => commands::search::run(args, cli.json),
         Commands::Query(args) => commands::query::run(args, cli.json),

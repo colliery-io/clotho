@@ -44,15 +44,15 @@ fn test_init_fails_if_exists() {
 }
 
 // ===========================================================================
-// Ingest
+// Capture
 // ===========================================================================
 
 #[test]
-fn test_ingest_stores_content_and_entity() {
+fn test_capture_stores_content_and_entity() {
     let (tmp, ws) = setup_workspace();
     let file = create_sample_file(&tmp, "meeting-notes.md", "# Standup\n\nDiscussed deployment timeline.");
 
-    // Simulate what the ingest command does
+    // Simulate what the capture command does
     let content = fs::read_to_string(&file).unwrap();
     let id = EntityId::new();
     let now = chrono::Utc::now();
@@ -91,7 +91,7 @@ fn test_ingest_stores_content_and_entity() {
 }
 
 #[test]
-fn test_ingest_registers_graph_node() {
+fn test_capture_registers_graph_node() {
     let (_tmp, ws) = setup_workspace();
     let id = EntityId::new();
 
@@ -101,7 +101,7 @@ fn test_ingest_registers_graph_node() {
 }
 
 #[test]
-fn test_ingest_indexes_in_fts5() {
+fn test_capture_indexes_in_fts5() {
     let (_tmp, ws) = setup_workspace();
     let id = EntityId::new();
 

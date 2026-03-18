@@ -29,7 +29,7 @@ This plugin provides 15 MCP tools for managing a Clotho workspace:
 
 ### Write Tools
 - `clotho_init` — Initialize workspace
-- `clotho_ingest` — Ingest a file
+- `clotho_capture` — Capture a file
 - `clotho_create_entity` — Create any entity type
 - `clotho_update_entity` — Update entity fields
 - `clotho_delete_entity` — Delete entity

@@ -24,9 +24,9 @@ Look for these patterns in transcripts:
 
 ## Extraction Workflow
 
-1. **Read the transcript** — Ingest it first if not already in the workspace:
+1. **Read the transcript** — Capture it first if not already in the workspace:
    ```
-   clotho_ingest(workspace_path, file_path: "transcript.md", entity_type: "transcript", title: "Sprint Planning")
+   clotho_capture(workspace_path, file_path: "transcript.md", entity_type: "transcript", title: "Sprint Planning")
    ```
 
 2. **Identify speech acts** — Read through the content and identify each speech act.

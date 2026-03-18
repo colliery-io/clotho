@@ -1,9 +1,9 @@
 ---
-name: clotho-transcript-ingestor
-description: "Use when the user says 'process this transcript', 'extract from this meeting', 'ingest transcript', 'here's a transcript', or provides a meeting transcript/notes for extraction. Also triggered when a file is provided with meeting content."
+name: clotho-transcript-processor
+description: "Use when the user says 'process this transcript', 'extract from this meeting', 'capture transcript', 'here's a transcript', or provides a meeting transcript/notes for extraction. Also triggered when a file is provided with meeting content."
 ---
 
-# Transcript Ingestor
+# Transcript Processor
 
 Single-transcript processing. The user has a transcript or meeting notes — process it, extract signals, and link everything. This is the manual/ad-hoc version of what the daily debrief does in batch.
 
@@ -15,7 +15,7 @@ Determine how the user is providing the content:
 
 **File path:**
 ```
-clotho_ingest(workspace_path, file_path: "<path>", entity_type: "transcript", title: "<meeting name>")
+clotho_capture(workspace_path, file_path: "<path>", entity_type: "transcript", title: "<meeting name>")
 ```
 
 **Pasted text:**

@@ -13,11 +13,11 @@ use clotho_store::index::SearchIndex;
 use clotho_store::workspace::Workspace;
 
 #[derive(Args)]
-pub struct IngestArgs {
-    /// Path to the file to ingest.
+pub struct CaptureArgs {
+    /// Path to the file to capture.
     pub file: PathBuf,
 
-    /// Entity type for the ingested content.
+    /// Entity type for the captureed content.
     #[arg(long, default_value = "note")]
     pub r#type: String,
 
@@ -26,7 +26,7 @@ pub struct IngestArgs {
     pub title: Option<String>,
 }
 
-pub fn run(args: IngestArgs, json: bool) -> Result<(), Box<dyn std::error::Error>> {
+pub fn run(args: CaptureArgs, json: bool) -> Result<(), Box<dyn std::error::Error>> {
     // Validate file exists
     if !args.file.exists() {
         return Err(format!("File not found: {}", args.file.display()).into());
@@ -106,7 +106,7 @@ pub fn run(args: IngestArgs, json: bool) -> Result<(), Box<dyn std::error::Error
         });
         println!("{}", serde_json::to_string_pretty(&out)?);
     } else {
-        println!("Ingested {} as {} ({})", args.file.display(), title, entity_type);
+        println!("Captured {} as {} ({})", args.file.display(), title, entity_type);
         println!("  ID: {}", id);
         println!("  Content: {}", content_path.display());
     }

@@ -69,7 +69,7 @@ clotho ontology-set <program-id> \
 
 **Ingest a transcript:**
 ```bash
-clotho ingest meeting-transcript.md --type transcript --title "Architecture Review"
+clotho capture meeting-transcript.md --type transcript --title "Architecture Review"
 ```
 
 **Create a note:**
@@ -164,7 +164,7 @@ claude plugin add /path/to/clotho/plugins/clotho
 
 **Read:** clotho_search, clotho_query, clotho_read_entity, clotho_list_entities, clotho_get_relations, clotho_get_ontology, clotho_search_ontology
 
-**Write:** clotho_init, clotho_ingest, clotho_create_entity, clotho_update_entity, clotho_delete_entity, clotho_create_note, clotho_create_reflection, clotho_create_relation, clotho_delete_relation, clotho_update_ontology, clotho_sync
+**Write:** clotho_init, clotho_capture, clotho_create_entity, clotho_update_entity, clotho_delete_entity, clotho_create_note, clotho_create_reflection, clotho_create_relation, clotho_delete_relation, clotho_update_ontology, clotho_sync
 
 ## Filesystem Layout
 
