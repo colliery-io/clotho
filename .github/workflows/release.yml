@@ -18,10 +18,6 @@ jobs:
             target: aarch64-apple-darwin
             cli_name: clotho-aarch64-apple-darwin
             mcp_name: clotho-mcp-aarch64-apple-darwin
-          - os: macos-13
-            target: x86_64-apple-darwin
-            cli_name: clotho-x86_64-apple-darwin
-            mcp_name: clotho-mcp-x86_64-apple-darwin
           - os: ubuntu-22.04
             target: x86_64-unknown-linux-gnu
             cli_name: clotho-x86_64-unknown-linux-gnu
