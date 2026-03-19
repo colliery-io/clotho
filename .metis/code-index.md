@@ -1,6 +1,6 @@
 # Code Index
 
-> Generated: 2026-03-19T03:43:35Z | 82 files | Rust
+> Generated: 2026-03-19T12:25:46Z | 83 files | Rust
 
 ## Project Structure
 
@@ -96,6 +96,7 @@
 │   │   ├── federation.rs
 │   │   ├── index.rs
 │   │   ├── lib.rs
+│   │   ├── migrations.rs
 │   │   ├── sync.rs
 │   │   └── workspace.rs
 │   └── tests/
@@ -1116,8 +1117,15 @@
 - pub `error` module L3 — `-`
 - pub `federation` module L4 — `-`
 - pub `index` module L5 — `-`
-- pub `sync` module L6 — `-`
-- pub `workspace` module L7 — `-`
+- pub `migrations` module L6 — `-`
+- pub `sync` module L7 — `-`
+- pub `workspace` module L8 — `-`
+
+#### clotho-store/src/migrations.rs
+
+- pub `run_migrations` function L13-19 — `(db_path: &Path) -> Result<(), StoreError>` — Run all pending migrations on the entities database.
+- pub `run_migrations_in_memory` function L22-27 — `(conn: &mut Connection) -> Result<(), StoreError>` — Run migrations on an in-memory connection (for tests).
+-  `embedded` module L7-10 — `-`
 
 #### clotho-store/src/sync.rs
 
@@ -1138,23 +1146,23 @@
 - pub `OntologyConfig` struct L37-40 — `{ known_entities: Vec<String>, extraction: ExtractionConfig }` — Default ontology configuration.
 - pub `ExtractionConfig` struct L43-45 — `{ default_confidence_threshold: f32 }`
 - pub `Workspace` struct L86-89 — `{ path: PathBuf }` — A Clotho workspace.
-- pub `init` function L96-130 — `(base_path: &Path) -> Result<Self, StoreError>` — Initialize a new workspace at the given path.
-- pub `open` function L135-164 — `(base_path: &Path) -> Result<Self, StoreError>` — Open an existing workspace.
-- pub `project_root` function L169-174 — `(&self) -> PathBuf` — Path to the project root (parent of .clotho/).
-- pub `data_path` function L177-179 — `(&self) -> PathBuf` — Path to the data directory (.clotho/data/).
-- pub `graph_path` function L182-184 — `(&self) -> PathBuf` — Path to the graph directory (.clotho/graph/).
-- pub `index_path` function L187-189 — `(&self) -> PathBuf` — Path to the index directory (.clotho/index/).
-- pub `inbox_path` function L192-194 — `(&self) -> PathBuf` — Path to the inbox directory (.clotho/inbox/).
-- pub `config_path` function L197-199 — `(&self) -> PathBuf` — Path to the config directory (.clotho/config/).
-- pub `read_config` function L202-206 — `(&self) -> Result<WorkspaceConfig, StoreError>` — Read the workspace configuration.
-- pub `read_ontology` function L209-213 — `(&self) -> Result<OntologyConfig, StoreError>` — Read the ontology configuration.
+- pub `init` function L96-133 — `(base_path: &Path) -> Result<Self, StoreError>` — Initialize a new workspace at the given path.
+- pub `open` function L138-170 — `(base_path: &Path) -> Result<Self, StoreError>` — Open an existing workspace.
+- pub `project_root` function L175-180 — `(&self) -> PathBuf` — Path to the project root (parent of .clotho/).
+- pub `data_path` function L183-185 — `(&self) -> PathBuf` — Path to the data directory (.clotho/data/).
+- pub `graph_path` function L188-190 — `(&self) -> PathBuf` — Path to the graph directory (.clotho/graph/).
+- pub `index_path` function L193-195 — `(&self) -> PathBuf` — Path to the index directory (.clotho/index/).
+- pub `inbox_path` function L198-200 — `(&self) -> PathBuf` — Path to the inbox directory (.clotho/inbox/).
+- pub `config_path` function L203-205 — `(&self) -> PathBuf` — Path to the config directory (.clotho/config/).
+- pub `read_config` function L208-212 — `(&self) -> Result<WorkspaceConfig, StoreError>` — Read the workspace configuration.
+- pub `read_ontology` function L215-219 — `(&self) -> Result<OntologyConfig, StoreError>` — Read the ontology configuration.
 -  `WorkspaceConfig` type L22-33 — `impl Default for WorkspaceConfig`
 -  `default` function L23-32 — `() -> Self`
 -  `OntologyConfig` type L47-56 — `impl Default for OntologyConfig`
 -  `default` function L48-55 — `() -> Self`
 -  `VISIBLE_DIRS` variable L59-71 — `: &[&str]` — Visible content directories created at project root.
 -  `HIDDEN_DIRS` variable L74-80 — `: &[&str]` — Machine-managed directories created inside .clotho/.
--  `Workspace` type L91-214 — `= Workspace`
+-  `Workspace` type L91-220 — `= Workspace`
 
 ### clotho-store/src/data
 

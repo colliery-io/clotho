@@ -7,7 +7,7 @@ license = "Apache-2.0"
 
 [dependencies]
 chrono = { version = "0.4", features = ["serde"] }
-git2 = { version = "0.19", features = ["vendored-libgit2"] }
+git2 = { version = "0.19", features = ["vendored-libgit2", "vendored-openssl"] }
 thiserror = "2"
 
 [dev-dependencies]
