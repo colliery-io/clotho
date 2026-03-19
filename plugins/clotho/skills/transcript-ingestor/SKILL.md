@@ -7,7 +7,7 @@ description: "Use when the user says 'process this transcript', 'extract from th
 
 Single-transcript processing. The user has a transcript or meeting notes — process it, extract signals, and link everything. This is the manual/ad-hoc version of what the daily debrief does in batch.
 
-**You need the workspace_path.** If not known, find the `.clotho/` directory relative to the current working directory.
+The workspace is set automatically. Use `clotho_set_workspace` if needed.
 
 ## Step 1: Ingest the transcript
 
@@ -15,17 +15,17 @@ Determine how the user is providing the content:
 
 **File path:**
 ```
-clotho_capture(workspace_path, file_path: "<path>", entity_type: "transcript", title: "<meeting name>")
+clotho_capture(file_path: "<path>", entity_type: "transcript", title: "<meeting name>")
 ```
 
 **Pasted text:**
 ```
-clotho_create_entity(workspace_path, entity_type: "transcript", title: "<meeting name>", content: "<pasted text>")
+clotho_create_entity(entity_type: "transcript", title: "<meeting name>", content: "<pasted text>")
 ```
 
 **Verbal description:**
 ```
-clotho_create_note(workspace_path, title: "<meeting name> - Notes", content: "<what they described>")
+clotho_create_note(title: "<meeting name> - Notes", content: "<what they described>")
 ```
 
 If the user doesn't provide a title, infer from the content (first line, meeting subject, attendee names + date).
@@ -37,12 +37,12 @@ Ask (or infer from content):
 
 Present active programs:
 ```
-clotho_list_entities(workspace_path, entity_type: "Program", status: "active")
+clotho_list_entities(entity_type: "Program", status: "active")
 ```
 
 If the user specifies a program, read its content to understand the extraction lens:
 ```
-clotho_read_entity(workspace_path, entity_id: "<program_id>")
+clotho_read_entity(entity_id: "<program_id>")
 ```
 
 If the user says "not sure" or it spans multiple, proceed with general extraction and route later.
@@ -51,12 +51,12 @@ If the user says "not sure" or it spans multiple, proceed with general extractio
 
 If this was a meeting (not just standalone notes), ensure a Meeting entity exists:
 ```
-clotho_create_entity(workspace_path, entity_type: "meeting", title: "<meeting name>")
+clotho_create_entity(entity_type: "meeting", title: "<meeting name>")
 ```
 
 Link the transcript to the meeting:
 ```
-clotho_create_relation(workspace_path, source_id: "<transcript_id>", relation_type: "spawned_from", target_id: "<meeting_id>")
+clotho_create_relation(source_id: "<transcript_id>", relation_type: "spawned_from", target_id: "<meeting_id>")
 ```
 
 ## Step 4: Launch extraction
@@ -64,7 +64,6 @@ clotho_create_relation(workspace_path, source_id: "<transcript_id>", relation_ty
 Launch the **debrief-processor** agent with:
 - The single transcript/note entity ID
 - The program context (if identified)
-- The workspace_path
 
 The agent will:
 - Read program context to understand what signals matter
@@ -80,7 +79,7 @@ Present the agent's extraction summary. Ask:
 
 Handle corrections, then:
 ```
-clotho_sync(workspace_path)
+clotho_sync()
 ```
 
 ## Idempotency
@@ -90,6 +89,6 @@ If the user asks to process a transcript that's already been extracted (has EXTR
 
 Check with:
 ```
-clotho_get_relations(workspace_path, entity_id: "<transcript_id>")
+clotho_get_relations(entity_id: "<transcript_id>")
 ```
 Look for incoming EXTRACTED_FROM relations.

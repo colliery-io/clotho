@@ -1,6 +1,6 @@
 # Code Index
 
-> Generated: 2026-03-18T17:03:35Z | 81 files | Rust
+> Generated: 2026-03-18T17:48:05Z | 82 files | Rust
 
 ## Project Structure
 
@@ -21,6 +21,7 @@
 │   │   │   ├── reflect.rs
 │   │   │   ├── relate.rs
 │   │   │   ├── search.rs
+│   │   │   ├── status.rs
 │   │   │   ├── sync.rs
 │   │   │   └── update.rs
 │   │   └── main.rs
@@ -167,8 +168,9 @@
 - pub `reflect` module L10 — `-`
 - pub `relate` module L11 — `-`
 - pub `search` module L12 — `-`
-- pub `sync` module L13 — `-`
-- pub `update` module L14 — `-`
+- pub `status` module L13 — `-`
+- pub `sync` module L14 — `-`
+- pub `update` module L15 — `-`
 
 #### clotho-cli/src/commands/ontology.rs
 
@@ -213,6 +215,11 @@
 - pub `SearchArgs` struct L7-14 — `{ query: String, limit: usize }`
 - pub `run` function L16-54 — `(args: SearchArgs, json: bool) -> Result<(), Box<dyn std::error::Error>>`
 
+#### clotho-cli/src/commands/status.rs
+
+- pub `StatusArgs` struct L8 — `-`
+- pub `run` function L10-144 — `(_args: StatusArgs, json: bool) -> Result<(), Box<dyn std::error::Error>>`
+
 #### clotho-cli/src/commands/sync.rs
 
 - pub `SyncArgs` struct L7-15 — `{ prune: bool, keep: usize }`
@@ -232,8 +239,8 @@
 
 -  `commands` module L1 — `-`
 -  `Cli` struct L9-16 — `{ json: bool, command: Commands }` — Clotho — Personal work and time management through reflection,
--  `Commands` enum L19-76 — `Init | Create | Get | Update | Delete | Capture | List | Search | Query | Reflec...`
--  `main` function L78-112 — `()`
+-  `Commands` enum L19-79 — `Init | Create | Get | Update | Delete | Capture | List | Search | Query | Reflec...`
+-  `main` function L81-116 — `()`
 
 ### clotho-cli/tests
 

@@ -39,15 +39,18 @@ impl<'a> StoreSync<'a> {
         entity_type: EntityType,
     ) -> Result<(), StoreError> {
         let id_str = &row.id;
+        let id = parse_entity_id(id_str)?;
+
+        // Check existence BEFORE insert/update to determine event type
+        let is_update = self.entities.get(id_str)?.is_some();
 
         // 1. Write content file if provided
-        let id = parse_entity_id(id_str)?;
         if let Some(text) = content {
             self.content.write_content(entity_type, &id, text)?;
         }
 
         // 2. Insert or update in entities.db
-        if self.entities.get(id_str)?.is_some() {
+        if is_update {
             self.entities.update(row)?;
         } else {
             self.entities.insert(row)?;
@@ -67,7 +70,7 @@ impl<'a> StoreSync<'a> {
         )?;
 
         // 5. Log event
-        let event_type = if self.entities.get(id_str)?.is_some() {
+        let event_type = if is_update {
             EventType::Updated
         } else {
             EventType::Created

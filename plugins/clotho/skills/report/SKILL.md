@@ -7,13 +7,13 @@ description: "Use when the user says 'status report', 'report for my boss', 'pro
 
 On-demand ceremony for generating audience-appropriate status reports. You gather scope from the user, then launch the report-builder agent.
 
-**You need the workspace_path.** If not known, find the `.clotho/` directory relative to the current working directory.
+The workspace is set automatically. Use `clotho_set_workspace` if needed.
 
 ## Step 1: Which program(s)?
 
 Query active programs:
 ```
-clotho_list_entities(workspace_path, entity_type: "Program", status: "active")
+clotho_list_entities(entity_type: "Program", status: "active")
 ```
 
 Present:
@@ -52,7 +52,6 @@ Launch the **report-builder** agent with:
 - Time period
 - Audience type
 - Highlight/downplay guidance
-- workspace_path
 
 ## Step 6: Review
 
@@ -61,4 +60,4 @@ Present the agent's report output. Ask:
 
 Handle refinements. The agent creates an Artifact entity — the user can iterate on the content.
 
-Sync: `clotho_sync(workspace_path)`
+Sync: `clotho_sync()`

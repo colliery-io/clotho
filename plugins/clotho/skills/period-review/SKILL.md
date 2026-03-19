@@ -7,7 +7,7 @@ description: "Use when the user says 'quarterly review', 'annual review', 'half-
 
 Quarterly/half-year/annual ceremony. Deep retrospective analysis for business reviews, self-assessments, and performance reviews. You gather scope, launch the period-compiler agent for analysis, then collaborate extensively with the user on the narrative.
 
-**You need the workspace_path.** If not known, find the `.clotho/` directory relative to the current working directory.
+The workspace is set automatically. Use `clotho_set_workspace` if needed.
 
 ## Step 1: What period?
 
@@ -22,7 +22,7 @@ Ask:
 
 Query active programs:
 ```
-clotho_list_entities(workspace_path, entity_type: "Program")
+clotho_list_entities(entity_type: "Program")
 ```
 
 Ask:
@@ -58,7 +58,6 @@ Launch the **period-compiler** agent with:
 - Selected program IDs
 - Focus areas
 - Context/purpose
-- workspace_path
 
 ## Step 6: Collaborative narrative
 
@@ -86,6 +85,6 @@ Incorporate responses into the reflection.
 
 Update the Reflection entity with the collaboratively refined content.
 
-Sync: `clotho_sync(workspace_path)`
+Sync: `clotho_sync()`
 
 > "Period review captured. This covers [period] across [N programs]."

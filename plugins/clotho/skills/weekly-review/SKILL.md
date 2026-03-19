@@ -7,39 +7,39 @@ description: "Use when the user says 'weekly review', 'weekly reflection', 'revi
 
 End-of-week ceremony. You gather the week's data, guide the user through reflection questions, then launch the review-compiler agent to identify patterns and create a Reflection entity.
 
-**You need the workspace_path.** If not known, find the `.clotho/` directory relative to the current working directory.
+The workspace is set automatically. Use `clotho_set_workspace` if needed.
 
 ## Step 1: Gather the week's data
 
 Run these queries to build the week summary:
 
 ```
-clotho_list_entities(workspace_path, state: "done")
+clotho_list_entities(state: "done")
 ```
 Filter to updated_at within this week → **completed tasks**
 
 ```
-clotho_list_entities(workspace_path, state: "doing")
+clotho_list_entities(state: "doing")
 ```
 Filter to created_at this week → **newly started tasks**
 
 ```
-clotho_list_entities(workspace_path, state: "blocked")
+clotho_list_entities(state: "blocked")
 ```
 → **still blocked**
 
 ```
-clotho_list_entities(workspace_path, entity_type: "Decision")
+clotho_list_entities(entity_type: "Decision")
 ```
 Filter to created_at this week → **decisions made**
 
 ```
-clotho_list_entities(workspace_path, entity_type: "Risk")
+clotho_list_entities(entity_type: "Risk")
 ```
 Filter to created_at this week → **new risks**
 
 ```
-clotho_list_entities(workspace_path, entity_type: "Meeting")
+clotho_list_entities(entity_type: "Meeting")
 ```
 Filter to created_at this week → **meetings held**
 
@@ -84,7 +84,6 @@ Capture the user's responses — these become part of the reflection content.
 Launch the **review-compiler** agent with:
 - The week's data summary
 - The user's reflection responses
-- The workspace_path
 
 The agent will:
 - Analyze patterns across programs
@@ -103,4 +102,4 @@ Capture this as part of the reflection content. Update the Reflection entity if 
 End with:
 > "Weekly reflection captured. Have a good weekend."
 
-Sync: `clotho_sync(workspace_path)`
+Sync: `clotho_sync()`

@@ -10,7 +10,7 @@ description: "Use when the user asks to 'relate entities', 'create a relation', 
 Use `clotho_create_relation` to connect entities:
 
 ```
-clotho_create_relation(workspace_path, source_id: "<uuid>", relation_type: "belongs_to", target_id: "<uuid>")
+clotho_create_relation(source_id: "<uuid>", relation_type: "belongs_to", target_id: "<uuid>")
 ```
 
 ### Available Relation Types
@@ -33,7 +33,7 @@ clotho_create_relation(workspace_path, source_id: "<uuid>", relation_type: "belo
 ## Viewing Relations
 
 ```
-clotho_get_relations(workspace_path, entity_id: "<uuid>")
+clotho_get_relations(entity_id: "<uuid>")
 ```
 
 Returns both outgoing and incoming relations.
@@ -41,7 +41,7 @@ Returns both outgoing and incoming relations.
 ## Removing Relations
 
 ```
-clotho_delete_relation(workspace_path, source_id: "<uuid>", relation_type: "belongs_to", target_id: "<uuid>")
+clotho_delete_relation(source_id: "<uuid>", relation_type: "belongs_to", target_id: "<uuid>")
 ```
 
 ## Cypher Queries
@@ -49,7 +49,7 @@ clotho_delete_relation(workspace_path, source_id: "<uuid>", relation_type: "belo
 For complex graph queries, use raw Cypher:
 
 ```
-clotho_query(workspace_path, cypher: "MATCH (t:Task)-[:BLOCKED_BY]->(b:Blocker) RETURN t.title, b.title")
+clotho_query(cypher: "MATCH (t:Task)-[:BLOCKED_BY]->(b:Blocker) RETURN t.title, b.title")
 ```
 
 ### Useful Query Patterns

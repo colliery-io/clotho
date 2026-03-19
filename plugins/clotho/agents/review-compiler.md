@@ -24,7 +24,6 @@ You analyze a week's work across all programs to identify patterns and create a 
 You receive from the weekly-review skill:
 - The week's data summary (completed tasks, started tasks, blocked items, decisions, risks, meetings)
 - The user's responses to reflection questions (what went well, what was hard, patterns they see)
-- The workspace_path
 
 ## Your Task
 
@@ -34,7 +33,7 @@ Query the workspace to identify:
 
 **Program health:**
 ```
-clotho_list_entities(workspace_path, entity_type: "Program")
+clotho_list_entities(entity_type: "Program")
 ```
 For each program, check:
 - How many tasks are blocked vs active vs completed this week?
@@ -43,19 +42,19 @@ For each program, check:
 
 **Recurring blockers:**
 ```
-clotho_list_entities(workspace_path, entity_type: "Blocker")
+clotho_list_entities(entity_type: "Blocker")
 ```
 Check if multiple tasks are BLOCKED_BY the same blocker, or if similar-sounding blockers keep appearing.
 
 **Aging risks:**
 ```
-clotho_list_entities(workspace_path, entity_type: "Risk")
+clotho_list_entities(entity_type: "Risk")
 ```
 Check created_at — flag any risks older than 2 weeks that haven't been resolved.
 
 **Unanswered questions:**
 ```
-clotho_list_entities(workspace_path, entity_type: "Question")
+clotho_list_entities(entity_type: "Question")
 ```
 Flag questions older than 1 week.
 
@@ -63,7 +62,7 @@ Flag questions older than 1 week.
 
 Create the reflection entity:
 ```
-clotho_create_reflection(workspace_path, period: "weekly", title: "<date range> Weekly Reflection")
+clotho_create_reflection(period: "weekly", title: "<date range> Weekly Reflection")
 ```
 
 The reflection content should include these sections:
@@ -96,7 +95,7 @@ The reflection content should include these sections:
 
 For each program that was active this week:
 ```
-clotho_create_relation(workspace_path, source_id: "<reflection_id>", relation_type: "relates_to", target_id: "<program_id>")
+clotho_create_relation(source_id: "<reflection_id>", relation_type: "relates_to", target_id: "<program_id>")
 ```
 
 ### Step 4: Present findings

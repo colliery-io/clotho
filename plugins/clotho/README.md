@@ -18,14 +18,20 @@ Personal work and time management through reflection, transcripts, and sense-mak
 
 ## What It Does
 
-This plugin provides 15 MCP tools for managing a Clotho workspace:
+This plugin provides 21 MCP tools, 10 skills, and 4 agents for managing a Clotho workspace.
 
-### Read-only Tools
+### Session
+- `clotho_set_workspace` — Set workspace path (auto-detected on startup)
+
+### Read Tools
 - `clotho_search` — Full-text keyword search
 - `clotho_query` — Cypher graph queries
 - `clotho_read_entity` — Read entity by ID
 - `clotho_list_entities` — List with filters
 - `clotho_get_relations` — Show entity relations
+- `clotho_get_ontology` — Get extraction ontology
+- `clotho_search_ontology` — Search across ontologies
+- `clotho_check_processed` — Check processing history
 
 ### Write Tools
 - `clotho_init` — Initialize workspace
@@ -37,13 +43,29 @@ This plugin provides 15 MCP tools for managing a Clotho workspace:
 - `clotho_create_reflection` — Create a reflection
 - `clotho_create_relation` — Create graph edge
 - `clotho_delete_relation` — Remove graph edge
+- `clotho_update_ontology` — Update extraction ontology
+- `clotho_mark_processed` — Record processing done
 - `clotho_sync` — Git sync workspace
+
+### Ceremonies
+- `/daily-debrief` — End of day: capture, update, horizon check, extract
+- `/daily-brief` — Start of day: prioritized view
+- `/weekly-review` — End of week: reflection + pattern analysis
+- `/report` — Status reports for boss/stakeholders/team
+- `/period-review` — Quarterly+ retrospective
 
 ### Skills
 - **workspace-management** — Entity CRUD operations
 - **graph-queries** — Relations and Cypher queries
-- **extraction** — In-session speech act extraction from transcripts
-- **reflection** — Guided reflection creation workflow
+- **extraction** — In-session speech act extraction
+- **reflection** — Guided reflection creation
+- **transcript-processor** — Single transcript processing
+
+### Agents
+- **debrief-processor** — Extract signals from transcripts using program ontologies
+- **review-compiler** — Weekly pattern analysis
+- **report-builder** — Audience-appropriate report generation
+- **period-compiler** — Deep retrospective analysis
 
 ## Entity Types
 

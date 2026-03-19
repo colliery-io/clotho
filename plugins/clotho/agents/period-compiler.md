@@ -26,49 +26,48 @@ From the period-review skill:
 - Selected program IDs
 - Focus areas (accomplishments, challenges, growth, or all)
 - Context/purpose (QBR, self-assessment, etc.)
-- workspace_path
 
 ## Step 1: Gather period data
 
 ### Objectives
 For each selected program:
 ```
-clotho_query(workspace_path, cypher: "MATCH (o)-[:BELONGS_TO]->(p {id: '<program_id>'}) WHERE o.entity_type = 'Objective' RETURN o.id, o.title, o.status")
+clotho_query(cypher: "MATCH (o)-[:BELONGS_TO]->(p {id: '<program_id>'}) WHERE o.entity_type = 'Objective' RETURN o.id, o.title, o.status")
 ```
 Classify each as: completed, on track, at risk, or missed.
 
 ### Artifacts delivered
 ```
-clotho_query(workspace_path, cypher: "MATCH (a)-[:DELIVERS]->(o)-[:BELONGS_TO]->(p {id: '<program_id>'}) RETURN a.title, o.title")
+clotho_query(cypher: "MATCH (a)-[:DELIVERS]->(o)-[:BELONGS_TO]->(p {id: '<program_id>'}) RETURN a.title, o.title")
 ```
 These are concrete deliverables — evidence of work done.
 
 ### Tasks
 ```
-clotho_list_entities(workspace_path, entity_type: "Task")
+clotho_list_entities(entity_type: "Task")
 ```
 Filter by program (via BELONGS_TO) and period. Classify: completed, in progress, blocked, not started.
 
 ### Decisions
 ```
-clotho_list_entities(workspace_path, entity_type: "Decision")
+clotho_list_entities(entity_type: "Decision")
 ```
 Filter to period. For each, trace context via EXTRACTED_FROM → Transcript → Meeting.
 
 ### Risks
 ```
-clotho_list_entities(workspace_path, entity_type: "Risk")
+clotho_list_entities(entity_type: "Risk")
 ```
 All risks that existed during the period.
 
 ### Blockers
 ```
-clotho_list_entities(workspace_path, entity_type: "Blocker")
+clotho_list_entities(entity_type: "Blocker")
 ```
 
 ### Reflections
 ```
-clotho_list_entities(workspace_path, entity_type: "Reflection")
+clotho_list_entities(entity_type: "Reflection")
 ```
 Filter to weekly reflections within the period — these contain the user's real-time thinking.
 
@@ -97,7 +96,7 @@ For each risk:
 
 Create a Reflection entity:
 ```
-clotho_create_reflection(workspace_path, period: "quarterly", title: "[Period] Review")
+clotho_create_reflection(period: "quarterly", title: "[Period] Review")
 ```
 
 Structure the content with these sections:
@@ -146,7 +145,7 @@ Adjust emphasis based on the context:
 
 Link reflection to programs:
 ```
-clotho_create_relation(workspace_path, source_id: "<reflection_id>", relation_type: "relates_to", target_id: "<program_id>")
+clotho_create_relation(source_id: "<reflection_id>", relation_type: "relates_to", target_id: "<program_id>")
 ```
 
 Present each section to the user for collaborative refinement (the skill handles this interaction).

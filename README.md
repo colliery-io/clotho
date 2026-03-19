@@ -160,11 +160,13 @@ claude plugin add /path/to/clotho/plugins/clotho
 | `clotho-reflection` | Guided reflection creation |
 | `clotho-transcript-ingestor` | Single transcript processing |
 
-### 18 MCP Tools
+### 21 MCP Tools
 
-**Read:** clotho_search, clotho_query, clotho_read_entity, clotho_list_entities, clotho_get_relations, clotho_get_ontology, clotho_search_ontology
+**Session:** clotho_set_workspace
 
-**Write:** clotho_init, clotho_capture, clotho_create_entity, clotho_update_entity, clotho_delete_entity, clotho_create_note, clotho_create_reflection, clotho_create_relation, clotho_delete_relation, clotho_update_ontology, clotho_sync
+**Read:** clotho_search, clotho_query, clotho_read_entity, clotho_list_entities, clotho_get_relations, clotho_get_ontology, clotho_search_ontology, clotho_check_processed
+
+**Write:** clotho_init, clotho_capture, clotho_create_entity, clotho_update_entity, clotho_delete_entity, clotho_create_note, clotho_create_reflection, clotho_create_relation, clotho_delete_relation, clotho_update_ontology, clotho_mark_processed, clotho_sync
 
 ## Filesystem Layout
 
@@ -224,8 +226,8 @@ Content is browsable in any editor. Open `programs/` to see your portfolio. Open
 clotho/
 ├── clotho-core      # Domain model, traits, graph (graphqlite)
 ├── clotho-store     # Storage: SQLite, JSONL, FTS5, content, federation
-├── clotho-cli       # 19 CLI commands
-├── clotho-mcp       # 18 MCP tools (rust-mcp-sdk)
+├── clotho-cli       # 22 CLI commands
+├── clotho-mcp       # 21 MCP tools (rust-mcp-sdk)
 ├── clotho-sync      # Git sync (libgit2)
 ├── clotho-tests     # E2E integration tests
 └── plugins/clotho   # Claude Code plugin (skills, agents, hooks)

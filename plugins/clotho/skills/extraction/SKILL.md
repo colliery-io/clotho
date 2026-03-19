@@ -26,32 +26,32 @@ Look for these patterns in transcripts:
 
 1. **Read the transcript** — Capture it first if not already in the workspace:
    ```
-   clotho_capture(workspace_path, file_path: "transcript.md", entity_type: "transcript", title: "Sprint Planning")
+   clotho_capture(file_path: "transcript.md", entity_type: "transcript", title: "Sprint Planning")
    ```
 
 2. **Identify speech acts** — Read through the content and identify each speech act.
 
 3. **Create entities** — For each identified item:
    ```
-   clotho_create_entity(workspace_path, entity_type: "decision", title: "Go with microservice approach")
-   clotho_create_entity(workspace_path, entity_type: "risk", title: "Database migration complexity")
-   clotho_create_entity(workspace_path, entity_type: "task", title: "Write migration RFC")
+   clotho_create_entity(entity_type: "decision", title: "Go with microservice approach")
+   clotho_create_entity(entity_type: "risk", title: "Database migration complexity")
+   clotho_create_entity(entity_type: "task", title: "Write migration RFC")
    ```
 
 4. **Create relations** — Link extracted entities back to the transcript:
    ```
-   clotho_create_relation(workspace_path, source_id: "<decision_id>", relation_type: "extracted_from", target_id: "<transcript_id>")
+   clotho_create_relation(source_id: "<decision_id>", relation_type: "extracted_from", target_id: "<transcript_id>")
    ```
 
 5. **Link people** — Create Person entities and MENTIONS relations:
    ```
-   clotho_create_entity(workspace_path, entity_type: "person", title: "Alice")
-   clotho_create_relation(workspace_path, source_id: "<transcript_id>", relation_type: "mentions", target_id: "<person_id>")
+   clotho_create_entity(entity_type: "person", title: "Alice")
+   clotho_create_relation(source_id: "<transcript_id>", relation_type: "mentions", target_id: "<person_id>")
    ```
 
 6. **Connect to structure** — Link tasks/decisions to programs if context is clear:
    ```
-   clotho_create_relation(workspace_path, source_id: "<task_id>", relation_type: "belongs_to", target_id: "<program_id>")
+   clotho_create_relation(source_id: "<task_id>", relation_type: "belongs_to", target_id: "<program_id>")
    ```
 
 ## Important Principles

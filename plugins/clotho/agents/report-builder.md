@@ -25,7 +25,6 @@ From the report skill:
 - Time period (date range)
 - Audience type: boss, stakeholders, or team
 - Highlight/downplay guidance from user
-- workspace_path
 
 ## Step 1: Gather program data
 
@@ -33,36 +32,36 @@ For each selected program:
 
 **Objectives:**
 ```
-clotho_query(workspace_path, cypher: "MATCH (o)-[:BELONGS_TO]->(p {id: '<program_id>'}) WHERE o.entity_type = 'Objective' RETURN o.id, o.title")
+clotho_query(cypher: "MATCH (o)-[:BELONGS_TO]->(p {id: '<program_id>'}) WHERE o.entity_type = 'Objective' RETURN o.id, o.title")
 ```
 
 **Tasks by state:**
 ```
-clotho_query(workspace_path, cypher: "MATCH (t)-[:BELONGS_TO]->(p {id: '<program_id>'}) WHERE t.entity_type = 'Task' RETURN t.title, t.task_state")
+clotho_query(cypher: "MATCH (t)-[:BELONGS_TO]->(p {id: '<program_id>'}) WHERE t.entity_type = 'Task' RETURN t.title, t.task_state")
 ```
 
 **Completed in period:** Filter tasks with state=done and updated_at within the time period.
 
 **Decisions:**
 ```
-clotho_list_entities(workspace_path, entity_type: "Decision")
+clotho_list_entities(entity_type: "Decision")
 ```
 Filter to those related to this program (via EXTRACTED_FROM → Meeting → program context).
 
 **Active risks:**
 ```
-clotho_list_entities(workspace_path, entity_type: "Risk")
+clotho_list_entities(entity_type: "Risk")
 ```
 
 **Unresolved blockers:**
 ```
-clotho_list_entities(workspace_path, entity_type: "Blocker")
+clotho_list_entities(entity_type: "Blocker")
 ```
 Check which are linked to this program's tasks via BLOCKED_BY.
 
 **Artifacts delivered:**
 ```
-clotho_query(workspace_path, cypher: "MATCH (a)-[:DELIVERS]->(o)-[:BELONGS_TO]->(p {id: '<program_id>'}) RETURN a.title, o.title")
+clotho_query(cypher: "MATCH (a)-[:DELIVERS]->(o)-[:BELONGS_TO]->(p {id: '<program_id>'}) RETURN a.title, o.title")
 ```
 
 ## Step 2: Format for audience
@@ -148,12 +147,12 @@ Task-level. Who's doing what. Actionable.
 ## Step 3: Create Artifact
 
 ```
-clotho_create_entity(workspace_path, entity_type: "artifact", title: "[Program] Status Report — [Period]", content: "<formatted report>")
+clotho_create_entity(entity_type: "artifact", title: "[Program] Status Report — [Period]", content: "<formatted report>")
 ```
 
 Link to program:
 ```
-clotho_create_relation(workspace_path, source_id: "<artifact_id>", relation_type: "delivers", target_id: "<program_id>")
+clotho_create_relation(source_id: "<artifact_id>", relation_type: "delivers", target_id: "<program_id>")
 ```
 
 ## Step 4: Present

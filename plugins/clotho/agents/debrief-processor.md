@@ -28,14 +28,14 @@ Before processing any transcripts, load the ontology for each program and respon
 
 ### List programs and responsibilities
 ```
-clotho_list_entities(workspace_path, entity_type: "Program")
-clotho_list_entities(workspace_path, entity_type: "Responsibility")
+clotho_list_entities(entity_type: "Program")
+clotho_list_entities(entity_type: "Responsibility")
 ```
 
 ### Load each ontology
 For each program/responsibility:
 ```
-clotho_get_ontology(workspace_path, entity_id: "<program_id>")
+clotho_get_ontology(entity_id: "<program_id>")
 ```
 
 This returns the extraction lens for that program: keywords it cares about, signal types to look for, and people frequently involved.
@@ -46,8 +46,8 @@ Build a routing map:
 
 Also load existing risks and blockers for dedup context:
 ```
-clotho_list_entities(workspace_path, entity_type: "Risk")
-clotho_list_entities(workspace_path, entity_type: "Blocker")
+clotho_list_entities(entity_type: "Risk")
+clotho_list_entities(entity_type: "Blocker")
 ```
 
 ### Ontology growth
@@ -57,7 +57,7 @@ After extraction, if you encounter new keywords or signal types not in the ontol
 
 If confirmed:
 ```
-clotho_update_ontology(workspace_path, entity_id: "<program_id>", add_keywords: "event sourcing, CQRS")
+clotho_update_ontology(entity_id: "<program_id>", add_keywords: "event sourcing, CQRS")
 ```
 
 This is how the ontology grows over time via human-in-the-loop.
@@ -68,7 +68,7 @@ For each entity ID you're given:
 
 ### Read the content
 ```
-clotho_read_entity(workspace_path, entity_id: "<id>")
+clotho_read_entity(entity_id: "<id>")
 ```
 
 ### Determine program context
@@ -109,7 +109,7 @@ Beyond generic speech acts, look for signals that matter to the specific program
 
 For each extracted signal:
 ```
-clotho_create_entity(workspace_path, entity_type: "<type>", title: "<clear, specific title>")
+clotho_create_entity(entity_type: "<type>", title: "<clear, specific title>")
 ```
 
 **Title quality matters.** Be specific and attributed:
@@ -120,13 +120,13 @@ clotho_create_entity(workspace_path, entity_type: "<type>", title: "<clear, spec
 
 ### EXTRACTED_FROM — provenance
 ```
-clotho_create_relation(workspace_path, source_id: "<entity_id>", relation_type: "extracted_from", target_id: "<transcript_id>")
+clotho_create_relation(source_id: "<entity_id>", relation_type: "extracted_from", target_id: "<transcript_id>")
 ```
 
 ### BELONGS_TO — program routing
 For entities where you're confident about the program:
 ```
-clotho_create_relation(workspace_path, source_id: "<entity_id>", relation_type: "belongs_to", target_id: "<program_id>")
+clotho_create_relation(source_id: "<entity_id>", relation_type: "belongs_to", target_id: "<program_id>")
 ```
 
 For entities where routing is ambiguous, present options to the user instead of auto-linking.
@@ -134,22 +134,22 @@ For entities where routing is ambiguous, present options to the user instead of 
 ### MENTIONS — people
 Look for names. Search before creating:
 ```
-clotho_search(workspace_path, query: "<person name>")
+clotho_search(query: "<person name>")
 ```
 If not found:
 ```
-clotho_create_entity(workspace_path, entity_type: "person", title: "<name>")
+clotho_create_entity(entity_type: "person", title: "<name>")
 ```
 Then:
 ```
-clotho_create_relation(workspace_path, source_id: "<transcript_id>", relation_type: "mentions", target_id: "<person_id>")
+clotho_create_relation(source_id: "<transcript_id>", relation_type: "mentions", target_id: "<person_id>")
 ```
 
 ## Step 4: Dedup check
 
 Before creating an entity, check if something similar already exists:
 ```
-clotho_search(workspace_path, query: "<key terms from the signal>")
+clotho_search(query: "<key terms from the signal>")
 ```
 
 If you find an existing entity that covers the same ground:

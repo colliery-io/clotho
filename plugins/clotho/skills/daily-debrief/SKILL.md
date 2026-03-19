@@ -7,7 +7,7 @@ description: "Use when the user says 'end of day', 'daily debrief', 'process tod
 
 End-of-day ceremony. Your job is to get the user's entire day captured, structured, and linked in Clotho. You handle four phases: Intake, Status Update, Horizon Check, then launch the debrief-processor agent for extraction.
 
-**You need the workspace_path.** If not known, find the `.clotho/` directory relative to the current working directory.
+The workspace is set automatically. Use `clotho_set_workspace` if needed.
 
 ## Phase 1: Intake
 
@@ -21,9 +21,9 @@ End-of-day ceremony. Your job is to get the user's entire day captured, structur
 
 2. Query entities created today:
    ```
-   clotho_list_entities(workspace_path, entity_type: "Meeting")
-   clotho_list_entities(workspace_path, entity_type: "Transcript")
-   clotho_list_entities(workspace_path, entity_type: "Note")
+   clotho_list_entities(entity_type: "Meeting")
+   clotho_list_entities(entity_type: "Transcript")
+   clotho_list_entities(entity_type: "Note")
    ```
    Filter results to items with today's date in created_at.
 
@@ -34,7 +34,7 @@ End-of-day ceremony. Your job is to get the user's entire day captured, structur
 
 For each file in `.clotho/inbox/`:
 - Infer type from filename/extension (.transcript.md → transcript, .md → note, .ics → meeting)
-- Capture: `clotho_capture(workspace_path, file_path, entity_type, title)`
+- Capture: `clotho_capture(file_path, entity_type, title)`
 - After capturing, move the file out of inbox (or note it's been processed)
 
 ### Step 3: Gather additional materials
@@ -46,9 +46,9 @@ Ask the user:
 > - Just tell me what happened and I'll capture it as a note"
 
 For each material provided:
-- Pasted text → `clotho_create_note(workspace_path, title, content)` or `clotho_create_entity(workspace_path, entity_type: "transcript", title, content)`
-- File reference → `clotho_capture(workspace_path, file_path, entity_type)`
-- Verbal description → `clotho_create_note(workspace_path, title: "EOD note: <topic>", content: <what they said>)`
+- Pasted text → `clotho_create_note(title, content)` or `clotho_create_entity(entity_type: "transcript", title, content)`
+- File reference → `clotho_capture(file_path, entity_type)`
+- Verbal description → `clotho_create_note(title: "EOD note: <topic>", content: <what they said>)`
 
 Keep asking until the user says they're done.
 
@@ -58,8 +58,8 @@ Keep asking until the user says they're done.
 
 1. Query active and pending tasks:
    ```
-   clotho_list_entities(workspace_path, state: "doing")
-   clotho_list_entities(workspace_path, state: "todo")
+   clotho_list_entities(state: "doing")
+   clotho_list_entities(state: "todo")
    ```
 
 2. Present as a bulk list:
@@ -75,9 +75,9 @@ Keep asking until the user says they're done.
    > Tell me what changed: completed, blocked, started, or no change.
 
 3. For each update the user provides:
-   - Completed → `clotho_update_entity(workspace_path, entity_id, state: "done")`
-   - Blocked → `clotho_update_entity(workspace_path, entity_id, state: "blocked")` + ask what's blocking, create Blocker entity + BLOCKED_BY relation
-   - Started → `clotho_update_entity(workspace_path, entity_id, state: "doing")`
+   - Completed → `clotho_update_entity(entity_id, state: "done")`
+   - Blocked → `clotho_update_entity(entity_id, state: "blocked")` + ask what's blocking, create Blocker entity + BLOCKED_BY relation
+   - Started → `clotho_update_entity(entity_id, state: "doing")`
 
 ### Step 5: Ad-hoc items
 
@@ -85,9 +85,9 @@ Ask:
 > "Any decisions, risks, or blockers from outside meetings today?"
 
 For each:
-- Decision → `clotho_create_entity(workspace_path, entity_type: "decision", title)`
-- Risk → `clotho_create_entity(workspace_path, entity_type: "risk", title)`
-- Blocker → `clotho_create_entity(workspace_path, entity_type: "blocker", title)`
+- Decision → `clotho_create_entity(entity_type: "decision", title)`
+- Risk → `clotho_create_entity(entity_type: "risk", title)`
+- Blocker → `clotho_create_entity(entity_type: "blocker", title)`
 
 Link to relevant programs if the user specifies context.
 
@@ -97,17 +97,17 @@ Link to relevant programs if the user specifies context.
 
 1. Query tasks with upcoming deadlines:
    ```
-   clotho_query(workspace_path, cypher: "MATCH (t:Task) RETURN t.id, t.title, t.entity_type")
+   clotho_query(cypher: "MATCH (t:Task) RETURN t.id, t.title, t.entity_type")
    ```
    Check metadata for deadline fields. Also:
    ```
-   clotho_list_entities(workspace_path, state: "todo")
+   clotho_list_entities(state: "todo")
    ```
    Check created_at — flag any todo tasks older than 7 days as stale.
 
 2. Check program health:
    ```
-   clotho_list_entities(workspace_path, entity_type: "Program")
+   clotho_list_entities(entity_type: "Program")
    ```
    For each program, check if it has any tasks updated in the last 2 weeks. Flag programs with no recent activity.
 
@@ -141,5 +141,5 @@ After the agent completes:
 1. Present the extraction summary
 2. Ask: "Does this look right? Anything to adjust?"
 3. Handle any corrections
-4. Sync: `clotho_sync(workspace_path)`
+4. Sync: `clotho_sync()`
 5. Confirm: "Today is captured. Good night."

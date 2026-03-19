@@ -39,12 +39,18 @@ else
 
 ### Available MCP Tools
 
-**Read-only:**
+**Session:**
+- \`clotho_set_workspace\` — Set workspace path (auto-detected on startup)
+
+**Read:**
 - \`clotho_search\` — Full-text keyword search
 - \`clotho_query\` — Cypher graph queries
 - \`clotho_read_entity\` — Read entity by ID
 - \`clotho_list_entities\` — List with filters
 - \`clotho_get_relations\` — Show entity relations
+- \`clotho_get_ontology\` — Get extraction ontology
+- \`clotho_search_ontology\` — Search across all ontologies
+- \`clotho_check_processed\` — Check processing history
 
 **Write:**
 - \`clotho_init\` — Initialize workspace
@@ -56,9 +62,11 @@ else
 - \`clotho_create_reflection\` — Create a reflection
 - \`clotho_create_relation\` — Create graph edge
 - \`clotho_delete_relation\` — Remove graph edge
+- \`clotho_update_ontology\` — Update extraction ontology
+- \`clotho_mark_processed\` — Record processing done
 - \`clotho_sync\` — Git sync workspace
 
-All tools require \`workspace_path\` parameter set to \`$WORKSPACE_ROOT\`.
+The workspace is set automatically. Use \`clotho_set_workspace\` if needed.
 
 ### Entity Types
 
