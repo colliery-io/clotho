@@ -1,6 +1,6 @@
 # Code Index
 
-> Generated: 2026-03-18T17:48:05Z | 82 files | Rust
+> Generated: 2026-03-19T03:43:35Z | 82 files | Rust
 
 ## Project Structure
 
@@ -1122,14 +1122,14 @@
 #### clotho-store/src/sync.rs
 
 - pub `StoreSync` struct L18-25 — `{ content: &'a ContentStore, entities: &'a EntityStore, extractions: &'a Extract...` — Coordinated write layer across all storage backends.
-- pub `save_entity` function L35-78 — `( &self, row: &EntityRow, content: Option<&str>, entity_type: EntityType, ) -> R...` — Save an entity across all backends.
-- pub `delete_entity` function L81-106 — `( &self, id_str: &str, entity_type: EntityType, ) -> Result<(), StoreError>` — Delete an entity from all backends.
-- pub `promote_extraction` function L110-158 — `( &self, id_str: &str, ) -> Result<EntityRow, StoreError>` — Promote a draft extraction: move from extractions.db to entities.db,
-- pub `discard_extraction` function L161-165 — `(&self, id_str: &str) -> Result<(), StoreError>` — Discard a draft extraction.
-- pub `materialize_temporal_edges` function L171-204 — `( &self, id_str: &str, _entity_type: EntityType, has_cadence: bool, has_deadline...` — Materialize temporal edges for an entity in the graph.
--  `log_event` function L206-218 — `( &self, event_type: EventType, entity_id: &str, details: Option<serde_json::Val...`
--  `parse_entity_id` function L221-225 — `(s: &str) -> Result<EntityId, StoreError>`
--  `parse_entity_type_str` function L227-250 — `(s: &str) -> Result<EntityType, StoreError>`
+- pub `save_entity` function L35-81 — `( &self, row: &EntityRow, content: Option<&str>, entity_type: EntityType, ) -> R...` — Save an entity across all backends.
+- pub `delete_entity` function L84-109 — `( &self, id_str: &str, entity_type: EntityType, ) -> Result<(), StoreError>` — Delete an entity from all backends.
+- pub `promote_extraction` function L113-161 — `( &self, id_str: &str, ) -> Result<EntityRow, StoreError>` — Promote a draft extraction: move from extractions.db to entities.db,
+- pub `discard_extraction` function L164-168 — `(&self, id_str: &str) -> Result<(), StoreError>` — Discard a draft extraction.
+- pub `materialize_temporal_edges` function L174-207 — `( &self, id_str: &str, _entity_type: EntityType, has_cadence: bool, has_deadline...` — Materialize temporal edges for an entity in the graph.
+-  `log_event` function L209-221 — `( &self, event_type: EventType, entity_id: &str, details: Option<serde_json::Val...`
+-  `parse_entity_id` function L224-228 — `(s: &str) -> Result<EntityId, StoreError>`
+-  `parse_entity_type_str` function L230-253 — `(s: &str) -> Result<EntityType, StoreError>`
 
 #### clotho-store/src/workspace.rs
 

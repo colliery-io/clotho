@@ -126,6 +126,9 @@ impl Workspace {
         fs::write(clotho_path.join("data/tags.jsonl"), "")?;
         fs::write(clotho_path.join("data/events.jsonl"), "")?;
 
+        // Run database migrations
+        crate::migrations::run_migrations(&clotho_path.join("data/entities.db"))?;
+
         Ok(Self { path: clotho_path })
     }
 
@@ -159,6 +162,9 @@ impl Workspace {
                 "missing .clotho/config/config.toml".to_string(),
             ));
         }
+
+        // Run pending migrations (handles upgrades)
+        crate::migrations::run_migrations(&clotho_path.join("data/entities.db"))?;
 
         Ok(Self { path: clotho_path })
     }

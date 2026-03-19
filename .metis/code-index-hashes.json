@@ -74,7 +74,7 @@
     "clotho-store/src/federation.rs": "6babb0b063a9513ad46995641e9de3ae27032bea278b744bcf27a440bddd7e6a",
     "clotho-store/src/index.rs": "184fa10b4995a7a64b5487a5eaf6c54e0ae7764db257ff234f9e715f89fa2d48",
     "clotho-store/src/lib.rs": "574eacb3ab44802efc68f794388f090dad63aa9d19631ccf36e3c7d99c464268",
-    "clotho-store/src/sync.rs": "254b94013e6ab6eb7e9371969e39276e2a637dae95c97517456b1abfc2fa7dbc",
+    "clotho-store/src/sync.rs": "fe0147cefcba3bc8eabdad791f5a95aa2490e7feef15e693530c819d2e86f02c",
     "clotho-store/src/workspace.rs": "2ba8635c461fdbd9a046c428320d622bba1b4eb9814bd72c647707913653cd9e",
     "clotho-store/tests/store_tests.rs": "1ab55c767d12b8513a8ed40fc8c1ca1f045349f69b32b27c8530446b9065e403",
     "clotho-sync/src/engine.rs": "f99f531a2ea0d47e2346647e00461bf4b4a574d3be25b80261672eb85e912ff3",
