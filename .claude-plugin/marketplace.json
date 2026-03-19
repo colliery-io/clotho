@@ -1,9 +1,19 @@
 {
+  "name": "colliery-io-clotho",
+  "owner": {
+    "name": "Colliery",
+    "email": "contact@colliery.io"
+  },
   "plugins": [
     {
       "name": "clotho",
+      "source": "./plugins/clotho",
       "description": "Personal work and time management through reflection, transcripts, and sense-making.",
-      "source": "./plugins/clotho"
+      "version": "0.0.0",
+      "author": {
+        "name": "Colliery",
+        "email": "contact@colliery.io"
+      }
     }
   ]
 }
