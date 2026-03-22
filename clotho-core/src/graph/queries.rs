@@ -85,8 +85,8 @@ impl GraphStore {
             .stats()
             .map_err(|e| GraphError::QueryFailed(e.to_string()))?;
         Ok(GraphStats {
-            node_count: gs.nodes as usize,
-            edge_count: gs.edges as usize,
+            node_count: gs.node_count as usize,
+            edge_count: gs.edge_count as usize,
         })
     }
 
