@@ -1,4 +1,5 @@
 use crate::formatting::text_result;
+use crate::resolve;
 use crate::workspace_resolver;
 use clotho_store::data::entities::EntityStore;
 use clotho_store::data::ontology::{
@@ -15,7 +16,7 @@ use std::path::Path;
 
 #[mcp_tool(
     name = "clotho_get_ontology",
-    description = "Get the extraction ontology for a program or responsibility. Returns keywords, signal types (technical/social), and involved people that guide transcript extraction.",
+    description = "Get the extraction ontology for a program or responsibility. Accepts full UUID or prefix.",
     idempotent_hint = true,
     destructive_hint = false,
     open_world_hint = false,
@@ -23,7 +24,7 @@ use std::path::Path;
 )]
 #[derive(Debug, Serialize, Deserialize, JsonSchema)]
 pub struct GetOntologyTool {
-    /// Entity ID (Program or Responsibility UUID)
+    /// Entity ID (full UUID or prefix)
     pub entity_id: String,
 }
 
@@ -38,30 +39,46 @@ impl GetOntologyTool {
         let ontology_store = OntologyStore::open(&ws.data_path().join("entities.db"))
             .map_err(|e| CallToolError::new(std::io::Error::other(e.to_string())))?;
 
-        let row = entity_store.get(&self.entity_id)
-            .map_err(|e| CallToolError::new(std::io::Error::other(e.to_string())))?
-            .ok_or_else(|| CallToolError::new(std::io::Error::other(format!("Entity not found: {}", self.entity_id))))?;
+        let row = match resolve::resolve_for_read(&entity_store, &self.entity_id) {
+            Ok(row) => row,
+            Err(result) => return Ok(result),
+        };
 
-        let ontology = ontology_store.get(&self.entity_id)
+        let ontology = ontology_store
+            .get(&row.id)
             .map_err(|e| CallToolError::new(std::io::Error::other(e.to_string())))?;
 
         let mut output = format!("## Ontology: {} ({})\n\n", row.title, row.entity_type);
 
         if !ontology.keywords.is_empty() {
-            output.push_str(&format!("**Keywords:** {}\n\n", ontology.keywords.join(", ")));
+            output.push_str(&format!(
+                "**Keywords:** {}\n\n",
+                ontology.keywords.join(", ")
+            ));
         }
         if !ontology.signal_technical.is_empty() {
-            output.push_str(&format!("**Technical signals:** {}\n\n", ontology.signal_technical.join(", ")));
+            output.push_str(&format!(
+                "**Technical signals:** {}\n\n",
+                ontology.signal_technical.join(", ")
+            ));
         }
         if !ontology.signal_social.is_empty() {
-            output.push_str(&format!("**Social signals:** {}\n\n", ontology.signal_social.join(", ")));
+            output.push_str(&format!(
+                "**Social signals:** {}\n\n",
+                ontology.signal_social.join(", ")
+            ));
         }
         if !ontology.people.is_empty() {
-            output.push_str(&format!("**Involved people:** {}\n\n", ontology.people.join(", ")));
+            output.push_str(&format!(
+                "**Involved people:** {}\n\n",
+                ontology.people.join(", ")
+            ));
         }
 
-        if ontology.keywords.is_empty() && ontology.signal_technical.is_empty()
-            && ontology.signal_social.is_empty() && ontology.people.is_empty()
+        if ontology.keywords.is_empty()
+            && ontology.signal_technical.is_empty()
+            && ontology.signal_social.is_empty()
+            && ontology.people.is_empty()
         {
             output.push_str("No ontology configured yet.");
         }
@@ -72,7 +89,7 @@ impl GetOntologyTool {
 
 #[mcp_tool(
     name = "clotho_update_ontology",
-    description = "Update the extraction ontology for a program or responsibility. Add or remove keywords, signal types, and involved people. Entries are deduplicated automatically.",
+    description = "Update the extraction ontology for a program or responsibility. Accepts full UUID or prefix.",
     idempotent_hint = true,
     destructive_hint = false,
     open_world_hint = false,
@@ -80,7 +97,7 @@ impl GetOntologyTool {
 )]
 #[derive(Debug, Serialize, Deserialize, JsonSchema)]
 pub struct UpdateOntologyTool {
-    /// Entity ID (Program or Responsibility UUID)
+    /// Entity ID (full UUID or prefix)
     pub entity_id: String,
     /// Keywords to add (comma-separated)
     pub add_keywords: Option<String>,
@@ -104,46 +121,69 @@ impl UpdateOntologyTool {
             .map_err(|e| CallToolError::new(std::io::Error::other(e)))?;
         let ws = Workspace::open(Path::new(&ws_path))
             .map_err(|e| CallToolError::new(std::io::Error::other(e.to_string())))?;
+
+        let entity_store = EntityStore::open(&ws.data_path().join("entities.db"))
+            .map_err(|e| CallToolError::new(std::io::Error::other(e.to_string())))?;
         let ontology_store = OntologyStore::open(&ws.data_path().join("entities.db"))
             .map_err(|e| CallToolError::new(std::io::Error::other(e.to_string())))?;
+
+        let row = match resolve::resolve_for_write(&entity_store, &self.entity_id) {
+            Ok(row) => row,
+            Err(result) => return Ok(result),
+        };
+        let resolved_id = &row.id;
 
         let added_by = self.added_by.as_deref().unwrap_or("user");
 
         // Additions
         if let Some(ref kw) = self.add_keywords {
             let vals: Vec<&str> = kw.split(',').collect();
-            ontology_store.add(&self.entity_id, CATEGORY_KEYWORD, &vals, Some(added_by))
+            ontology_store
+                .add(resolved_id, CATEGORY_KEYWORD, &vals, Some(added_by))
                 .map_err(|e| CallToolError::new(std::io::Error::other(e.to_string())))?;
         }
         if let Some(ref ts) = self.add_technical_signals {
             let vals: Vec<&str> = ts.split(',').collect();
-            ontology_store.add(&self.entity_id, CATEGORY_SIGNAL_TECHNICAL, &vals, Some(added_by))
+            ontology_store
+                .add(
+                    resolved_id,
+                    CATEGORY_SIGNAL_TECHNICAL,
+                    &vals,
+                    Some(added_by),
+                )
                 .map_err(|e| CallToolError::new(std::io::Error::other(e.to_string())))?;
         }
         if let Some(ref ss) = self.add_social_signals {
             let vals: Vec<&str> = ss.split(',').collect();
-            ontology_store.add(&self.entity_id, CATEGORY_SIGNAL_SOCIAL, &vals, Some(added_by))
+            ontology_store
+                .add(resolved_id, CATEGORY_SIGNAL_SOCIAL, &vals, Some(added_by))
                 .map_err(|e| CallToolError::new(std::io::Error::other(e.to_string())))?;
         }
         if let Some(ref pp) = self.add_people {
             let vals: Vec<&str> = pp.split(',').collect();
-            ontology_store.add(&self.entity_id, CATEGORY_PERSON, &vals, Some(added_by))
+            ontology_store
+                .add(resolved_id, CATEGORY_PERSON, &vals, Some(added_by))
                 .map_err(|e| CallToolError::new(std::io::Error::other(e.to_string())))?;
         }
 
         // Removals
         if let Some(ref kw) = self.remove_keywords {
             let vals: Vec<&str> = kw.split(',').collect();
-            ontology_store.remove(&self.entity_id, CATEGORY_KEYWORD, &vals)
+            ontology_store
+                .remove(resolved_id, CATEGORY_KEYWORD, &vals)
                 .map_err(|e| CallToolError::new(std::io::Error::other(e.to_string())))?;
         }
         if let Some(ref pp) = self.remove_people {
             let vals: Vec<&str> = pp.split(',').collect();
-            ontology_store.remove(&self.entity_id, CATEGORY_PERSON, &vals)
+            ontology_store
+                .remove(resolved_id, CATEGORY_PERSON, &vals)
                 .map_err(|e| CallToolError::new(std::io::Error::other(e.to_string())))?;
         }
 
-        Ok(text_result(format!("## Ontology Updated\n\nUpdated ontology for entity `{}`", &self.entity_id[..8])))
+        Ok(text_result(format!(
+            "## Ontology Updated\n\nUpdated ontology for entity `{}`",
+            &resolved_id[..8]
+        )))
     }
 }
 
@@ -170,18 +210,27 @@ impl SearchOntologyTool {
         let ontology_store = OntologyStore::open(&ws.data_path().join("entities.db"))
             .map_err(|e| CallToolError::new(std::io::Error::other(e.to_string())))?;
 
-        let results = ontology_store.search(&self.query)
+        let results = ontology_store
+            .search(&self.query)
             .map_err(|e| CallToolError::new(std::io::Error::other(e.to_string())))?;
 
         if results.is_empty() {
-            return Ok(text_result(format!("No ontology entries matching '{}'.", self.query)));
+            return Ok(text_result(format!(
+                "No ontology entries matching '{}'.",
+                self.query
+            )));
         }
 
-        let mut output = format!("## Ontology Search: '{}'\n\n| Entity | Category | Value |\n|---|---|---|\n", self.query);
+        let mut output = format!(
+            "## Ontology Search: '{}'\n\n| Entity | Category | Value |\n|---|---|---|\n",
+            self.query
+        );
         for entry in &results {
             output.push_str(&format!(
                 "| `{}...` | {} | {} |\n",
-                &entry.entity_id[..8], entry.category, entry.value
+                &entry.entity_id[..8],
+                entry.category,
+                entry.value
             ));
         }
         output.push_str(&format!("\n{} matches", results.len()));

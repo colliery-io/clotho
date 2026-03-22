@@ -3,54 +3,62 @@ use clap::Args;
 use clotho_core::domain::traits::RelationType;
 use clotho_core::domain::types::EntityId;
 use clotho_core::graph::GraphStore;
+use clotho_store::data::entities::EntityStore;
 use clotho_store::workspace::Workspace;
+
+use crate::resolve;
 
 #[derive(Args)]
 pub struct RelateArgs {
-    /// Source entity ID.
+    /// Source entity ID (full UUID or prefix).
     pub source_id: String,
 
     /// Relation type (belongs_to, relates_to, delivers, spawned_from, extracted_from,
     /// has_decision, has_risk, blocked_by, mentions, has_cadence, has_deadline, has_schedule).
     pub relation_type: String,
 
-    /// Target entity ID.
+    /// Target entity ID (full UUID or prefix).
     pub target_id: String,
 }
 
 #[derive(Args)]
 pub struct UnrelateArgs {
-    /// Source entity ID.
+    /// Source entity ID (full UUID or prefix).
     pub source_id: String,
 
     /// Relation type.
     pub relation_type: String,
 
-    /// Target entity ID.
+    /// Target entity ID (full UUID or prefix).
     pub target_id: String,
 }
 
 #[derive(Args)]
 pub struct RelationsArgs {
-    /// Entity ID to show relations for.
+    /// Entity ID (full UUID or prefix).
     pub id: String,
 }
 
 pub fn run_relate(args: RelateArgs, json: bool) -> Result<(), Box<dyn std::error::Error>> {
     let ws = Workspace::open(&std::env::current_dir()?)?;
+    let store = EntityStore::open(&ws.data_path().join("entities.db"))?;
     let graph = GraphStore::open(&ws.graph_path().join("relations.db"))
         .map_err(|e| format!("graph error: {}", e))?;
 
-    let source = parse_id(&args.source_id)?;
-    let target = parse_id(&args.target_id)?;
+    // Resolve both IDs (destructive operation)
+    let source_row = resolve::resolve_for_write(&store, &args.source_id)?;
+    let target_row = resolve::resolve_for_write(&store, &args.target_id)?;
+
+    let source = parse_id(&source_row.id)?;
+    let target = parse_id(&target_row.id)?;
     let rel_type = parse_relation_type(&args.relation_type)?;
 
-    // Verify both nodes exist
+    // Verify both nodes exist in graph
     if !graph.has_node(&source).map_err(|e| format!("{}", e))? {
-        return Err(format!("Source entity not found in graph: {}", args.source_id).into());
+        return Err(format!("Source entity not found in graph: {}", source_row.id).into());
     }
     if !graph.has_node(&target).map_err(|e| format!("{}", e))? {
-        return Err(format!("Target entity not found in graph: {}", args.target_id).into());
+        return Err(format!("Target entity not found in graph: {}", target_row.id).into());
     }
 
     graph
@@ -60,17 +68,17 @@ pub fn run_relate(args: RelateArgs, json: bool) -> Result<(), Box<dyn std::error
     if json {
         let out = serde_json::json!({
             "status": "ok",
-            "source": args.source_id,
+            "source": source_row.id,
             "relation": args.relation_type,
-            "target": args.target_id,
+            "target": target_row.id,
         });
         println!("{}", serde_json::to_string_pretty(&out)?);
     } else {
         println!(
             "Created relation: {} -[{}]-> {}",
-            &args.source_id[..8],
+            &source_row.id[..8],
             args.relation_type.to_uppercase(),
-            &args.target_id[..8]
+            &target_row.id[..8]
         );
     }
 
@@ -79,11 +87,16 @@ pub fn run_relate(args: RelateArgs, json: bool) -> Result<(), Box<dyn std::error
 
 pub fn run_unrelate(args: UnrelateArgs, json: bool) -> Result<(), Box<dyn std::error::Error>> {
     let ws = Workspace::open(&std::env::current_dir()?)?;
+    let store = EntityStore::open(&ws.data_path().join("entities.db"))?;
     let graph = GraphStore::open(&ws.graph_path().join("relations.db"))
         .map_err(|e| format!("graph error: {}", e))?;
 
-    let source = parse_id(&args.source_id)?;
-    let target = parse_id(&args.target_id)?;
+    // Resolve both IDs (destructive operation)
+    let source_row = resolve::resolve_for_write(&store, &args.source_id)?;
+    let target_row = resolve::resolve_for_write(&store, &args.target_id)?;
+
+    let source = parse_id(&source_row.id)?;
+    let target = parse_id(&target_row.id)?;
     let rel_type = parse_relation_type(&args.relation_type)?;
 
     graph
@@ -99,9 +112,9 @@ pub fn run_unrelate(args: UnrelateArgs, json: bool) -> Result<(), Box<dyn std::e
     } else {
         println!(
             "Removed relation: {} -[{}]-> {}",
-            &args.source_id[..8],
+            &source_row.id[..8],
             args.relation_type.to_uppercase(),
-            &args.target_id[..8]
+            &target_row.id[..8]
         );
     }
 
@@ -110,10 +123,12 @@ pub fn run_unrelate(args: UnrelateArgs, json: bool) -> Result<(), Box<dyn std::e
 
 pub fn run_relations(args: RelationsArgs, json: bool) -> Result<(), Box<dyn std::error::Error>> {
     let ws = Workspace::open(&std::env::current_dir()?)?;
+    let store = EntityStore::open(&ws.data_path().join("entities.db"))?;
     let graph = GraphStore::open(&ws.graph_path().join("relations.db"))
         .map_err(|e| format!("graph error: {}", e))?;
 
-    let id = parse_id(&args.id)?;
+    let row = resolve::resolve_for_read(&store, &args.id)?;
+    let id = parse_id(&row.id)?;
 
     let outgoing = graph
         .get_edges_from(&id)
@@ -155,11 +170,7 @@ pub fn run_relations(args: RelationsArgs, json: bool) -> Result<(), Box<dyn std:
             }
         }
 
-        println!(
-            "\n{} outgoing, {} incoming",
-            outgoing.len(),
-            incoming.len()
-        );
+        println!("\n{} outgoing, {} incoming", outgoing.len(), incoming.len());
     }
 
     Ok(())

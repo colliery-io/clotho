@@ -44,22 +44,41 @@ impl Meeting {
 }
 
 impl Entity for Meeting {
-    fn id(&self) -> &EntityId { &self.id }
-    fn entity_type(&self) -> EntityType { EntityType::Meeting }
-    fn title(&self) -> &str { &self.title }
-    fn created_at(&self) -> DateTime<Utc> { self.created_at }
-    fn updated_at(&self) -> DateTime<Utc> { self.updated_at }
+    fn id(&self) -> &EntityId {
+        &self.id
+    }
+    fn entity_type(&self) -> EntityType {
+        EntityType::Meeting
+    }
+    fn title(&self) -> &str {
+        &self.title
+    }
+    fn created_at(&self) -> DateTime<Utc> {
+        self.created_at
+    }
+    fn updated_at(&self) -> DateTime<Utc> {
+        self.updated_at
+    }
 }
 
 impl Relatable for Meeting {
     fn relations(&self, graph: &GraphStore) -> Vec<Relation> {
-        graph.get_edges_from(self.id()).unwrap_or_default().into_iter().map(Relation::from).collect()
+        graph
+            .get_edges_from(self.id())
+            .unwrap_or_default()
+            .into_iter()
+            .map(Relation::from)
+            .collect()
     }
-    fn graph_label(&self) -> &'static str { "Meeting" }
+    fn graph_label(&self) -> &'static str {
+        "Meeting"
+    }
 }
 
 impl Taggable for Meeting {
-    fn tags(&self) -> &[Tag] { &self.tags }
+    fn tags(&self) -> &[Tag] {
+        &self.tags
+    }
     fn add_tag(&mut self, tag: Tag) {
         if !self.tags.contains(&tag) {
             self.tags.push(tag);
@@ -76,7 +95,9 @@ impl Taggable for Meeting {
 }
 
 impl ContentBearing for Meeting {
-    fn content(&self) -> &str { &self.content }
+    fn content(&self) -> &str {
+        &self.content
+    }
     fn set_content(&mut self, content: String) {
         self.content = content;
         self.updated_at = Utc::now();
@@ -88,7 +109,9 @@ impl ContentBearing for Meeting {
 }
 
 impl HasSchedule for Meeting {
-    fn scheduled_at(&self) -> Option<DateTime<Utc>> { self.scheduled_at }
+    fn scheduled_at(&self) -> Option<DateTime<Utc>> {
+        self.scheduled_at
+    }
     fn set_scheduled_at(&mut self, at: Option<DateTime<Utc>>) {
         self.scheduled_at = at;
         self.updated_at = Utc::now();
@@ -130,22 +153,41 @@ impl Transcript {
 }
 
 impl Entity for Transcript {
-    fn id(&self) -> &EntityId { &self.id }
-    fn entity_type(&self) -> EntityType { EntityType::Transcript }
-    fn title(&self) -> &str { &self.title }
-    fn created_at(&self) -> DateTime<Utc> { self.created_at }
-    fn updated_at(&self) -> DateTime<Utc> { self.updated_at }
+    fn id(&self) -> &EntityId {
+        &self.id
+    }
+    fn entity_type(&self) -> EntityType {
+        EntityType::Transcript
+    }
+    fn title(&self) -> &str {
+        &self.title
+    }
+    fn created_at(&self) -> DateTime<Utc> {
+        self.created_at
+    }
+    fn updated_at(&self) -> DateTime<Utc> {
+        self.updated_at
+    }
 }
 
 impl Relatable for Transcript {
     fn relations(&self, graph: &GraphStore) -> Vec<Relation> {
-        graph.get_edges_from(self.id()).unwrap_or_default().into_iter().map(Relation::from).collect()
+        graph
+            .get_edges_from(self.id())
+            .unwrap_or_default()
+            .into_iter()
+            .map(Relation::from)
+            .collect()
     }
-    fn graph_label(&self) -> &'static str { "Transcript" }
+    fn graph_label(&self) -> &'static str {
+        "Transcript"
+    }
 }
 
 impl Taggable for Transcript {
-    fn tags(&self) -> &[Tag] { &self.tags }
+    fn tags(&self) -> &[Tag] {
+        &self.tags
+    }
     fn add_tag(&mut self, tag: Tag) {
         if !self.tags.contains(&tag) {
             self.tags.push(tag);
@@ -162,7 +204,9 @@ impl Taggable for Transcript {
 }
 
 impl ContentBearing for Transcript {
-    fn content(&self) -> &str { &self.content }
+    fn content(&self) -> &str {
+        &self.content
+    }
     fn set_content(&mut self, content: String) {
         self.content = content;
         self.updated_at = Utc::now();
@@ -213,22 +257,41 @@ impl Note {
 }
 
 impl Entity for Note {
-    fn id(&self) -> &EntityId { &self.id }
-    fn entity_type(&self) -> EntityType { EntityType::Note }
-    fn title(&self) -> &str { &self.title }
-    fn created_at(&self) -> DateTime<Utc> { self.created_at }
-    fn updated_at(&self) -> DateTime<Utc> { self.updated_at }
+    fn id(&self) -> &EntityId {
+        &self.id
+    }
+    fn entity_type(&self) -> EntityType {
+        EntityType::Note
+    }
+    fn title(&self) -> &str {
+        &self.title
+    }
+    fn created_at(&self) -> DateTime<Utc> {
+        self.created_at
+    }
+    fn updated_at(&self) -> DateTime<Utc> {
+        self.updated_at
+    }
 }
 
 impl Relatable for Note {
     fn relations(&self, graph: &GraphStore) -> Vec<Relation> {
-        graph.get_edges_from(self.id()).unwrap_or_default().into_iter().map(Relation::from).collect()
+        graph
+            .get_edges_from(self.id())
+            .unwrap_or_default()
+            .into_iter()
+            .map(Relation::from)
+            .collect()
     }
-    fn graph_label(&self) -> &'static str { "Note" }
+    fn graph_label(&self) -> &'static str {
+        "Note"
+    }
 }
 
 impl Taggable for Note {
-    fn tags(&self) -> &[Tag] { &self.tags }
+    fn tags(&self) -> &[Tag] {
+        &self.tags
+    }
     fn add_tag(&mut self, tag: Tag) {
         if !self.tags.contains(&tag) {
             self.tags.push(tag);
@@ -245,7 +308,9 @@ impl Taggable for Note {
 }
 
 impl ContentBearing for Note {
-    fn content(&self) -> &str { &self.content }
+    fn content(&self) -> &str {
+        &self.content
+    }
     fn set_content(&mut self, content: String) {
         self.content = content;
         self.updated_at = Utc::now();
@@ -304,22 +369,41 @@ impl Reflection {
 }
 
 impl Entity for Reflection {
-    fn id(&self) -> &EntityId { &self.id }
-    fn entity_type(&self) -> EntityType { EntityType::Reflection }
-    fn title(&self) -> &str { &self.title }
-    fn created_at(&self) -> DateTime<Utc> { self.created_at }
-    fn updated_at(&self) -> DateTime<Utc> { self.updated_at }
+    fn id(&self) -> &EntityId {
+        &self.id
+    }
+    fn entity_type(&self) -> EntityType {
+        EntityType::Reflection
+    }
+    fn title(&self) -> &str {
+        &self.title
+    }
+    fn created_at(&self) -> DateTime<Utc> {
+        self.created_at
+    }
+    fn updated_at(&self) -> DateTime<Utc> {
+        self.updated_at
+    }
 }
 
 impl Relatable for Reflection {
     fn relations(&self, graph: &GraphStore) -> Vec<Relation> {
-        graph.get_edges_from(self.id()).unwrap_or_default().into_iter().map(Relation::from).collect()
+        graph
+            .get_edges_from(self.id())
+            .unwrap_or_default()
+            .into_iter()
+            .map(Relation::from)
+            .collect()
     }
-    fn graph_label(&self) -> &'static str { "Reflection" }
+    fn graph_label(&self) -> &'static str {
+        "Reflection"
+    }
 }
 
 impl Taggable for Reflection {
-    fn tags(&self) -> &[Tag] { &self.tags }
+    fn tags(&self) -> &[Tag] {
+        &self.tags
+    }
     fn add_tag(&mut self, tag: Tag) {
         if !self.tags.contains(&tag) {
             self.tags.push(tag);
@@ -336,7 +420,9 @@ impl Taggable for Reflection {
 }
 
 impl ContentBearing for Reflection {
-    fn content(&self) -> &str { &self.content }
+    fn content(&self) -> &str {
+        &self.content
+    }
     fn set_content(&mut self, content: String) {
         self.content = content;
         self.updated_at = Utc::now();
@@ -391,22 +477,41 @@ impl Artifact {
 }
 
 impl Entity for Artifact {
-    fn id(&self) -> &EntityId { &self.id }
-    fn entity_type(&self) -> EntityType { EntityType::Artifact }
-    fn title(&self) -> &str { &self.title }
-    fn created_at(&self) -> DateTime<Utc> { self.created_at }
-    fn updated_at(&self) -> DateTime<Utc> { self.updated_at }
+    fn id(&self) -> &EntityId {
+        &self.id
+    }
+    fn entity_type(&self) -> EntityType {
+        EntityType::Artifact
+    }
+    fn title(&self) -> &str {
+        &self.title
+    }
+    fn created_at(&self) -> DateTime<Utc> {
+        self.created_at
+    }
+    fn updated_at(&self) -> DateTime<Utc> {
+        self.updated_at
+    }
 }
 
 impl Relatable for Artifact {
     fn relations(&self, graph: &GraphStore) -> Vec<Relation> {
-        graph.get_edges_from(self.id()).unwrap_or_default().into_iter().map(Relation::from).collect()
+        graph
+            .get_edges_from(self.id())
+            .unwrap_or_default()
+            .into_iter()
+            .map(Relation::from)
+            .collect()
     }
-    fn graph_label(&self) -> &'static str { "Artifact" }
+    fn graph_label(&self) -> &'static str {
+        "Artifact"
+    }
 }
 
 impl Taggable for Artifact {
-    fn tags(&self) -> &[Tag] { &self.tags }
+    fn tags(&self) -> &[Tag] {
+        &self.tags
+    }
     fn add_tag(&mut self, tag: Tag) {
         if !self.tags.contains(&tag) {
             self.tags.push(tag);
@@ -423,7 +528,9 @@ impl Taggable for Artifact {
 }
 
 impl ContentBearing for Artifact {
-    fn content(&self) -> &str { &self.content }
+    fn content(&self) -> &str {
+        &self.content
+    }
     fn set_content(&mut self, content: String) {
         self.content = content;
         self.updated_at = Utc::now();
@@ -434,7 +541,9 @@ impl ContentBearing for Artifact {
 }
 
 impl HasDeadline for Artifact {
-    fn deadline(&self) -> Option<DateTime<Utc>> { self.deadline }
+    fn deadline(&self) -> Option<DateTime<Utc>> {
+        self.deadline
+    }
     fn set_deadline(&mut self, deadline: Option<DateTime<Utc>>) {
         self.deadline = deadline;
         self.updated_at = Utc::now();

@@ -13,7 +13,11 @@ fn setup_workspace(tmp: &tempfile::TempDir) -> std::path::PathBuf {
     fs::create_dir_all(ws.join("index")).unwrap();
     fs::create_dir_all(ws.join("inbox")).unwrap();
     fs::create_dir_all(ws.join("config")).unwrap();
-    fs::write(ws.join("config/config.toml"), "[sync]\nauto_commit = true\n").unwrap();
+    fs::write(
+        ws.join("config/config.toml"),
+        "[sync]\nauto_commit = true\n",
+    )
+    .unwrap();
     // Visible content dirs at project root
     for dir in &["programs", "tasks", "meetings", "notes", "people"] {
         fs::create_dir_all(tmp.path().join(dir)).unwrap();
@@ -177,7 +181,11 @@ fn prune_reduces_commit_count() {
 
     // Create 5 commits
     for i in 0..5 {
-        fs::write(tmp.path().join(format!("notes/note-{}.md", i)), format!("note {}", i)).unwrap();
+        fs::write(
+            tmp.path().join(format!("notes/note-{}.md", i)),
+            format!("note {}", i),
+        )
+        .unwrap();
         engine.sync().unwrap();
     }
     assert_eq!(engine.commit_count().unwrap(), 5);
@@ -232,6 +240,7 @@ fn index_directory_not_committed() {
             has_index = true;
         }
         git2::TreeWalkResult::Ok
-    }).unwrap();
+    })
+    .unwrap();
     assert!(!has_index, "index/ should not be in the git tree");
 }

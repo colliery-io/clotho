@@ -43,7 +43,8 @@ impl CaptureTool {
         let file = Path::new(&self.file_path);
         if !file.exists() {
             return Err(CallToolError::new(std::io::Error::other(format!(
-                "File not found: {}", self.file_path
+                "File not found: {}",
+                self.file_path
             ))));
         }
 
@@ -98,7 +99,12 @@ impl CaptureTool {
         let index = SearchIndex::open(&ws.index_path().join("search.db"))
             .map_err(|e| CallToolError::new(std::io::Error::other(e.to_string())))?;
         index
-            .index_entity(&id.to_string(), &format!("{}", entity_type), &title, &content)
+            .index_entity(
+                &id.to_string(),
+                &format!("{}", entity_type),
+                &title,
+                &content,
+            )
             .map_err(|e| CallToolError::new(std::io::Error::other(e.to_string())))?;
 
         let events = EventStore::new(&ws.data_path());
@@ -123,7 +129,8 @@ fn parse_entity_type(s: &str) -> Result<EntityType, CallToolError> {
         "transcript" => Ok(EntityType::Transcript),
         "artifact" => Ok(EntityType::Artifact),
         _ => Err(CallToolError::new(std::io::Error::other(format!(
-            "Unknown type '{}'. Valid: note, meeting, transcript, artifact", s
+            "Unknown type '{}'. Valid: note, meeting, transcript, artifact",
+            s
         )))),
     }
 }

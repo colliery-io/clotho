@@ -58,7 +58,11 @@ impl ListEntitiesTool {
         );
 
         for row in &rows {
-            let id_short = if row.id.len() > 8 { &row.id[..8] } else { &row.id };
+            let id_short = if row.id.len() > 8 {
+                &row.id[..8]
+            } else {
+                &row.id
+            };
             let status = row
                 .task_state
                 .as_deref()

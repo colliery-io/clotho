@@ -8,9 +8,11 @@ use clotho_store::data::jsonl::{Event, EventStore, EventType};
 use clotho_store::index::SearchIndex;
 use clotho_store::workspace::Workspace;
 
+use crate::resolve;
+
 #[derive(Args)]
 pub struct DeleteArgs {
-    /// Entity ID (UUID) to delete.
+    /// Entity ID (full UUID or prefix).
     pub id: String,
 }
 
@@ -18,11 +20,10 @@ pub fn run(args: DeleteArgs, json: bool) -> Result<(), Box<dyn std::error::Error
     let ws = Workspace::open(&std::env::current_dir()?)?;
     let store = EntityStore::open(&ws.data_path().join("entities.db"))?;
 
-    // Verify entity exists and get its content path
-    let row = store
-        .get(&args.id)?
-        .ok_or_else(|| format!("Entity not found: {}", args.id))?;
+    // Resolve and verify entity exists
+    let row = resolve::resolve_for_write(&store, &args.id)?;
 
+    let resolved_id = row.id.clone();
     let title = row.title.clone();
 
     // Delete content file if it exists
@@ -34,11 +35,11 @@ pub fn run(args: DeleteArgs, json: bool) -> Result<(), Box<dyn std::error::Error
     }
 
     // Delete from entities.db
-    store.delete(&args.id)?;
+    store.delete(&resolved_id)?;
 
     // Delete from graph
     if let Ok(graph) = GraphStore::open(&ws.graph_path().join("relations.db")) {
-        let id: EntityId = uuid::Uuid::parse_str(&args.id)
+        let id: EntityId = uuid::Uuid::parse_str(&resolved_id)
             .map(EntityId::from)
             .map_err(|e| format!("invalid ID: {}", e))?;
         let _ = graph.remove_node(&id);
@@ -46,7 +47,7 @@ pub fn run(args: DeleteArgs, json: bool) -> Result<(), Box<dyn std::error::Error
 
     // Delete from search index
     if let Ok(index) = SearchIndex::open(&ws.index_path().join("search.db")) {
-        let _ = index.remove_entity(&args.id);
+        let _ = index.remove_entity(&resolved_id);
     }
 
     // Log event
@@ -54,19 +55,19 @@ pub fn run(args: DeleteArgs, json: bool) -> Result<(), Box<dyn std::error::Error
     events.log(&Event {
         timestamp: Utc::now(),
         event_type: EventType::Deleted,
-        entity_id: args.id.clone(),
+        entity_id: resolved_id.clone(),
         details: None,
     })?;
 
     if json {
         let out = serde_json::json!({
             "status": "ok",
-            "id": args.id,
+            "id": resolved_id,
             "deleted": true,
         });
         println!("{}", serde_json::to_string_pretty(&out)?);
     } else {
-        println!("Deleted {} ({})", title, args.id);
+        println!("Deleted {} ({})", title, resolved_id);
     }
 
     Ok(())

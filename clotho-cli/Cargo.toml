@@ -1,6 +1,6 @@
 [package]
 name = "clotho-cli"
-version = "0.0.0"
+version.workspace = true
 edition = "2021"
 description = "Command-line interface for Clotho"
 license = "Apache-2.0"

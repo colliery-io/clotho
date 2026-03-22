@@ -41,15 +41,27 @@ impl Program {
 }
 
 impl Entity for Program {
-    fn id(&self) -> &EntityId { &self.id }
-    fn entity_type(&self) -> EntityType { EntityType::Program }
-    fn title(&self) -> &str { &self.title }
-    fn created_at(&self) -> DateTime<Utc> { self.created_at }
-    fn updated_at(&self) -> DateTime<Utc> { self.updated_at }
+    fn id(&self) -> &EntityId {
+        &self.id
+    }
+    fn entity_type(&self) -> EntityType {
+        EntityType::Program
+    }
+    fn title(&self) -> &str {
+        &self.title
+    }
+    fn created_at(&self) -> DateTime<Utc> {
+        self.created_at
+    }
+    fn updated_at(&self) -> DateTime<Utc> {
+        self.updated_at
+    }
 }
 
 impl Activatable for Program {
-    fn status(&self) -> Status { self.status }
+    fn status(&self) -> Status {
+        self.status
+    }
     fn set_status(&mut self, status: Status) {
         self.status = status;
         self.updated_at = Utc::now();
@@ -58,13 +70,22 @@ impl Activatable for Program {
 
 impl Relatable for Program {
     fn relations(&self, graph: &GraphStore) -> Vec<Relation> {
-        graph.get_edges_from(self.id()).unwrap_or_default().into_iter().map(Relation::from).collect()
+        graph
+            .get_edges_from(self.id())
+            .unwrap_or_default()
+            .into_iter()
+            .map(Relation::from)
+            .collect()
     }
-    fn graph_label(&self) -> &'static str { "Program" }
+    fn graph_label(&self) -> &'static str {
+        "Program"
+    }
 }
 
 impl Taggable for Program {
-    fn tags(&self) -> &[Tag] { &self.tags }
+    fn tags(&self) -> &[Tag] {
+        &self.tags
+    }
     fn add_tag(&mut self, tag: Tag) {
         if !self.tags.contains(&tag) {
             self.tags.push(tag);
@@ -81,7 +102,9 @@ impl Taggable for Program {
 }
 
 impl ContentBearing for Program {
-    fn content(&self) -> &str { &self.content }
+    fn content(&self) -> &str {
+        &self.content
+    }
     fn set_content(&mut self, content: String) {
         self.content = content;
         self.updated_at = Utc::now();
@@ -92,7 +115,9 @@ impl ContentBearing for Program {
 }
 
 impl HasCadence for Program {
-    fn cadence(&self) -> Option<&Cadence> { self.cadence.as_ref() }
+    fn cadence(&self) -> Option<&Cadence> {
+        self.cadence.as_ref()
+    }
     fn set_cadence(&mut self, cadence: Option<Cadence>) {
         self.cadence = cadence;
         self.updated_at = Utc::now();
@@ -135,15 +160,27 @@ impl Responsibility {
 }
 
 impl Entity for Responsibility {
-    fn id(&self) -> &EntityId { &self.id }
-    fn entity_type(&self) -> EntityType { EntityType::Responsibility }
-    fn title(&self) -> &str { &self.title }
-    fn created_at(&self) -> DateTime<Utc> { self.created_at }
-    fn updated_at(&self) -> DateTime<Utc> { self.updated_at }
+    fn id(&self) -> &EntityId {
+        &self.id
+    }
+    fn entity_type(&self) -> EntityType {
+        EntityType::Responsibility
+    }
+    fn title(&self) -> &str {
+        &self.title
+    }
+    fn created_at(&self) -> DateTime<Utc> {
+        self.created_at
+    }
+    fn updated_at(&self) -> DateTime<Utc> {
+        self.updated_at
+    }
 }
 
 impl Activatable for Responsibility {
-    fn status(&self) -> Status { self.status }
+    fn status(&self) -> Status {
+        self.status
+    }
     fn set_status(&mut self, status: Status) {
         self.status = status;
         self.updated_at = Utc::now();
@@ -152,13 +189,22 @@ impl Activatable for Responsibility {
 
 impl Relatable for Responsibility {
     fn relations(&self, graph: &GraphStore) -> Vec<Relation> {
-        graph.get_edges_from(self.id()).unwrap_or_default().into_iter().map(Relation::from).collect()
+        graph
+            .get_edges_from(self.id())
+            .unwrap_or_default()
+            .into_iter()
+            .map(Relation::from)
+            .collect()
     }
-    fn graph_label(&self) -> &'static str { "Responsibility" }
+    fn graph_label(&self) -> &'static str {
+        "Responsibility"
+    }
 }
 
 impl Taggable for Responsibility {
-    fn tags(&self) -> &[Tag] { &self.tags }
+    fn tags(&self) -> &[Tag] {
+        &self.tags
+    }
     fn add_tag(&mut self, tag: Tag) {
         if !self.tags.contains(&tag) {
             self.tags.push(tag);
@@ -175,7 +221,9 @@ impl Taggable for Responsibility {
 }
 
 impl ContentBearing for Responsibility {
-    fn content(&self) -> &str { &self.content }
+    fn content(&self) -> &str {
+        &self.content
+    }
     fn set_content(&mut self, content: String) {
         self.content = content;
         self.updated_at = Utc::now();
@@ -186,7 +234,9 @@ impl ContentBearing for Responsibility {
 }
 
 impl HasCadence for Responsibility {
-    fn cadence(&self) -> Option<&Cadence> { self.cadence.as_ref() }
+    fn cadence(&self) -> Option<&Cadence> {
+        self.cadence.as_ref()
+    }
     fn set_cadence(&mut self, cadence: Option<Cadence>) {
         self.cadence = cadence;
         self.updated_at = Utc::now();
@@ -232,15 +282,27 @@ impl Objective {
 }
 
 impl Entity for Objective {
-    fn id(&self) -> &EntityId { &self.id }
-    fn entity_type(&self) -> EntityType { EntityType::Objective }
-    fn title(&self) -> &str { &self.title }
-    fn created_at(&self) -> DateTime<Utc> { self.created_at }
-    fn updated_at(&self) -> DateTime<Utc> { self.updated_at }
+    fn id(&self) -> &EntityId {
+        &self.id
+    }
+    fn entity_type(&self) -> EntityType {
+        EntityType::Objective
+    }
+    fn title(&self) -> &str {
+        &self.title
+    }
+    fn created_at(&self) -> DateTime<Utc> {
+        self.created_at
+    }
+    fn updated_at(&self) -> DateTime<Utc> {
+        self.updated_at
+    }
 }
 
 impl Activatable for Objective {
-    fn status(&self) -> Status { self.status }
+    fn status(&self) -> Status {
+        self.status
+    }
     fn set_status(&mut self, status: Status) {
         self.status = status;
         self.updated_at = Utc::now();
@@ -249,13 +311,22 @@ impl Activatable for Objective {
 
 impl Relatable for Objective {
     fn relations(&self, graph: &GraphStore) -> Vec<Relation> {
-        graph.get_edges_from(self.id()).unwrap_or_default().into_iter().map(Relation::from).collect()
+        graph
+            .get_edges_from(self.id())
+            .unwrap_or_default()
+            .into_iter()
+            .map(Relation::from)
+            .collect()
     }
-    fn graph_label(&self) -> &'static str { "Objective" }
+    fn graph_label(&self) -> &'static str {
+        "Objective"
+    }
 }
 
 impl Taggable for Objective {
-    fn tags(&self) -> &[Tag] { &self.tags }
+    fn tags(&self) -> &[Tag] {
+        &self.tags
+    }
     fn add_tag(&mut self, tag: Tag) {
         if !self.tags.contains(&tag) {
             self.tags.push(tag);
@@ -272,7 +343,9 @@ impl Taggable for Objective {
 }
 
 impl ContentBearing for Objective {
-    fn content(&self) -> &str { &self.content }
+    fn content(&self) -> &str {
+        &self.content
+    }
     fn set_content(&mut self, content: String) {
         self.content = content;
         self.updated_at = Utc::now();
@@ -283,7 +356,9 @@ impl ContentBearing for Objective {
 }
 
 impl HasDeadline for Objective {
-    fn deadline(&self) -> Option<DateTime<Utc>> { self.deadline }
+    fn deadline(&self) -> Option<DateTime<Utc>> {
+        self.deadline
+    }
     fn set_deadline(&mut self, deadline: Option<DateTime<Utc>>) {
         self.deadline = deadline;
         self.updated_at = Utc::now();

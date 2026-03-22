@@ -42,15 +42,13 @@ pub fn run(args: SyncArgs, json: bool) -> Result<(), Box<dyn std::error::Error>>
             "files_changed": result.files_changed,
         });
         println!("{}", serde_json::to_string_pretty(&out)?);
-    } else {
-        if result.committed {
-            println!("Synced: {} files committed", result.files_changed);
-            if result.pushed {
-                println!("  Pushed to remote");
-            }
-        } else {
-            println!("No changes to sync.");
+    } else if result.committed {
+        println!("Synced: {} files committed", result.files_changed);
+        if result.pushed {
+            println!("  Pushed to remote");
         }
+    } else {
+        println!("No changes to sync.");
     }
 
     Ok(())

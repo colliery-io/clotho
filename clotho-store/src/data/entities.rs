@@ -5,6 +5,19 @@ use serde::{Deserialize, Serialize};
 
 use crate::error::StoreError;
 
+/// Result of resolving a potentially-partial entity ID.
+#[derive(Debug)]
+pub enum ResolveResult {
+    /// Full UUID matched exactly.
+    Exact(EntityRow),
+    /// Prefix matched exactly one entity.
+    Unique(EntityRow),
+    /// Prefix matched multiple entities — caller must handle.
+    Ambiguous(Vec<EntityRow>),
+    /// Nothing matched.
+    NotFound,
+}
+
 const SCHEMA: &str = r#"
 CREATE TABLE IF NOT EXISTS entities (
     id TEXT PRIMARY KEY,
@@ -131,7 +144,7 @@ impl EntityStore {
             .query_row(
                 "SELECT id, entity_type, title, created_at, updated_at, status, task_state, extraction_status, source_transcript_id, source_span_start, source_span_end, confidence, content_path, metadata FROM entities WHERE id=?1",
                 params![id],
-                |row| row_to_entity_row(row),
+                row_to_entity_row,
             )
             .optional()?;
         Ok(row)
@@ -150,7 +163,7 @@ impl EntityStore {
             .conn
             .prepare("SELECT id, entity_type, title, created_at, updated_at, status, task_state, extraction_status, source_transcript_id, source_span_start, source_span_end, confidence, content_path, metadata FROM entities WHERE entity_type=?1")?;
         let rows = stmt
-            .query_map(params![entity_type], |row| row_to_entity_row(row))?
+            .query_map(params![entity_type], row_to_entity_row)?
             .collect::<Result<Vec<_>, _>>()?;
         Ok(rows)
     }
@@ -161,7 +174,7 @@ impl EntityStore {
             .conn
             .prepare("SELECT id, entity_type, title, created_at, updated_at, status, task_state, extraction_status, source_transcript_id, source_span_start, source_span_end, confidence, content_path, metadata FROM entities WHERE status=?1")?;
         let rows = stmt
-            .query_map(params![status], |row| row_to_entity_row(row))?
+            .query_map(params![status], row_to_entity_row)?
             .collect::<Result<Vec<_>, _>>()?;
         Ok(rows)
     }
@@ -172,7 +185,7 @@ impl EntityStore {
             .conn
             .prepare("SELECT id, entity_type, title, created_at, updated_at, status, task_state, extraction_status, source_transcript_id, source_span_start, source_span_end, confidence, content_path, metadata FROM entities WHERE task_state=?1")?;
         let rows = stmt
-            .query_map(params![state], |row| row_to_entity_row(row))?
+            .query_map(params![state], row_to_entity_row)?
             .collect::<Result<Vec<_>, _>>()?;
         Ok(rows)
     }
@@ -183,9 +196,37 @@ impl EntityStore {
             .conn
             .prepare("SELECT id, entity_type, title, created_at, updated_at, status, task_state, extraction_status, source_transcript_id, source_span_start, source_span_end, confidence, content_path, metadata FROM entities")?;
         let rows = stmt
-            .query_map([], |row| row_to_entity_row(row))?
+            .query_map([], row_to_entity_row)?
             .collect::<Result<Vec<_>, _>>()?;
         Ok(rows)
+    }
+
+    /// Find entities whose ID starts with the given prefix.
+    pub fn get_by_prefix(&self, prefix: &str) -> Result<Vec<EntityRow>, StoreError> {
+        let pattern = format!("{}%", prefix);
+        let mut stmt = self.conn.prepare(
+            "SELECT id, entity_type, title, created_at, updated_at, status, task_state, extraction_status, source_transcript_id, source_span_start, source_span_end, confidence, content_path, metadata FROM entities WHERE id LIKE ?1",
+        )?;
+        let rows = stmt
+            .query_map(params![pattern], row_to_entity_row)?
+            .collect::<Result<Vec<_>, _>>()?;
+        Ok(rows)
+    }
+
+    /// Resolve a full or partial entity ID. Tries exact match first, then prefix.
+    pub fn resolve_id(&self, input: &str) -> Result<ResolveResult, StoreError> {
+        // Try exact match first
+        if let Some(row) = self.get(input)? {
+            return Ok(ResolveResult::Exact(row));
+        }
+
+        // Try prefix match
+        let matches = self.get_by_prefix(input)?;
+        match matches.len() {
+            0 => Ok(ResolveResult::NotFound),
+            1 => Ok(ResolveResult::Unique(matches.into_iter().next().unwrap())),
+            _ => Ok(ResolveResult::Ambiguous(matches)),
+        }
     }
 
     /// Access the underlying connection (for federation ATTACH).

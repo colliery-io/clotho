@@ -43,9 +43,10 @@ impl CreateReflectionTool {
         let now = Utc::now();
         let id = EntityId::new();
 
-        let title = self.title.clone().unwrap_or_else(|| {
-            format!("{} {} reflection", now.format("%Y-%m-%d"), self.period)
-        });
+        let title = self
+            .title
+            .clone()
+            .unwrap_or_else(|| format!("{} {} reflection", now.format("%Y-%m-%d"), self.period));
 
         let template = format!(
             "# {}\n\n## Period\n\nType: {}\nDate: {}\n\n## Reflections\n\n\n\n## Key Takeaways\n\n\n\n## Action Items\n\n\n",
@@ -58,9 +59,15 @@ impl CreateReflectionTool {
             .map_err(|e| CallToolError::new(std::io::Error::other(e.to_string())))?;
 
         let mut metadata = serde_json::Map::new();
-        metadata.insert("period_type".to_string(), serde_json::Value::String(self.period.clone()));
+        metadata.insert(
+            "period_type".to_string(),
+            serde_json::Value::String(self.period.clone()),
+        );
         if let Some(ref prog) = self.program_id {
-            metadata.insert("program_id".to_string(), serde_json::Value::String(prog.clone()));
+            metadata.insert(
+                "program_id".to_string(),
+                serde_json::Value::String(prog.clone()),
+            );
         }
 
         let entity_store = EntityStore::open(&ws.data_path().join("entities.db"))

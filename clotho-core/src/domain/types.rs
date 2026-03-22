@@ -37,7 +37,7 @@ impl From<EntityId> for Uuid {
     }
 }
 
-/// Enum of all 15 entity types.
+/// Enum of all entity types.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub enum EntityType {
@@ -54,6 +54,7 @@ pub enum EntityType {
     Note,
     Reflection,
     Artifact,
+    Reference,
     // Derived layer
     Decision,
     Risk,
@@ -77,6 +78,7 @@ impl fmt::Display for EntityType {
             Self::Note => "Note",
             Self::Reflection => "Reflection",
             Self::Artifact => "Artifact",
+            Self::Reference => "Reference",
             Self::Decision => "Decision",
             Self::Risk => "Risk",
             Self::Blocker => "Blocker",

@@ -203,7 +203,7 @@ checksum = "c8d4a3bb8b1e0c1050499d1815f5ab16d04f0959b233085fb31653fbfc9d98f9"
 
 [[package]]
 name = "clotho-cli"
-version = "0.0.0"
+version = "0.0.1"
 dependencies = [
  "chrono",
  "clap",
@@ -218,7 +218,7 @@ dependencies = [
 
 [[package]]
 name = "clotho-core"
-version = "0.0.0"
+version = "0.0.1"
 dependencies = [
  "async-trait",
  "chrono",
@@ -231,7 +231,7 @@ dependencies = [
 
 [[package]]
 name = "clotho-mcp"
-version = "0.0.0"
+version = "0.0.1"
 dependencies = [
  "anyhow",
  "async-trait",
@@ -256,7 +256,7 @@ dependencies = [
 
 [[package]]
 name = "clotho-store"
-version = "0.0.0"
+version = "0.0.1"
 dependencies = [
  "chrono",
  "clotho-core",
@@ -272,7 +272,7 @@ dependencies = [
 
 [[package]]
 name = "clotho-sync"
-version = "0.0.0"
+version = "0.0.1"
 dependencies = [
  "chrono",
  "git2",
@@ -282,7 +282,7 @@ dependencies = [
 
 [[package]]
 name = "clotho-tests"
-version = "0.0.0"
+version = "0.0.1"
 dependencies = [
  "chrono",
  "clotho-core",

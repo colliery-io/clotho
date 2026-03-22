@@ -3,9 +3,11 @@ use clap::Args;
 use clotho_store::data::entities::EntityStore;
 use clotho_store::workspace::Workspace;
 
+use crate::resolve;
+
 #[derive(Args)]
 pub struct GetArgs {
-    /// Entity ID (UUID) to read.
+    /// Entity ID (full UUID or prefix).
     pub id: String,
 }
 
@@ -13,9 +15,7 @@ pub fn run(args: GetArgs, json: bool) -> Result<(), Box<dyn std::error::Error>> 
     let ws = Workspace::open(&std::env::current_dir()?)?;
     let store = EntityStore::open(&ws.data_path().join("entities.db"))?;
 
-    let row = store
-        .get(&args.id)?
-        .ok_or_else(|| format!("Entity not found: {}", args.id))?;
+    let row = resolve::resolve_for_read(&store, &args.id)?;
 
     if json {
         let out = serde_json::json!({

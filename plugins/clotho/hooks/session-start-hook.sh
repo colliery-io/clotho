@@ -1,10 +1,9 @@
 #!/usr/bin/env bash
 # Clotho session-start hook
-# Detects .clotho/ directory and injects workspace context
+# Queries workspace state and tells Claude what to DO, not just what exists
 
 set -euo pipefail
 
-# Find .clotho directory by walking up from cwd
 find_clotho_dir() {
     local dir="$PWD"
     while [ "$dir" != "/" ]; do
@@ -20,68 +19,76 @@ find_clotho_dir() {
 CLOTHO_DIR=$(find_clotho_dir 2>/dev/null || echo "")
 
 if [ -z "$CLOTHO_DIR" ]; then
-    # No Clotho workspace found — minimal context
-    CONTEXT="No Clotho workspace detected. Use \`clotho init\` or the \`clotho_init\` MCP tool to create one."
+    CONTEXT="No Clotho workspace detected. If the user mentions work, meetings, tasks, or wants to organize their professional life, suggest initializing a Clotho workspace with \`clotho_init\`."
 else
-    WORKSPACE_ROOT="$(dirname "$CLOTHO_DIR")"
+    DB="$CLOTHO_DIR/data/entities.db"
 
-    # Count entities if entities.db exists
-    ENTITY_COUNT=""
-    if [ -f "$CLOTHO_DIR/data/entities.db" ]; then
-        ENTITY_COUNT=$(sqlite3 "$CLOTHO_DIR/data/entities.db" "SELECT count(*) FROM entities;" 2>/dev/null || echo "0")
+    # Query workspace state
+    ENTITY_COUNT=0
+    BLOCKED_TASKS=""
+    ACTIVE_TASKS=""
+    UNPROCESSED_COUNT=0
+    RECENT=""
+
+    if [ -f "$DB" ]; then
+        ENTITY_COUNT=$(sqlite3 "$DB" "SELECT count(*) FROM entities;" 2>/dev/null || echo "0")
+        BLOCKED_TASKS=$(sqlite3 "$DB" "SELECT id, title FROM entities WHERE task_state='blocked' LIMIT 5;" 2>/dev/null || echo "")
+        ACTIVE_TASKS=$(sqlite3 "$DB" "SELECT count(*) FROM entities WHERE task_state='doing';" 2>/dev/null || echo "0")
+        TODO_TASKS=$(sqlite3 "$DB" "SELECT count(*) FROM entities WHERE task_state='todo';" 2>/dev/null || echo "0")
+
+        # Count unprocessed transcripts (no processing_log entry for 'extraction')
+        if sqlite3 "$DB" "SELECT 1 FROM sqlite_master WHERE name='processing_log' LIMIT 1;" 2>/dev/null | grep -q 1; then
+            UNPROCESSED_COUNT=$(sqlite3 "$DB" "SELECT count(*) FROM entities WHERE entity_type='Transcript' AND id NOT IN (SELECT DISTINCT entity_id FROM processing_log WHERE process_name='extraction');" 2>/dev/null || echo "0")
+        else
+            UNPROCESSED_COUNT=$(sqlite3 "$DB" "SELECT count(*) FROM entities WHERE entity_type='Transcript';" 2>/dev/null || echo "0")
+        fi
+
+        # Recent activity (last 5 updated entities)
+        RECENT=$(sqlite3 -separator '|' "$DB" "SELECT entity_type, title, substr(updated_at, 1, 10) FROM entities ORDER BY updated_at DESC LIMIT 5;" 2>/dev/null || echo "")
     fi
 
-    CONTEXT="## Clotho Workspace Detected
+    # Build actionable context
+    CONTEXT="## Clotho Workspace Active
 
-**Path**: \`$CLOTHO_DIR\`
+This is a **Clotho-managed workspace**. Clotho is the user's primary work management system. **Always use Clotho tools** when the user discusses work, meetings, tasks, decisions, people, risks, or anything related to their professional activities.
 
-**Entities**: ${ENTITY_COUNT:-0}
+### Workspace State
+- **${ENTITY_COUNT} entities** across programs, tasks, transcripts, decisions, etc.
+- **${ACTIVE_TASKS} active tasks**, **${TODO_TASKS} queued**, **${BLOCKED_TASKS:+BLOCKED items exist — surface these first}${BLOCKED_TASKS:-0 blocked}**
+- **${UNPROCESSED_COUNT} unprocessed transcripts** in the extraction queue"
 
-### Available MCP Tools
+    if [ -n "$BLOCKED_TASKS" ]; then
+        CONTEXT="${CONTEXT}
 
-**Session:**
-- \`clotho_set_workspace\` — Set workspace path (auto-detected on startup)
+### ⚠ Blocked Tasks (surface immediately)
+$(echo "$BLOCKED_TASKS" | while IFS='|' read -r id title; do echo "- ${title} (\`${id:0:8}\`)"; done)"
+    fi
 
-**Read:**
-- \`clotho_search\` — Full-text keyword search
-- \`clotho_query\` — Cypher graph queries
-- \`clotho_read_entity\` — Read entity by ID
-- \`clotho_list_entities\` — List with filters
-- \`clotho_get_relations\` — Show entity relations
-- \`clotho_get_ontology\` — Get extraction ontology
-- \`clotho_search_ontology\` — Search across all ontologies
-- \`clotho_check_processed\` — Check processing history
+    if [ "$UNPROCESSED_COUNT" -gt 0 ] 2>/dev/null; then
+        CONTEXT="${CONTEXT}
 
-**Write:**
-- \`clotho_init\` — Initialize workspace
-- \`clotho_capture\` — Capture a file
-- \`clotho_create_entity\` — Create any entity type
-- \`clotho_update_entity\` — Update entity fields
-- \`clotho_delete_entity\` — Delete entity
-- \`clotho_create_note\` — Create a note
-- \`clotho_create_reflection\` — Create a reflection
-- \`clotho_create_relation\` — Create graph edge
-- \`clotho_delete_relation\` — Remove graph edge
-- \`clotho_update_ontology\` — Update extraction ontology
-- \`clotho_mark_processed\` — Record processing done
-- \`clotho_sync\` — Git sync workspace
+### Extraction Queue
+${UNPROCESSED_COUNT} transcripts awaiting extraction. Mention this to the user — they may want to run \`/daily-debrief\` or process them."
+    fi
 
-The workspace is set automatically. Use \`clotho_set_workspace\` if needed.
+    CONTEXT="${CONTEXT}
 
-### Entity Types
+### What to Do
+1. **Start by calling \`clotho_workspace_summary\`** to get the full picture
+2. If the user mentions a meeting or transcript → offer to capture/extract it
+3. If the user discusses work outcomes → create entities (decisions, tasks, risks)
+4. If the user asks about status → query Clotho, don't guess
+5. Always link new entities to Programs via \`belongs_to\` relations
+6. Use \`clotho_batch_create_relations\` for multiple links at once
 
-**Structural** (what you do): Program, Responsibility, Objective
-**Execution** (work in motion): Workstream, Task
-**Capture** (raw material): Meeting, Transcript, Note, Reflection, Artifact
-**Derived** (sense-making): Decision, Risk, Blocker, Question, Insight
-**Cross-cutting**: Person
-
-### Relation Types
-
-belongs_to, relates_to, delivers, spawned_from, extracted_from, has_decision, has_risk, blocked_by, mentions, has_cadence, has_deadline, has_schedule"
+### Key Behavioral Rules
+- **Clotho is the source of truth** for the user's work. Don't track tasks, decisions, or risks in your own memory — put them in Clotho.
+- **Capture aggressively.** When the user mentions something actionable (a decision, a risk, a follow-up), create the entity. It's easier to delete than to miss.
+- **Link everything.** Orphan entities are useless. Every entity should connect to a program or person.
+- **Surface the extraction queue.** If there are unprocessed transcripts, mention it naturally."
 fi
 
-# Output as JSON for Claude Code hook system
+# Output as JSON
 cat <<EOF
 {
   "hookSpecificOutput": {

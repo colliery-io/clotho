@@ -112,8 +112,7 @@ impl SearchIndex {
         _content_store: &ContentStore,
     ) -> Result<usize, StoreError> {
         // Clear existing index
-        self.conn
-            .execute("DELETE FROM search_index", [])?;
+        self.conn.execute("DELETE FROM search_index", [])?;
 
         let entities = entity_store.list_all()?;
         let mut count = 0;
@@ -132,12 +131,7 @@ impl SearchIndex {
                 String::new()
             };
 
-            self.index_entity(
-                &entity.id,
-                &entity.entity_type,
-                &entity.title,
-                &content,
-            )?;
+            self.index_entity(&entity.id, &entity.entity_type, &entity.title, &content)?;
             count += 1;
         }
 

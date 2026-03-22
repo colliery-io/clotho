@@ -5,9 +5,11 @@ use clotho_store::data::entities::EntityStore;
 use clotho_store::data::jsonl::{Event, EventStore, EventType};
 use clotho_store::workspace::Workspace;
 
+use crate::resolve;
+
 #[derive(Args)]
 pub struct UpdateArgs {
-    /// Entity ID (UUID) to update.
+    /// Entity ID (full UUID or prefix).
     pub id: String,
 
     /// New title.
@@ -27,9 +29,7 @@ pub fn run(args: UpdateArgs, json: bool) -> Result<(), Box<dyn std::error::Error
     let ws = Workspace::open(&std::env::current_dir()?)?;
     let store = EntityStore::open(&ws.data_path().join("entities.db"))?;
 
-    let mut row = store
-        .get(&args.id)?
-        .ok_or_else(|| format!("Entity not found: {}", args.id))?;
+    let mut row = resolve::resolve_for_write(&store, &args.id)?;
 
     // Apply updates
     if let Some(ref title) = args.title {
@@ -47,7 +47,9 @@ pub fn run(args: UpdateArgs, json: bool) -> Result<(), Box<dyn std::error::Error
 
     // Update graph node title if changed
     if args.title.is_some() {
-        if let Ok(graph) = clotho_core::graph::GraphStore::open(&ws.graph_path().join("relations.db")) {
+        if let Ok(graph) =
+            clotho_core::graph::GraphStore::open(&ws.graph_path().join("relations.db"))
+        {
             if let Ok(et) = parse_entity_type_str(&row.entity_type) {
                 let id = uuid::Uuid::parse_str(&row.id)
                     .map(clotho_core::domain::types::EntityId::from)?;
@@ -58,7 +60,9 @@ pub fn run(args: UpdateArgs, json: bool) -> Result<(), Box<dyn std::error::Error
 
     // Update FTS5 index
     if let Ok(index) = clotho_store::index::SearchIndex::open(&ws.index_path().join("search.db")) {
-        let content = row.content_path.as_ref()
+        let content = row
+            .content_path
+            .as_ref()
             .and_then(|p| std::fs::read_to_string(p).ok())
             .unwrap_or_default();
         let _ = index.index_entity(&row.id, &row.entity_type, &row.title, &content);
@@ -100,6 +104,7 @@ fn parse_entity_type_str(s: &str) -> Result<clotho_core::domain::types::EntityTy
         "Note" => Ok(EntityType::Note),
         "Reflection" => Ok(EntityType::Reflection),
         "Artifact" => Ok(EntityType::Artifact),
+        "Reference" => Ok(EntityType::Reference),
         "Decision" => Ok(EntityType::Decision),
         "Risk" => Ok(EntityType::Risk),
         "Blocker" => Ok(EntityType::Blocker),

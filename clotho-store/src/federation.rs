@@ -50,10 +50,7 @@ impl Federation {
         // Attach relations.db if it exists
         if self.relations_db.exists() {
             conn.execute(
-                &format!(
-                    "ATTACH DATABASE '{}' AS graph",
-                    self.relations_db.display()
-                ),
+                &format!("ATTACH DATABASE '{}' AS graph", self.relations_db.display()),
                 [],
             )
             .map_err(|e| StoreError::FederationError(format!("attach relations.db: {}", e)))?;
@@ -62,10 +59,7 @@ impl Federation {
         // Attach search.db if it exists
         if self.search_db.exists() {
             conn.execute(
-                &format!(
-                    "ATTACH DATABASE '{}' AS idx",
-                    self.search_db.display()
-                ),
+                &format!("ATTACH DATABASE '{}' AS idx", self.search_db.display()),
                 [],
             )
             .map_err(|e| StoreError::FederationError(format!("attach search.db: {}", e)))?;
@@ -81,11 +75,7 @@ impl Federation {
             .prepare(sql)
             .map_err(|e| StoreError::FederationError(e.to_string()))?;
 
-        let column_names: Vec<String> = stmt
-            .column_names()
-            .iter()
-            .map(|s| s.to_string())
-            .collect();
+        let column_names: Vec<String> = stmt.column_names().iter().map(|s| s.to_string()).collect();
 
         let rows = stmt
             .query_map([], |row| {
@@ -110,14 +100,10 @@ fn sqlite_to_json(val: rusqlite::types::Value) -> Value {
     match val {
         rusqlite::types::Value::Null => Value::Null,
         rusqlite::types::Value::Integer(i) => Value::Number(i.into()),
-        rusqlite::types::Value::Real(f) => {
-            serde_json::Number::from_f64(f)
-                .map(Value::Number)
-                .unwrap_or(Value::Null)
-        }
+        rusqlite::types::Value::Real(f) => serde_json::Number::from_f64(f)
+            .map(Value::Number)
+            .unwrap_or(Value::Null),
         rusqlite::types::Value::Text(s) => Value::String(s),
-        rusqlite::types::Value::Blob(b) => {
-            Value::String(format!("<blob:{} bytes>", b.len()))
-        }
+        rusqlite::types::Value::Blob(b) => Value::String(format!("<blob:{} bytes>", b.len())),
     }
 }

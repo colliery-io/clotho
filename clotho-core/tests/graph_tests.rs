@@ -28,7 +28,8 @@ fn graph_store_in_memory_empty() {
 fn register_and_get_node() {
     let gs = setup();
     let id = EntityId::new();
-    gs.register_node(&id, EntityType::Program, "Test Program").unwrap();
+    gs.register_node(&id, EntityType::Program, "Test Program")
+        .unwrap();
 
     assert!(gs.has_node(&id).unwrap());
 
@@ -67,8 +68,10 @@ fn remove_node() {
 fn upsert_node_updates_title() {
     let gs = setup();
     let id = EntityId::new();
-    gs.register_node(&id, EntityType::Program, "Original").unwrap();
-    gs.register_node(&id, EntityType::Program, "Updated").unwrap();
+    gs.register_node(&id, EntityType::Program, "Original")
+        .unwrap();
+    gs.register_node(&id, EntityType::Program, "Updated")
+        .unwrap();
 
     let info = gs.get_node(&id).unwrap().expect("node should exist");
     assert_eq!(info.title, "Updated");
@@ -88,7 +91,8 @@ fn add_and_has_edge() {
     let src = EntityId::new();
     let tgt = EntityId::new();
     gs.register_node(&src, EntityType::Task, "Task A").unwrap();
-    gs.register_node(&tgt, EntityType::Program, "Program X").unwrap();
+    gs.register_node(&tgt, EntityType::Program, "Program X")
+        .unwrap();
 
     gs.add_edge(&src, &tgt, RelationType::BelongsTo).unwrap();
     assert!(gs.has_edge(&src, &tgt, RelationType::BelongsTo).unwrap());
@@ -100,7 +104,8 @@ fn has_edge_false_when_missing() {
     let src = EntityId::new();
     let tgt = EntityId::new();
     gs.register_node(&src, EntityType::Task, "Task A").unwrap();
-    gs.register_node(&tgt, EntityType::Program, "Program X").unwrap();
+    gs.register_node(&tgt, EntityType::Program, "Program X")
+        .unwrap();
 
     assert!(!gs.has_edge(&src, &tgt, RelationType::BelongsTo).unwrap());
 }
@@ -111,7 +116,8 @@ fn remove_edge() {
     let src = EntityId::new();
     let tgt = EntityId::new();
     gs.register_node(&src, EntityType::Task, "Task A").unwrap();
-    gs.register_node(&tgt, EntityType::Program, "Program X").unwrap();
+    gs.register_node(&tgt, EntityType::Program, "Program X")
+        .unwrap();
 
     gs.add_edge(&src, &tgt, RelationType::BelongsTo).unwrap();
     assert!(gs.has_edge(&src, &tgt, RelationType::BelongsTo).unwrap());
@@ -126,8 +132,10 @@ fn get_edges_from() {
     let src = EntityId::new();
     let tgt1 = EntityId::new();
     let tgt2 = EntityId::new();
-    gs.register_node(&src, EntityType::Transcript, "Transcript").unwrap();
-    gs.register_node(&tgt1, EntityType::Person, "Alice").unwrap();
+    gs.register_node(&src, EntityType::Transcript, "Transcript")
+        .unwrap();
+    gs.register_node(&tgt1, EntityType::Person, "Alice")
+        .unwrap();
     gs.register_node(&tgt2, EntityType::Program, "PMO").unwrap();
 
     gs.add_edge(&src, &tgt1, RelationType::Mentions).unwrap();
@@ -135,7 +143,9 @@ fn get_edges_from() {
 
     let edges = gs.get_edges_from(&src).unwrap();
     assert_eq!(edges.len(), 2);
-    assert!(edges.iter().all(|e| e.relation_type == RelationType::Mentions));
+    assert!(edges
+        .iter()
+        .all(|e| e.relation_type == RelationType::Mentions));
 }
 
 #[test]
@@ -145,8 +155,10 @@ fn get_edges_by_type_filters() {
     let tgt1 = EntityId::new();
     let tgt2 = EntityId::new();
     gs.register_node(&src, EntityType::Task, "Task").unwrap();
-    gs.register_node(&tgt1, EntityType::Program, "Program").unwrap();
-    gs.register_node(&tgt2, EntityType::Blocker, "Blocker").unwrap();
+    gs.register_node(&tgt1, EntityType::Program, "Program")
+        .unwrap();
+    gs.register_node(&tgt2, EntityType::Blocker, "Blocker")
+        .unwrap();
 
     gs.add_edge(&src, &tgt1, RelationType::BelongsTo).unwrap();
     gs.add_edge(&src, &tgt2, RelationType::BlockedBy).unwrap();
@@ -168,7 +180,8 @@ fn get_edges_to() {
     let tgt = EntityId::new();
     gs.register_node(&src1, EntityType::Task, "Task 1").unwrap();
     gs.register_node(&src2, EntityType::Task, "Task 2").unwrap();
-    gs.register_node(&tgt, EntityType::Program, "Program").unwrap();
+    gs.register_node(&tgt, EntityType::Program, "Program")
+        .unwrap();
 
     gs.add_edge(&src1, &tgt, RelationType::BelongsTo).unwrap();
     gs.add_edge(&src2, &tgt, RelationType::BelongsTo).unwrap();
@@ -187,12 +200,12 @@ fn add_edge_with_props() {
     let src = EntityId::new();
     let tgt = EntityId::new();
     gs.register_node(&src, EntityType::Task, "Task").unwrap();
-    gs.register_node(&tgt, EntityType::Task, "Deadline Node").unwrap();
+    gs.register_node(&tgt, EntityType::Task, "Deadline Node")
+        .unwrap();
 
-    let props = vec![
-        ("deadline".to_string(), "2025-06-01".to_string()),
-    ];
-    gs.add_edge_with_props(&src, &tgt, RelationType::HasDeadline, props).unwrap();
+    let props = vec![("deadline".to_string(), "2025-06-01".to_string())];
+    gs.add_edge_with_props(&src, &tgt, RelationType::HasDeadline, props)
+        .unwrap();
     assert!(gs.has_edge(&src, &tgt, RelationType::HasDeadline).unwrap());
 }
 
@@ -206,9 +219,12 @@ fn relatable_returns_real_edges() {
     let program = Program::new("Test Program");
     let task = Task::new("Test Task");
 
-    gs.register_node(program.id(), EntityType::Program, program.title()).unwrap();
-    gs.register_node(task.id(), EntityType::Task, task.title()).unwrap();
-    gs.add_edge(task.id(), program.id(), RelationType::BelongsTo).unwrap();
+    gs.register_node(program.id(), EntityType::Program, program.title())
+        .unwrap();
+    gs.register_node(task.id(), EntityType::Task, task.title())
+        .unwrap();
+    gs.add_edge(task.id(), program.id(), RelationType::BelongsTo)
+        .unwrap();
 
     let relations = task.relations(&gs);
     assert_eq!(relations.len(), 1);
@@ -220,7 +236,8 @@ fn relatable_returns_real_edges() {
 fn relatable_empty_when_no_edges() {
     let gs = setup();
     let program = Program::new("Orphan Program");
-    gs.register_node(program.id(), EntityType::Program, program.title()).unwrap();
+    gs.register_node(program.id(), EntityType::Program, program.title())
+        .unwrap();
 
     let relations = program.relations(&gs);
     assert!(relations.is_empty());
@@ -253,14 +270,20 @@ fn get_related_by_type() {
     let meeting = EntityId::new();
     let decision = EntityId::new();
     let risk = EntityId::new();
-    gs.register_node(&meeting, EntityType::Meeting, "Standup").unwrap();
-    gs.register_node(&decision, EntityType::Decision, "Go with A").unwrap();
-    gs.register_node(&risk, EntityType::Risk, "Budget risk").unwrap();
+    gs.register_node(&meeting, EntityType::Meeting, "Standup")
+        .unwrap();
+    gs.register_node(&decision, EntityType::Decision, "Go with A")
+        .unwrap();
+    gs.register_node(&risk, EntityType::Risk, "Budget risk")
+        .unwrap();
 
-    gs.add_edge(&meeting, &decision, RelationType::HasDecision).unwrap();
+    gs.add_edge(&meeting, &decision, RelationType::HasDecision)
+        .unwrap();
     gs.add_edge(&meeting, &risk, RelationType::HasRisk).unwrap();
 
-    let decisions = gs.get_related_by_type(&meeting, RelationType::HasDecision).unwrap();
+    let decisions = gs
+        .get_related_by_type(&meeting, RelationType::HasDecision)
+        .unwrap();
     assert_eq!(decisions.len(), 1);
     assert_eq!(decisions[0].entity_type, EntityType::Decision);
 }
@@ -271,23 +294,33 @@ fn get_incoming_by_type() {
     let program = EntityId::new();
     let task1 = EntityId::new();
     let task2 = EntityId::new();
-    gs.register_node(&program, EntityType::Program, "PMO").unwrap();
-    gs.register_node(&task1, EntityType::Task, "Task 1").unwrap();
-    gs.register_node(&task2, EntityType::Task, "Task 2").unwrap();
+    gs.register_node(&program, EntityType::Program, "PMO")
+        .unwrap();
+    gs.register_node(&task1, EntityType::Task, "Task 1")
+        .unwrap();
+    gs.register_node(&task2, EntityType::Task, "Task 2")
+        .unwrap();
 
-    gs.add_edge(&task1, &program, RelationType::BelongsTo).unwrap();
-    gs.add_edge(&task2, &program, RelationType::BelongsTo).unwrap();
+    gs.add_edge(&task1, &program, RelationType::BelongsTo)
+        .unwrap();
+    gs.add_edge(&task2, &program, RelationType::BelongsTo)
+        .unwrap();
 
-    let tasks = gs.get_incoming_by_type(&program, RelationType::BelongsTo).unwrap();
+    let tasks = gs
+        .get_incoming_by_type(&program, RelationType::BelongsTo)
+        .unwrap();
     assert_eq!(tasks.len(), 2);
 }
 
 #[test]
 fn get_entities_by_label() {
     let gs = setup();
-    gs.register_node(&EntityId::new(), EntityType::Task, "Task 1").unwrap();
-    gs.register_node(&EntityId::new(), EntityType::Task, "Task 2").unwrap();
-    gs.register_node(&EntityId::new(), EntityType::Program, "Program").unwrap();
+    gs.register_node(&EntityId::new(), EntityType::Task, "Task 1")
+        .unwrap();
+    gs.register_node(&EntityId::new(), EntityType::Task, "Task 2")
+        .unwrap();
+    gs.register_node(&EntityId::new(), EntityType::Program, "Program")
+        .unwrap();
 
     let tasks = gs.get_entities_by_label(EntityType::Task).unwrap();
     assert_eq!(tasks.len(), 2);
@@ -306,10 +339,12 @@ fn raw_cypher_query() {
     let id = EntityId::new();
     gs.register_node(&id, EntityType::Program, "Test").unwrap();
 
-    let result = gs.raw_cypher(&format!(
-        "MATCH (n {{id: '{}'}}) RETURN n.title AS title",
-        id
-    )).unwrap();
+    let result = gs
+        .raw_cypher(&format!(
+            "MATCH (n {{id: '{}'}}) RETURN n.title AS title",
+            id
+        ))
+        .unwrap();
 
     assert_eq!(result.len(), 1);
     let title: String = result[0].get("title").unwrap_or_default();
@@ -326,7 +361,8 @@ fn remove_node_cascades_edges() {
     let src = EntityId::new();
     let tgt = EntityId::new();
     gs.register_node(&src, EntityType::Task, "Task").unwrap();
-    gs.register_node(&tgt, EntityType::Program, "Program").unwrap();
+    gs.register_node(&tgt, EntityType::Program, "Program")
+        .unwrap();
     gs.add_edge(&src, &tgt, RelationType::BelongsTo).unwrap();
 
     assert!(gs.has_edge(&src, &tgt, RelationType::BelongsTo).unwrap());

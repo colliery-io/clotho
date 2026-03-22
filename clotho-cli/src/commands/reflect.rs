@@ -60,9 +60,15 @@ pub fn run(args: ReflectArgs, json: bool) -> Result<(), Box<dyn std::error::Erro
     // Insert entity row
     let entity_store = EntityStore::open(&ws.data_path().join("entities.db"))?;
     let mut metadata = serde_json::Map::new();
-    metadata.insert("period_type".to_string(), serde_json::Value::String(args.period.clone()));
+    metadata.insert(
+        "period_type".to_string(),
+        serde_json::Value::String(args.period.clone()),
+    );
     if let Some(ref prog) = args.program {
-        metadata.insert("program_id".to_string(), serde_json::Value::String(prog.clone()));
+        metadata.insert(
+            "program_id".to_string(),
+            serde_json::Value::String(prog.clone()),
+        );
     }
 
     let row = EntityRow {

@@ -25,8 +25,7 @@ impl GraphStore {
 
     /// Create an in-memory graph database (for tests).
     pub fn in_memory() -> Result<Self, GraphError> {
-        let graph =
-            Graph::open_in_memory().map_err(|e| GraphError::OpenFailed(e.to_string()))?;
+        let graph = Graph::open_in_memory().map_err(|e| GraphError::OpenFailed(e.to_string()))?;
         Ok(Self { inner: graph })
     }
 

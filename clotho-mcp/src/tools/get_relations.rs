@@ -1,7 +1,9 @@
 use crate::formatting::text_result;
+use crate::resolve;
 use crate::workspace_resolver;
 use clotho_core::domain::types::EntityId;
 use clotho_core::graph::GraphStore;
+use clotho_store::data::entities::EntityStore;
 use clotho_store::workspace::Workspace;
 use rust_mcp_sdk::{
     macros::{mcp_tool, JsonSchema},
@@ -12,7 +14,7 @@ use std::path::Path;
 
 #[mcp_tool(
     name = "clotho_get_relations",
-    description = "List all relations (outgoing and incoming graph edges) for an entity.",
+    description = "List all relations (outgoing and incoming graph edges) for an entity. Accepts full UUID or prefix.",
     idempotent_hint = true,
     destructive_hint = false,
     open_world_hint = false,
@@ -20,7 +22,7 @@ use std::path::Path;
 )]
 #[derive(Debug, Serialize, Deserialize, JsonSchema)]
 pub struct GetRelationsTool {
-    /// Entity ID (UUID)
+    /// Entity ID (full UUID or prefix)
     pub entity_id: String,
 }
 
@@ -30,22 +32,33 @@ impl GetRelationsTool {
             .map_err(|e| CallToolError::new(std::io::Error::other(e)))?;
         let ws = Workspace::open(Path::new(&ws_path))
             .map_err(|e| CallToolError::new(std::io::Error::other(e.to_string())))?;
+
+        let entity_store = EntityStore::open(&ws.data_path().join("entities.db"))
+            .map_err(|e| CallToolError::new(std::io::Error::other(e.to_string())))?;
         let graph = GraphStore::open(&ws.graph_path().join("relations.db"))
             .map_err(|e| CallToolError::new(std::io::Error::other(e.to_string())))?;
 
-        let id = uuid::Uuid::parse_str(&self.entity_id).map(EntityId::from)
+        let row = match resolve::resolve_for_read(&entity_store, &self.entity_id) {
+            Ok(row) => row,
+            Err(result) => return Ok(result),
+        };
+
+        let id = uuid::Uuid::parse_str(&row.id)
+            .map(EntityId::from)
             .map_err(|e| CallToolError::new(std::io::Error::other(format!("invalid ID: {}", e))))?;
 
-        let outgoing = graph.get_edges_from(&id)
+        let outgoing = graph
+            .get_edges_from(&id)
             .map_err(|e| CallToolError::new(std::io::Error::other(e.to_string())))?;
-        let incoming = graph.get_edges_to(&id)
+        let incoming = graph
+            .get_edges_to(&id)
             .map_err(|e| CallToolError::new(std::io::Error::other(e.to_string())))?;
 
         if outgoing.is_empty() && incoming.is_empty() {
-            return Ok(text_result(format!("No relations for entity `{}`", self.entity_id)));
+            return Ok(text_result(format!("No relations for entity `{}`", row.id)));
         }
 
-        let mut output = format!("## Relations for `{}`\n\n", &self.entity_id[..8]);
+        let mut output = format!("## Relations for `{}`\n\n", &row.id[..8]);
 
         if !outgoing.is_empty() {
             output.push_str("### Outgoing\n\n| Relation | Target |\n|---|---|\n");
@@ -62,7 +75,11 @@ impl GetRelationsTool {
             }
         }
 
-        output.push_str(&format!("\n{} outgoing, {} incoming", outgoing.len(), incoming.len()));
+        output.push_str(&format!(
+            "\n{} outgoing, {} incoming",
+            outgoing.len(),
+            incoming.len()
+        ));
 
         Ok(text_result(output))
     }

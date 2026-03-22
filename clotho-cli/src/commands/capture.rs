@@ -85,7 +85,12 @@ pub fn run(args: CaptureArgs, json: bool) -> Result<(), Box<dyn std::error::Erro
 
     // Index in FTS5
     let search_index = SearchIndex::open(&ws.index_path().join("search.db"))?;
-    search_index.index_entity(&id.to_string(), &format!("{}", entity_type), &title, &content)?;
+    search_index.index_entity(
+        &id.to_string(),
+        &format!("{}", entity_type),
+        &title,
+        &content,
+    )?;
 
     // Log event
     let event_store = EventStore::new(&ws.data_path());
@@ -106,7 +111,12 @@ pub fn run(args: CaptureArgs, json: bool) -> Result<(), Box<dyn std::error::Erro
         });
         println!("{}", serde_json::to_string_pretty(&out)?);
     } else {
-        println!("Captured {} as {} ({})", args.file.display(), title, entity_type);
+        println!(
+            "Captured {} as {} ({})",
+            args.file.display(),
+            title,
+            entity_type
+        );
         println!("  ID: {}", id);
         println!("  Content: {}", content_path.display());
     }

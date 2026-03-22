@@ -1,9 +1,10 @@
 use crate::tools::{
-    CaptureTool, CheckProcessedTool, ClothoTools, CreateEntityTool, CreateNoteTool,
-    CreateReflectionTool, CreateRelationTool, DeleteEntityTool, DeleteRelationTool,
-    GetOntologyTool, GetRelationsTool, InitTool, ListEntitiesTool, MarkProcessedTool,
-    QueryTool, ReadEntityTool, SearchOntologyTool, SearchTool, SetWorkspaceTool, SyncTool,
-    UpdateEntityTool, UpdateOntologyTool,
+    BatchCreateRelationsTool, CaptureDirectoryTool, CaptureTool, CheckProcessedTool, ClothoTools,
+    CreateEntityTool, CreateNoteTool, CreateReflectionTool, CreateRelationTool, DeleteEntityTool,
+    DeleteRelationTool, GetOntologyTool, GetRelationsTool, InitTool, ListEntitiesTool,
+    ListUnprocessedTool, MarkProcessedTool, QueryTool, ReadEntityTool, SearchOntologyTool,
+    SearchTool, SetWorkspaceTool, SyncTool, UpdateEntityTool, UpdateOntologyTool,
+    WorkspaceSummaryTool,
 };
 use async_trait::async_trait;
 use rust_mcp_sdk::{
@@ -17,6 +18,12 @@ use std::sync::Arc;
 use tracing::info;
 
 pub struct ClothoServerHandler;
+
+impl Default for ClothoServerHandler {
+    fn default() -> Self {
+        Self::new()
+    }
+}
 
 impl ClothoServerHandler {
     pub fn new() -> Self {
@@ -82,6 +89,21 @@ impl ServerHandler for ClothoServerHandler {
                     .map_err(rust_mcp_sdk::schema::schema_utils::CallToolError::new)?;
                 tool.call_tool().await
             }
+            "clotho_capture_directory" => {
+                let tool: CaptureDirectoryTool = serde_json::from_value(args)
+                    .map_err(rust_mcp_sdk::schema::schema_utils::CallToolError::new)?;
+                tool.call_tool().await
+            }
+            "clotho_workspace_summary" => {
+                let tool: WorkspaceSummaryTool = serde_json::from_value(args)
+                    .map_err(rust_mcp_sdk::schema::schema_utils::CallToolError::new)?;
+                tool.call_tool().await
+            }
+            "clotho_list_unprocessed" => {
+                let tool: ListUnprocessedTool = serde_json::from_value(args)
+                    .map_err(rust_mcp_sdk::schema::schema_utils::CallToolError::new)?;
+                tool.call_tool().await
+            }
             "clotho_create_note" => {
                 let tool: CreateNoteTool = serde_json::from_value(args)
                     .map_err(rust_mcp_sdk::schema::schema_utils::CallToolError::new)?;
@@ -109,6 +131,11 @@ impl ServerHandler for ClothoServerHandler {
             }
             "clotho_create_relation" => {
                 let tool: CreateRelationTool = serde_json::from_value(args)
+                    .map_err(rust_mcp_sdk::schema::schema_utils::CallToolError::new)?;
+                tool.call_tool().await
+            }
+            "clotho_batch_create_relations" => {
+                let tool: BatchCreateRelationsTool = serde_json::from_value(args)
                     .map_err(rust_mcp_sdk::schema::schema_utils::CallToolError::new)?;
                 tool.call_tool().await
             }
@@ -152,9 +179,7 @@ impl ServerHandler for ClothoServerHandler {
                     .map_err(rust_mcp_sdk::schema::schema_utils::CallToolError::new)?;
                 tool.call_tool().await
             }
-            _ => Err(
-                rust_mcp_sdk::schema::schema_utils::CallToolError::unknown_tool(params.name),
-            ),
+            _ => Err(rust_mcp_sdk::schema::schema_utils::CallToolError::unknown_tool(params.name)),
         }
     }
 }

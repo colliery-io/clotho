@@ -9,7 +9,7 @@
       "name": "clotho",
       "source": "./plugins/clotho",
       "description": "Personal work and time management through reflection, transcripts, and sense-making.",
-      "version": "0.0.0",
+      "version": "0.0.1",
       "author": {
         "name": "Colliery",
         "email": "contact@colliery.io"

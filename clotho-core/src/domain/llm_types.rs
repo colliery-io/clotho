@@ -89,7 +89,8 @@ pub enum ExtractorError {
 /// Core trait for LLM-powered extraction from transcripts.
 #[async_trait]
 pub trait Extractor: Send + Sync {
-    async fn extract(&self, request: ExtractionRequest) -> Result<ExtractionResult, ExtractorError>;
+    async fn extract(&self, request: ExtractionRequest)
+        -> Result<ExtractionResult, ExtractorError>;
 }
 
 // ---------------------------------------------------------------------------
@@ -126,10 +127,7 @@ pub enum SummarizerError {
 /// Core trait for LLM-powered summarization.
 #[async_trait]
 pub trait Summarizer: Send + Sync {
-    async fn summarize(
-        &self,
-        request: SummaryRequest,
-    ) -> Result<SummaryResult, SummarizerError>;
+    async fn summarize(&self, request: SummaryRequest) -> Result<SummaryResult, SummarizerError>;
 }
 
 // ---------------------------------------------------------------------------
@@ -174,10 +172,7 @@ pub enum ResolverError {
 /// Core trait for LLM-assisted entity resolution.
 #[async_trait]
 pub trait Resolver: Send + Sync {
-    async fn resolve(
-        &self,
-        request: ResolutionRequest,
-    ) -> Result<ResolutionResult, ResolverError>;
+    async fn resolve(&self, request: ResolutionRequest) -> Result<ResolutionResult, ResolverError>;
 }
 
 // ---------------------------------------------------------------------------

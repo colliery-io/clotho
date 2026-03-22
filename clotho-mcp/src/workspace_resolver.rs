@@ -18,9 +18,8 @@ pub fn get_workspace() -> Option<String> {
 
 /// Get the workspace path or error.
 pub fn require_workspace() -> Result<String, String> {
-    get_workspace().ok_or_else(|| {
-        "No workspace set. Use clotho_set_workspace to set one.".to_string()
-    })
+    get_workspace()
+        .ok_or_else(|| "No workspace set. Use clotho_set_workspace to set one.".to_string())
 }
 
 /// Try to detect a workspace by walking up from cwd.

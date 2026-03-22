@@ -49,11 +49,14 @@ pub fn run(args: QueryArgs, json: bool) -> Result<(), Box<dyn std::error::Error>
                 .iter()
                 .map(|col| {
                     let val: String = row.get(col).unwrap_or_default();
-                    format!("{:<20}", if val.len() > 18 {
-                        format!("{}...", &val[..15])
-                    } else {
-                        val
-                    })
+                    format!(
+                        "{:<20}",
+                        if val.len() > 18 {
+                            format!("{}...", &val[..15])
+                        } else {
+                            val
+                        }
+                    )
                 })
                 .collect();
             println!("{}", vals.join(" "));

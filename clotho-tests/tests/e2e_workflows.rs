@@ -71,20 +71,29 @@ impl TestWorkspace {
 
         let (status, state, extraction) = defaults(et);
 
-        self.entities().insert(&EntityRow {
-            id: id.to_string(),
-            entity_type: entity_type.to_string(),
-            title: title.to_string(),
-            created_at: now.to_rfc3339(),
-            updated_at: now.to_rfc3339(),
-            status, task_state: state, extraction_status: extraction,
-            source_transcript_id: None, source_span_start: None,
-            source_span_end: None, confidence: None,
-            content_path: None, metadata: None,
-        }).unwrap();
+        self.entities()
+            .insert(&EntityRow {
+                id: id.to_string(),
+                entity_type: entity_type.to_string(),
+                title: title.to_string(),
+                created_at: now.to_rfc3339(),
+                updated_at: now.to_rfc3339(),
+                status,
+                task_state: state,
+                extraction_status: extraction,
+                source_transcript_id: None,
+                source_span_start: None,
+                source_span_end: None,
+                confidence: None,
+                content_path: None,
+                metadata: None,
+            })
+            .unwrap();
 
         self.graph().register_node(&id, et, title).unwrap();
-        self.search().index_entity(&id.to_string(), entity_type, title, "").unwrap();
+        self.search()
+            .index_entity(&id.to_string(), entity_type, title, "")
+            .unwrap();
 
         id.to_string()
     }
@@ -97,21 +106,29 @@ impl TestWorkspace {
         let (status, state, extraction) = defaults(et);
 
         let content_path = self.content().write_content(et, &id, content).unwrap();
-        self.entities().insert(&EntityRow {
-            id: id.to_string(),
-            entity_type: entity_type.to_string(),
-            title: title.to_string(),
-            created_at: now.to_rfc3339(),
-            updated_at: now.to_rfc3339(),
-            status, task_state: state, extraction_status: extraction,
-            source_transcript_id: None, source_span_start: None,
-            source_span_end: None, confidence: None,
-            content_path: Some(content_path.display().to_string()),
-            metadata: None,
-        }).unwrap();
+        self.entities()
+            .insert(&EntityRow {
+                id: id.to_string(),
+                entity_type: entity_type.to_string(),
+                title: title.to_string(),
+                created_at: now.to_rfc3339(),
+                updated_at: now.to_rfc3339(),
+                status,
+                task_state: state,
+                extraction_status: extraction,
+                source_transcript_id: None,
+                source_span_start: None,
+                source_span_end: None,
+                confidence: None,
+                content_path: Some(content_path.display().to_string()),
+                metadata: None,
+            })
+            .unwrap();
 
         self.graph().register_node(&id, et, title).unwrap();
-        self.search().index_entity(&id.to_string(), entity_type, title, content).unwrap();
+        self.search()
+            .index_entity(&id.to_string(), entity_type, title, content)
+            .unwrap();
 
         id.to_string()
     }
@@ -135,6 +152,7 @@ fn parse_entity_type(s: &str) -> EntityType {
         "Note" => EntityType::Note,
         "Reflection" => EntityType::Reflection,
         "Artifact" => EntityType::Artifact,
+        "Reference" => EntityType::Reference,
         "Decision" => EntityType::Decision,
         "Risk" => EntityType::Risk,
         "Blocker" => EntityType::Blocker,
@@ -147,11 +165,16 @@ fn parse_entity_type(s: &str) -> EntityType {
 
 fn defaults(et: EntityType) -> (Option<String>, Option<String>, Option<String>) {
     match et {
-        EntityType::Program | EntityType::Responsibility | EntityType::Objective | EntityType::Workstream
-            => (Some("active".into()), None, None),
+        EntityType::Program
+        | EntityType::Responsibility
+        | EntityType::Objective
+        | EntityType::Workstream => (Some("active".into()), None, None),
         EntityType::Task => (None, Some("todo".into()), None),
-        EntityType::Decision | EntityType::Risk | EntityType::Blocker | EntityType::Question | EntityType::Insight
-            => (None, None, Some("draft".into())),
+        EntityType::Decision
+        | EntityType::Risk
+        | EntityType::Blocker
+        | EntityType::Question
+        | EntityType::Insight => (None, None, Some("draft".into())),
         _ => (None, None, None),
     }
 }
@@ -192,7 +215,10 @@ fn scenario_work_management_lifecycle() {
 
     // Verify structural relationships
     let prog_eid: EntityId = uuid::Uuid::parse_str(&prog_id).unwrap().into();
-    let incoming = tw.graph().get_incoming_by_type(&prog_eid, RelationType::BelongsTo).unwrap();
+    let incoming = tw
+        .graph()
+        .get_incoming_by_type(&prog_eid, RelationType::BelongsTo)
+        .unwrap();
     assert_eq!(incoming.len(), 4); // obj + 3 tasks
 
     // Verify tags
@@ -217,7 +243,10 @@ fn scenario_work_management_lifecycle() {
     assert_eq!(all_tasks.len(), 3);
 
     // Graph query: what belongs to the program?
-    let neighbors = tw.graph().get_incoming_by_type(&prog_eid, RelationType::BelongsTo).unwrap();
+    let neighbors = tw
+        .graph()
+        .get_incoming_by_type(&prog_eid, RelationType::BelongsTo)
+        .unwrap();
     assert_eq!(neighbors.len(), 4);
 
     // Search
@@ -272,10 +301,10 @@ fn scenario_content_capture_and_search() {
 
     // Search across all content
     let strangler = tw.search().search("strangler").unwrap();
-    assert!(strangler.len() >= 1); // Should find in transcript and/or notes
+    assert!(!strangler.is_empty()); // Should find in transcript and/or notes
 
     let database = tw.search().search("database").unwrap();
-    assert!(database.len() >= 1);
+    assert!(!database.is_empty());
 
     let canary = tw.search().search("canary").unwrap();
     assert_eq!(canary.len(), 1);
@@ -286,18 +315,28 @@ fn scenario_content_capture_and_search() {
 
     // Verify transcript → meeting relation
     let t_eid: EntityId = uuid::Uuid::parse_str(&transcript_id).unwrap().into();
-    let spawned = tw.graph().get_edges_by_type(&t_eid, RelationType::SpawnedFrom).unwrap();
+    let spawned = tw
+        .graph()
+        .get_edges_by_type(&t_eid, RelationType::SpawnedFrom)
+        .unwrap();
     assert_eq!(spawned.len(), 1);
 
     // Verify mentions
-    let mentions = tw.graph().get_edges_by_type(&t_eid, RelationType::Mentions).unwrap();
+    let mentions = tw
+        .graph()
+        .get_edges_by_type(&t_eid, RelationType::Mentions)
+        .unwrap();
     assert_eq!(mentions.len(), 2);
 
     // Verify content is readable
-    let content = tw.content().read_content(
-        EntityType::Transcript,
-        &uuid::Uuid::parse_str(&transcript_id).unwrap().into(),
-    ).unwrap().unwrap();
+    let content = tw
+        .content()
+        .read_content(
+            EntityType::Transcript,
+            &uuid::Uuid::parse_str(&transcript_id).unwrap().into(),
+        )
+        .unwrap()
+        .unwrap();
     assert!(content.contains("strangler fig"));
 }
 
@@ -323,49 +362,55 @@ fn scenario_extraction_lifecycle() {
     let now = Utc::now().to_rfc3339();
 
     let decision_id = EntityId::new().to_string();
-    extraction_store.insert_draft(&ExtractionRow {
-        id: decision_id.clone(),
-        entity_type: "Decision".to_string(),
-        title: "Going with option B for API design".to_string(),
-        speech_act: Some("decide".to_string()),
-        extraction_status: "draft".to_string(),
-        source_transcript_id: Some(transcript_id.clone()),
-        source_span_start: Some(0),
-        source_span_end: Some(52),
-        confidence: Some(0.92),
-        created_at: now.clone(),
-        metadata: None,
-    }).unwrap();
+    extraction_store
+        .insert_draft(&ExtractionRow {
+            id: decision_id.clone(),
+            entity_type: "Decision".to_string(),
+            title: "Going with option B for API design".to_string(),
+            speech_act: Some("decide".to_string()),
+            extraction_status: "draft".to_string(),
+            source_transcript_id: Some(transcript_id.clone()),
+            source_span_start: Some(0),
+            source_span_end: Some(52),
+            confidence: Some(0.92),
+            created_at: now.clone(),
+            metadata: None,
+        })
+        .unwrap();
 
     let risk_id = EntityId::new().to_string();
-    extraction_store.insert_draft(&ExtractionRow {
-        id: risk_id.clone(),
-        entity_type: "Risk".to_string(),
-        title: "Rate limiting at scale".to_string(),
-        speech_act: Some("risk".to_string()),
-        extraction_status: "draft".to_string(),
-        source_transcript_id: Some(transcript_id.clone()),
-        source_span_start: Some(53),
-        source_span_end: Some(100),
-        confidence: Some(0.85),
-        created_at: now.clone(),
-        metadata: None,
-    }).unwrap();
+    extraction_store
+        .insert_draft(&ExtractionRow {
+            id: risk_id.clone(),
+            entity_type: "Risk".to_string(),
+            title: "Rate limiting at scale".to_string(),
+            speech_act: Some("risk".to_string()),
+            extraction_status: "draft".to_string(),
+            source_transcript_id: Some(transcript_id.clone()),
+            source_span_start: Some(53),
+            source_span_end: Some(100),
+            confidence: Some(0.85),
+            created_at: now.clone(),
+            metadata: None,
+        })
+        .unwrap();
 
     let task_id = EntityId::new().to_string();
-    extraction_store.insert_draft(&ExtractionRow {
-        id: task_id.clone(),
-        entity_type: "Task".to_string(),
-        title: "Auth service refactor".to_string(),
-        speech_act: Some("commit".to_string()),
-        extraction_status: "draft".to_string(),
-        source_transcript_id: Some(transcript_id.clone()),
-        source_span_start: Some(101),
-        source_span_end: Some(150),
-        confidence: Some(0.88),
-        created_at: now.clone(),
-        metadata: None,
-    }).unwrap();
+    extraction_store
+        .insert_draft(&ExtractionRow {
+            id: task_id.clone(),
+            entity_type: "Task".to_string(),
+            title: "Auth service refactor".to_string(),
+            speech_act: Some("commit".to_string()),
+            extraction_status: "draft".to_string(),
+            source_transcript_id: Some(transcript_id.clone()),
+            source_span_start: Some(101),
+            source_span_end: Some(150),
+            confidence: Some(0.88),
+            created_at: now.clone(),
+            metadata: None,
+        })
+        .unwrap();
 
     // Verify all are pending
     let pending = extraction_store.list_pending().unwrap();
@@ -379,28 +424,34 @@ fn scenario_extraction_lifecycle() {
 
     // Move promoted to entities.db
     let entity_store = tw.entities();
-    entity_store.insert(&EntityRow {
-        id: promoted.id.clone(),
-        entity_type: promoted.entity_type,
-        title: promoted.title.clone(),
-        created_at: promoted.created_at,
-        updated_at: Utc::now().to_rfc3339(),
-        status: None,
-        task_state: None,
-        extraction_status: Some("promoted".to_string()),
-        source_transcript_id: promoted.source_transcript_id,
-        source_span_start: promoted.source_span_start,
-        source_span_end: promoted.source_span_end,
-        confidence: promoted.confidence,
-        content_path: None,
-        metadata: None,
-    }).unwrap();
+    entity_store
+        .insert(&EntityRow {
+            id: promoted.id.clone(),
+            entity_type: promoted.entity_type,
+            title: promoted.title.clone(),
+            created_at: promoted.created_at,
+            updated_at: Utc::now().to_rfc3339(),
+            status: None,
+            task_state: None,
+            extraction_status: Some("promoted".to_string()),
+            source_transcript_id: promoted.source_transcript_id,
+            source_span_start: promoted.source_span_start,
+            source_span_end: promoted.source_span_end,
+            confidence: promoted.confidence,
+            content_path: None,
+            metadata: None,
+        })
+        .unwrap();
 
     // Register in graph with EXTRACTED_FROM relation
     let dec_eid: EntityId = uuid::Uuid::parse_str(&decision_id).unwrap().into();
     let trans_eid: EntityId = uuid::Uuid::parse_str(&transcript_id).unwrap().into();
-    tw.graph().register_node(&dec_eid, EntityType::Decision, &promoted.title).unwrap();
-    tw.graph().add_edge(&dec_eid, &trans_eid, RelationType::ExtractedFrom).unwrap();
+    tw.graph()
+        .register_node(&dec_eid, EntityType::Decision, &promoted.title)
+        .unwrap();
+    tw.graph()
+        .add_edge(&dec_eid, &trans_eid, RelationType::ExtractedFrom)
+        .unwrap();
 
     // Discard the low-value extraction
     extraction_store.discard(&risk_id).unwrap();
@@ -415,7 +466,10 @@ fn scenario_extraction_lifecycle() {
     assert_eq!(decisions.len(), 1);
 
     // Verify graph relation
-    let extracted = tw.graph().get_edges_by_type(&dec_eid, RelationType::ExtractedFrom).unwrap();
+    let extracted = tw
+        .graph()
+        .get_edges_by_type(&dec_eid, RelationType::ExtractedFrom)
+        .unwrap();
     assert_eq!(extracted.len(), 1);
 }
 
@@ -457,7 +511,7 @@ fn scenario_reflection_workflow() {
 
     // Search for reflection content
     let results = tw.search().search("workshop").unwrap();
-    assert!(results.len() >= 1);
+    assert!(!results.is_empty());
 
     let alignment = tw.search().search("alignment").unwrap();
     assert_eq!(alignment.len(), 1);
@@ -465,7 +519,10 @@ fn scenario_reflection_workflow() {
 
     // Verify reflection relates to both programs
     let ref_eid: EntityId = uuid::Uuid::parse_str(&reflection_id).unwrap().into();
-    let relates = tw.graph().get_edges_by_type(&ref_eid, RelationType::RelatesTo).unwrap();
+    let relates = tw
+        .graph()
+        .get_edges_by_type(&ref_eid, RelationType::RelatesTo)
+        .unwrap();
     assert_eq!(relates.len(), 2);
 
     // Query: what's connected to Technical Education?
@@ -504,7 +561,11 @@ fn scenario_git_sync_lifecycle() {
     // Modify content
     let store = tw.entities();
     let all = store.list_all().unwrap();
-    let mut prog = all.iter().find(|r| r.entity_type == "Program").unwrap().clone();
+    let mut prog = all
+        .iter()
+        .find(|r| r.entity_type == "Program")
+        .unwrap()
+        .clone();
     prog.title = "Updated Program".to_string();
     store.update(&prog).unwrap();
 
@@ -522,7 +583,8 @@ fn scenario_git_sync_lifecycle() {
         fs::write(
             tw.ws.project_root().join(format!("notes/note-{}.md", i)),
             format!("# Note {}", i),
-        ).unwrap();
+        )
+        .unwrap();
         engine.sync().unwrap();
     }
     assert_eq!(engine.commit_count().unwrap(), 8);
@@ -572,28 +634,43 @@ fn scenario_graph_traversal() {
 
     // Query: what belongs to the program?
     let prog_eid: EntityId = uuid::Uuid::parse_str(&prog).unwrap().into();
-    let belongs = tw.graph().get_incoming_by_type(&prog_eid, RelationType::BelongsTo).unwrap();
+    let belongs = tw
+        .graph()
+        .get_incoming_by_type(&prog_eid, RelationType::BelongsTo)
+        .unwrap();
     assert_eq!(belongs.len(), 5); // 2 objectives + 3 tasks
 
     // Query: what's blocking task2?
     let task2_eid: EntityId = uuid::Uuid::parse_str(&task2).unwrap().into();
-    let blockers = tw.graph().get_related_by_type(&task2_eid, RelationType::BlockedBy).unwrap();
+    let blockers = tw
+        .graph()
+        .get_related_by_type(&task2_eid, RelationType::BlockedBy)
+        .unwrap();
     assert_eq!(blockers.len(), 1);
     assert_eq!(blockers[0].title, "Shared database coupling");
 
     // Query: what artifacts deliver against objectives?
     let obj1_eid: EntityId = uuid::Uuid::parse_str(&obj1).unwrap().into();
-    let deliverables = tw.graph().get_incoming_by_type(&obj1_eid, RelationType::Delivers).unwrap();
+    let deliverables = tw
+        .graph()
+        .get_incoming_by_type(&obj1_eid, RelationType::Delivers)
+        .unwrap();
     assert_eq!(deliverables.len(), 1);
     assert_eq!(deliverables[0].title, "User service RFC");
 
     // Query: what decisions came from the meeting?
     let meeting_eid: EntityId = uuid::Uuid::parse_str(&meeting).unwrap().into();
-    let decisions = tw.graph().get_related_by_type(&meeting_eid, RelationType::HasDecision).unwrap();
+    let decisions = tw
+        .graph()
+        .get_related_by_type(&meeting_eid, RelationType::HasDecision)
+        .unwrap();
     assert_eq!(decisions.len(), 1);
 
     // Raw Cypher: count all entities
-    let result = tw.graph().raw_cypher("MATCH (n) RETURN count(n) AS total").unwrap();
+    let result = tw
+        .graph()
+        .raw_cypher("MATCH (n) RETURN count(n) AS total")
+        .unwrap();
     let total: i64 = result[0].get("total").unwrap_or(0);
     assert_eq!(total, 11); // prog + 2 obj + 3 task + blocker + alice + meeting + decision + artifact
 
@@ -616,34 +693,42 @@ fn scenario_event_log_integrity() {
 
     // Log various events
     let id1 = tw.insert_entity("Program", "P1");
-    events.log(&Event {
-        timestamp: Utc::now(),
-        event_type: EventType::Created,
-        entity_id: id1.clone(),
-        details: Some(serde_json::json!({"entity_type": "Program"})),
-    }).unwrap();
+    events
+        .log(&Event {
+            timestamp: Utc::now(),
+            event_type: EventType::Created,
+            entity_id: id1.clone(),
+            details: Some(serde_json::json!({"entity_type": "Program"})),
+        })
+        .unwrap();
 
-    events.log(&Event {
-        timestamp: Utc::now(),
-        event_type: EventType::Updated,
-        entity_id: id1.clone(),
-        details: None,
-    }).unwrap();
+    events
+        .log(&Event {
+            timestamp: Utc::now(),
+            event_type: EventType::Updated,
+            entity_id: id1.clone(),
+            details: None,
+        })
+        .unwrap();
 
     let id2 = tw.insert_entity("Task", "T1");
-    events.log(&Event {
-        timestamp: Utc::now(),
-        event_type: EventType::Created,
-        entity_id: id2.clone(),
-        details: None,
-    }).unwrap();
+    events
+        .log(&Event {
+            timestamp: Utc::now(),
+            event_type: EventType::Created,
+            entity_id: id2.clone(),
+            details: None,
+        })
+        .unwrap();
 
-    events.log(&Event {
-        timestamp: Utc::now(),
-        event_type: EventType::Transitioned,
-        entity_id: id2.clone(),
-        details: Some(serde_json::json!({"from": "todo", "to": "doing"})),
-    }).unwrap();
+    events
+        .log(&Event {
+            timestamp: Utc::now(),
+            event_type: EventType::Transitioned,
+            entity_id: id2.clone(),
+            details: Some(serde_json::json!({"from": "todo", "to": "doing"})),
+        })
+        .unwrap();
 
     // Read all events
     let all = events.read_all().unwrap();
@@ -655,6 +740,6 @@ fn scenario_event_log_integrity() {
 
     // Events are chronological
     for i in 1..all.len() {
-        assert!(all[i].timestamp >= all[i-1].timestamp);
+        assert!(all[i].timestamp >= all[i - 1].timestamp);
     }
 }

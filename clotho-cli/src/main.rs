@@ -1,4 +1,5 @@
 mod commands;
+pub mod resolve;
 
 use clap::Parser;
 

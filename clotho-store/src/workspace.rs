@@ -65,19 +65,14 @@ const VISIBLE_DIRS: &[&str] = &[
     "meetings",
     "reflections",
     "artifacts",
+    "references",
     "notes",
     "people",
     "derived",
 ];
 
 /// Machine-managed directories created inside .clotho/.
-const HIDDEN_DIRS: &[&str] = &[
-    "data",
-    "graph",
-    "index",
-    "inbox",
-    "config",
-];
+const HIDDEN_DIRS: &[&str] = &["data", "graph", "index", "inbox", "config"];
 
 /// A Clotho workspace.
 ///

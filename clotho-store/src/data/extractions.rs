@@ -123,7 +123,7 @@ impl ExtractionStore {
             .query_row(
                 "SELECT id, entity_type, title, speech_act, extraction_status, source_transcript_id, source_span_start, source_span_end, confidence, created_at, metadata FROM extractions WHERE id=?1",
                 params![id],
-                |row| row_to_extraction_row(row),
+                row_to_extraction_row,
             )
             .optional()?;
         Ok(row)
@@ -135,7 +135,7 @@ impl ExtractionStore {
             "SELECT id, entity_type, title, speech_act, extraction_status, source_transcript_id, source_span_start, source_span_end, confidence, created_at, metadata FROM extractions WHERE extraction_status='draft' ORDER BY confidence DESC",
         )?;
         let rows = stmt
-            .query_map([], |row| row_to_extraction_row(row))?
+            .query_map([], row_to_extraction_row)?
             .collect::<Result<Vec<_>, _>>()?;
         Ok(rows)
     }
@@ -146,7 +146,7 @@ impl ExtractionStore {
             "SELECT id, entity_type, title, speech_act, extraction_status, source_transcript_id, source_span_start, source_span_end, confidence, created_at, metadata FROM extractions WHERE extraction_status='draft' AND confidence >= ?1 ORDER BY confidence DESC",
         )?;
         let rows = stmt
-            .query_map(params![min], |row| row_to_extraction_row(row))?
+            .query_map(params![min], row_to_extraction_row)?
             .collect::<Result<Vec<_>, _>>()?;
         Ok(rows)
     }

@@ -102,7 +102,11 @@ pub fn run(args: CreateArgs, json: bool) -> Result<(), Box<dyn std::error::Error
             .map(EntityId::from)
             .map_err(|e| format!("invalid parent ID: {}", e))?;
         graph
-            .add_edge(&id, &parent_id, clotho_core::domain::traits::RelationType::BelongsTo)
+            .add_edge(
+                &id,
+                &parent_id,
+                clotho_core::domain::traits::RelationType::BelongsTo,
+            )
             .map_err(|e| format!("graph error: {}", e))?;
     }
 
@@ -154,6 +158,7 @@ fn parse_entity_type(s: &str) -> Result<EntityType, Box<dyn std::error::Error>> 
         "note" => Ok(EntityType::Note),
         "reflection" => Ok(EntityType::Reflection),
         "artifact" => Ok(EntityType::Artifact),
+        "reference" => Ok(EntityType::Reference),
         "decision" => Ok(EntityType::Decision),
         "risk" => Ok(EntityType::Risk),
         "blocker" => Ok(EntityType::Blocker),
@@ -204,12 +209,18 @@ fn build_metadata(et: EntityType, args: &CreateArgs) -> Option<String> {
 
     if et == EntityType::Person {
         if let Some(ref email) = args.email {
-            meta.insert("email".to_string(), serde_json::Value::String(email.clone()));
+            meta.insert(
+                "email".to_string(),
+                serde_json::Value::String(email.clone()),
+            );
         }
     }
 
     if let Some(ref parent) = args.parent {
-        meta.insert("parent_id".to_string(), serde_json::Value::String(parent.clone()));
+        meta.insert(
+            "parent_id".to_string(),
+            serde_json::Value::String(parent.clone()),
+        );
     }
 
     if meta.is_empty() {

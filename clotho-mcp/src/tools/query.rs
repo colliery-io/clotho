@@ -42,7 +42,8 @@ impl QueryTool {
         }
 
         let columns = result.columns().to_vec();
-        let mut output = format!("## Query Results\n\n| {} |\n|{}|\n",
+        let mut output = format!(
+            "## Query Results\n\n| {} |\n|{}|\n",
             columns.join(" | "),
             columns.iter().map(|_| "---").collect::<Vec<_>>().join("|"),
         );

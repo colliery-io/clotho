@@ -43,14 +43,25 @@ impl SearchTool {
         results.truncate(limit);
 
         if results.is_empty() {
-            return Ok(text_result(format!("No results found for '{}'.", self.query)));
+            return Ok(text_result(format!(
+                "No results found for '{}'.",
+                self.query
+            )));
         }
 
-        let mut output = format!("## Search Results for \"{}\"\n\nFound {} results\n\n", self.query, results.len());
+        let mut output = format!(
+            "## Search Results for \"{}\"\n\nFound {} results\n\n",
+            self.query,
+            results.len()
+        );
         for (i, r) in results.iter().enumerate() {
             output.push_str(&format!(
                 "{}. **[{}]** {}\n   {}\n   ID: `{}`\n\n",
-                i + 1, r.entity_type, r.title, r.snippet, r.entity_id
+                i + 1,
+                r.entity_type,
+                r.title,
+                r.snippet,
+                r.entity_id
             ));
         }
 

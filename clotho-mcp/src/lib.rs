@@ -1,4 +1,5 @@
 pub mod formatting;
+pub mod resolve;
 pub mod server;
 pub mod tools;
 pub mod workspace_resolver;

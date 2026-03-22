@@ -38,7 +38,8 @@ impl SyncTool {
                 .map_err(|e| CallToolError::new(std::io::Error::other(e.to_string())))?,
         };
 
-        let result = engine.sync()
+        let result = engine
+            .sync()
             .map_err(|e| CallToolError::new(std::io::Error::other(e.to_string())))?;
 
         let mut output = if result.committed {

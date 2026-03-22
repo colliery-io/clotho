@@ -1,8 +1,10 @@
 use crate::formatting::text_result;
+use crate::resolve;
 use crate::workspace_resolver;
 use clotho_core::domain::traits::RelationType;
 use clotho_core::domain::types::EntityId;
 use clotho_core::graph::GraphStore;
+use clotho_store::data::entities::EntityStore;
 use clotho_store::workspace::Workspace;
 use rust_mcp_sdk::{
     macros::{mcp_tool, JsonSchema},
@@ -13,7 +15,7 @@ use std::path::Path;
 
 #[mcp_tool(
     name = "clotho_create_relation",
-    description = "Create a typed relation (graph edge) between two entities.",
+    description = "Create a typed relation (graph edge) between two entities. Accepts full UUID or prefix.",
     idempotent_hint = true,
     destructive_hint = false,
     open_world_hint = false,
@@ -21,11 +23,11 @@ use std::path::Path;
 )]
 #[derive(Debug, Serialize, Deserialize, JsonSchema)]
 pub struct CreateRelationTool {
-    /// Source entity ID (UUID)
+    /// Source entity ID (full UUID or prefix)
     pub source_id: String,
     /// Relation type (belongs_to, relates_to, delivers, spawned_from, extracted_from, has_decision, has_risk, blocked_by, mentions, has_cadence, has_deadline, has_schedule)
     pub relation_type: String,
-    /// Target entity ID (UUID)
+    /// Target entity ID (full UUID or prefix)
     pub target_id: String,
 }
 
@@ -35,19 +37,34 @@ impl CreateRelationTool {
             .map_err(|e| CallToolError::new(std::io::Error::other(e)))?;
         let ws = Workspace::open(Path::new(&ws_path))
             .map_err(|e| CallToolError::new(std::io::Error::other(e.to_string())))?;
+
+        let entity_store = EntityStore::open(&ws.data_path().join("entities.db"))
+            .map_err(|e| CallToolError::new(std::io::Error::other(e.to_string())))?;
         let graph = GraphStore::open(&ws.graph_path().join("relations.db"))
             .map_err(|e| CallToolError::new(std::io::Error::other(e.to_string())))?;
 
-        let source = parse_id(&self.source_id)?;
-        let target = parse_id(&self.target_id)?;
+        let source_row = match resolve::resolve_for_write(&entity_store, &self.source_id) {
+            Ok(row) => row,
+            Err(result) => return Ok(result),
+        };
+        let target_row = match resolve::resolve_for_write(&entity_store, &self.target_id) {
+            Ok(row) => row,
+            Err(result) => return Ok(result),
+        };
+
+        let source = parse_id(&source_row.id)?;
+        let target = parse_id(&target_row.id)?;
         let rel = parse_relation_type(&self.relation_type)?;
 
-        graph.add_edge(&source, &target, rel)
+        graph
+            .add_edge(&source, &target, rel)
             .map_err(|e| CallToolError::new(std::io::Error::other(e.to_string())))?;
 
         Ok(text_result(format!(
             "## Relation Created\n\n`{}` -[{}]-> `{}`",
-            &self.source_id[..8], self.relation_type.to_uppercase(), &self.target_id[..8]
+            &source_row.id[..8],
+            self.relation_type.to_uppercase(),
+            &target_row.id[..8]
         )))
     }
 }
@@ -72,6 +89,9 @@ fn parse_relation_type(s: &str) -> Result<RelationType, CallToolError> {
         "has_cadence" => Ok(RelationType::HasCadence),
         "has_deadline" => Ok(RelationType::HasDeadline),
         "has_schedule" => Ok(RelationType::HasSchedule),
-        _ => Err(CallToolError::new(std::io::Error::other(format!("Unknown relation type: {}", s)))),
+        _ => Err(CallToolError::new(std::io::Error::other(format!(
+            "Unknown relation type: {}",
+            s
+        )))),
     }
 }

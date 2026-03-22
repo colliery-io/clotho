@@ -50,7 +50,11 @@ fn test_init_fails_if_exists() {
 #[test]
 fn test_capture_stores_content_and_entity() {
     let (tmp, ws) = setup_workspace();
-    let file = create_sample_file(&tmp, "meeting-notes.md", "# Standup\n\nDiscussed deployment timeline.");
+    let file = create_sample_file(
+        &tmp,
+        "meeting-notes.md",
+        "# Standup\n\nDiscussed deployment timeline.",
+    );
 
     // Simulate what the capture command does
     let content = fs::read_to_string(&file).unwrap();
@@ -58,7 +62,9 @@ fn test_capture_stores_content_and_entity() {
     let now = chrono::Utc::now();
 
     let content_store = ContentStore::new(&ws.project_root());
-    let content_path = content_store.write_content(EntityType::Note, &id, &content).unwrap();
+    let content_path = content_store
+        .write_content(EntityType::Note, &id, &content)
+        .unwrap();
     assert!(content_path.exists());
 
     let entity_store = EntityStore::open(&ws.data_path().join("entities.db")).unwrap();
@@ -86,7 +92,10 @@ fn test_capture_stores_content_and_entity() {
     assert_eq!(got.entity_type, "Note");
 
     // Verify content is readable
-    let read = content_store.read_content(EntityType::Note, &id).unwrap().unwrap();
+    let read = content_store
+        .read_content(EntityType::Note, &id)
+        .unwrap()
+        .unwrap();
     assert!(read.contains("deployment timeline"));
 }
 
@@ -96,7 +105,9 @@ fn test_capture_registers_graph_node() {
     let id = EntityId::new();
 
     let graph = GraphStore::open(&ws.graph_path().join("relations.db")).unwrap();
-    graph.register_node(&id, EntityType::Meeting, "Standup").unwrap();
+    graph
+        .register_node(&id, EntityType::Meeting, "Standup")
+        .unwrap();
     assert!(graph.has_node(&id).unwrap());
 }
 
@@ -106,7 +117,14 @@ fn test_capture_indexes_in_fts5() {
     let id = EntityId::new();
 
     let index = SearchIndex::open(&ws.index_path().join("search.db")).unwrap();
-    index.index_entity(&id.to_string(), "Note", "Architecture", "microservice patterns and event sourcing").unwrap();
+    index
+        .index_entity(
+            &id.to_string(),
+            "Note",
+            "Architecture",
+            "microservice patterns and event sourcing",
+        )
+        .unwrap();
 
     let results = index.search("microservice").unwrap();
     assert_eq!(results.len(), 1);
@@ -123,39 +141,43 @@ fn test_list_entities() {
     let store = EntityStore::open(&ws.data_path().join("entities.db")).unwrap();
 
     let now = chrono::Utc::now().to_rfc3339();
-    store.insert(&clotho_store::data::entities::EntityRow {
-        id: EntityId::new().to_string(),
-        entity_type: "Task".to_string(),
-        title: "Fix bug".to_string(),
-        created_at: now.clone(),
-        updated_at: now.clone(),
-        status: None,
-        task_state: Some("todo".to_string()),
-        extraction_status: None,
-        source_transcript_id: None,
-        source_span_start: None,
-        source_span_end: None,
-        confidence: None,
-        content_path: None,
-        metadata: None,
-    }).unwrap();
+    store
+        .insert(&clotho_store::data::entities::EntityRow {
+            id: EntityId::new().to_string(),
+            entity_type: "Task".to_string(),
+            title: "Fix bug".to_string(),
+            created_at: now.clone(),
+            updated_at: now.clone(),
+            status: None,
+            task_state: Some("todo".to_string()),
+            extraction_status: None,
+            source_transcript_id: None,
+            source_span_start: None,
+            source_span_end: None,
+            confidence: None,
+            content_path: None,
+            metadata: None,
+        })
+        .unwrap();
 
-    store.insert(&clotho_store::data::entities::EntityRow {
-        id: EntityId::new().to_string(),
-        entity_type: "Program".to_string(),
-        title: "PMO".to_string(),
-        created_at: now.clone(),
-        updated_at: now.clone(),
-        status: Some("active".to_string()),
-        task_state: None,
-        extraction_status: None,
-        source_transcript_id: None,
-        source_span_start: None,
-        source_span_end: None,
-        confidence: None,
-        content_path: None,
-        metadata: None,
-    }).unwrap();
+    store
+        .insert(&clotho_store::data::entities::EntityRow {
+            id: EntityId::new().to_string(),
+            entity_type: "Program".to_string(),
+            title: "PMO".to_string(),
+            created_at: now.clone(),
+            updated_at: now.clone(),
+            status: Some("active".to_string()),
+            task_state: None,
+            extraction_status: None,
+            source_transcript_id: None,
+            source_span_start: None,
+            source_span_end: None,
+            confidence: None,
+            content_path: None,
+            metadata: None,
+        })
+        .unwrap();
 
     let all = store.list_all().unwrap();
     assert_eq!(all.len(), 2);
@@ -180,8 +202,17 @@ fn test_search_finds_content() {
     let (_tmp, ws) = setup_workspace();
     let index = SearchIndex::open(&ws.index_path().join("search.db")).unwrap();
 
-    index.index_entity("id1", "Note", "Deploy Plan", "Rolling deployment strategy with blue-green").unwrap();
-    index.index_entity("id2", "Meeting", "Standup", "Quick sync on sprint progress").unwrap();
+    index
+        .index_entity(
+            "id1",
+            "Note",
+            "Deploy Plan",
+            "Rolling deployment strategy with blue-green",
+        )
+        .unwrap();
+    index
+        .index_entity("id2", "Meeting", "Standup", "Quick sync on sprint progress")
+        .unwrap();
 
     let results = index.search("deployment").unwrap();
     assert_eq!(results.len(), 1);
@@ -196,7 +227,9 @@ fn test_search_finds_content() {
 fn test_search_empty_results() {
     let (_tmp, ws) = setup_workspace();
     let index = SearchIndex::open(&ws.index_path().join("search.db")).unwrap();
-    index.index_entity("id1", "Note", "Test", "something").unwrap();
+    index
+        .index_entity("id1", "Note", "Test", "something")
+        .unwrap();
 
     let results = index.search("nonexistent").unwrap();
     assert!(results.is_empty());
@@ -212,12 +245,16 @@ fn test_query_cypher() {
     let graph = GraphStore::open(&ws.graph_path().join("relations.db")).unwrap();
 
     let id = EntityId::new();
-    graph.register_node(&id, EntityType::Program, "Test Program").unwrap();
+    graph
+        .register_node(&id, EntityType::Program, "Test Program")
+        .unwrap();
 
-    let result = graph.raw_cypher(&format!(
-        "MATCH (n {{id: '{}'}}) RETURN n.title AS title",
-        id
-    )).unwrap();
+    let result = graph
+        .raw_cypher(&format!(
+            "MATCH (n {{id: '{}'}}) RETURN n.title AS title",
+            id
+        ))
+        .unwrap();
 
     assert_eq!(result.len(), 1);
     let title: String = result[0].get("title").unwrap_or_default();
@@ -237,31 +274,38 @@ fn test_reflect_creates_entity_and_content() {
     // Create content
     let content_store = ContentStore::new(&ws.project_root());
     let template = "# Weekly Reflection\n\n## Reflections\n\n## Key Takeaways\n";
-    let path = content_store.write_content(EntityType::Reflection, &id, template).unwrap();
+    let path = content_store
+        .write_content(EntityType::Reflection, &id, template)
+        .unwrap();
     assert!(path.exists());
 
     // Create entity
     let entity_store = EntityStore::open(&ws.data_path().join("entities.db")).unwrap();
-    entity_store.insert(&clotho_store::data::entities::EntityRow {
-        id: id.to_string(),
-        entity_type: "Reflection".to_string(),
-        title: "Weekly reflection".to_string(),
-        created_at: now.to_rfc3339(),
-        updated_at: now.to_rfc3339(),
-        status: Some("active".to_string()),
-        task_state: None,
-        extraction_status: None,
-        source_transcript_id: None,
-        source_span_start: None,
-        source_span_end: None,
-        confidence: None,
-        content_path: Some(path.display().to_string()),
-        metadata: Some(r#"{"period_type":"weekly"}"#.to_string()),
-    }).unwrap();
+    entity_store
+        .insert(&clotho_store::data::entities::EntityRow {
+            id: id.to_string(),
+            entity_type: "Reflection".to_string(),
+            title: "Weekly reflection".to_string(),
+            created_at: now.to_rfc3339(),
+            updated_at: now.to_rfc3339(),
+            status: Some("active".to_string()),
+            task_state: None,
+            extraction_status: None,
+            source_transcript_id: None,
+            source_span_start: None,
+            source_span_end: None,
+            confidence: None,
+            content_path: Some(path.display().to_string()),
+            metadata: Some(r#"{"period_type":"weekly"}"#.to_string()),
+        })
+        .unwrap();
 
     let got = entity_store.get(&id.to_string()).unwrap().unwrap();
     assert_eq!(got.entity_type, "Reflection");
 
-    let content = content_store.read_content(EntityType::Reflection, &id).unwrap().unwrap();
+    let content = content_store
+        .read_content(EntityType::Reflection, &id)
+        .unwrap()
+        .unwrap();
     assert!(content.contains("Key Takeaways"));
 }

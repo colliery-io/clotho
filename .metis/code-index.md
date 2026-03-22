@@ -1,6 +1,6 @@
 # Code Index
 
-> Generated: 2026-03-19T12:25:46Z | 83 files | Rust
+> Generated: 2026-03-22T13:03:47Z | 89 files | Rust
 
 ## Project Structure
 
@@ -24,7 +24,8 @@
 │   │   │   ├── status.rs
 │   │   │   ├── sync.rs
 │   │   │   └── update.rs
-│   │   └── main.rs
+│   │   ├── main.rs
+│   │   └── resolve.rs
 │   └── tests/
 │       └── cli_tests.rs
 ├── clotho-core/
@@ -56,10 +57,13 @@
 │   │   ├── formatting.rs
 │   │   ├── lib.rs
 │   │   ├── main.rs
+│   │   ├── resolve.rs
 │   │   ├── server.rs
 │   │   ├── tools/
 │   │   │   ├── all_tools.rs
+│   │   │   ├── batch_relations.rs
 │   │   │   ├── capture.rs
+│   │   │   ├── capture_directory.rs
 │   │   │   ├── create_entity.rs
 │   │   │   ├── create_note.rs
 │   │   │   ├── create_reflection.rs
@@ -69,6 +73,7 @@
 │   │   │   ├── get_relations.rs
 │   │   │   ├── init.rs
 │   │   │   ├── list_entities.rs
+│   │   │   ├── list_unprocessed.rs
 │   │   │   ├── mod.rs
 │   │   │   ├── ontology.rs
 │   │   │   ├── processing.rs
@@ -77,7 +82,8 @@
 │   │   │   ├── search.rs
 │   │   │   ├── set_workspace.rs
 │   │   │   ├── sync.rs
-│   │   │   └── update_entity.rs
+│   │   │   ├── update_entity.rs
+│   │   │   └── workspace_summary.rs
 │   │   └── workspace_resolver.rs
 │   └── tests/
 │       ├── entity_mgmt_tests.rs
@@ -123,27 +129,27 @@
 #### clotho-cli/src/commands/capture.rs
 
 - pub `CaptureArgs` struct L16-27 — `{ file: PathBuf, r#type: String, title: Option<String> }`
-- pub `run` function L29-115 — `(args: CaptureArgs, json: bool) -> Result<(), Box<dyn std::error::Error>>`
--  `parse_entity_type` function L117-130 — `(s: &str) -> Result<EntityType, Box<dyn std::error::Error>>`
+- pub `run` function L29-125 — `(args: CaptureArgs, json: bool) -> Result<(), Box<dyn std::error::Error>>`
+-  `parse_entity_type` function L127-140 — `(s: &str) -> Result<EntityType, Box<dyn std::error::Error>>`
 
 #### clotho-cli/src/commands/create.rs
 
 - pub `CreateArgs` struct L13-41 — `{ entity_type: String, title: String, status: Option<String>, state: Option<Stri...`
-- pub `run` function L43-143 — `(args: CreateArgs, json: bool) -> Result<(), Box<dyn std::error::Error>>`
--  `parse_entity_type` function L145-168 — `(s: &str) -> Result<EntityType, Box<dyn std::error::Error>>`
--  `defaults_for_type` function L171-189 — `(et: EntityType) -> (Option<String>, Option<String>, Option<String>)` — Returns (default_status, default_task_state, default_extraction_status) for a type.
--  `is_content_bearing` function L191-200 — `(et: EntityType) -> bool`
--  `build_metadata` function L202-220 — `(et: EntityType, args: &CreateArgs) -> Option<String>`
+- pub `run` function L43-147 — `(args: CreateArgs, json: bool) -> Result<(), Box<dyn std::error::Error>>`
+-  `parse_entity_type` function L149-173 — `(s: &str) -> Result<EntityType, Box<dyn std::error::Error>>`
+-  `defaults_for_type` function L176-194 — `(et: EntityType) -> (Option<String>, Option<String>, Option<String>)` — Returns (default_status, default_task_state, default_extraction_status) for a type.
+-  `is_content_bearing` function L196-205 — `(et: EntityType) -> bool`
+-  `build_metadata` function L207-231 — `(et: EntityType, args: &CreateArgs) -> Option<String>`
 
 #### clotho-cli/src/commands/delete.rs
 
-- pub `DeleteArgs` struct L12-15 — `{ id: String }`
-- pub `run` function L17-73 — `(args: DeleteArgs, json: bool) -> Result<(), Box<dyn std::error::Error>>`
+- pub `DeleteArgs` struct L14-17 — `{ id: String }`
+- pub `run` function L19-74 — `(args: DeleteArgs, json: bool) -> Result<(), Box<dyn std::error::Error>>`
 
 #### clotho-cli/src/commands/get.rs
 
-- pub `GetArgs` struct L7-10 — `{ id: String }`
-- pub `run` function L12-66 — `(args: GetArgs, json: bool) -> Result<(), Box<dyn std::error::Error>>`
+- pub `GetArgs` struct L9-12 — `{ id: String }`
+- pub `run` function L14-66 — `(args: GetArgs, json: bool) -> Result<(), Box<dyn std::error::Error>>`
 
 #### clotho-cli/src/commands/init.rs
 
@@ -157,11 +163,11 @@
 
 #### clotho-cli/src/commands/mod.rs
 
-- pub `create` module L1 — `-`
-- pub `delete` module L2 — `-`
-- pub `get` module L3 — `-`
-- pub `init` module L4 — `-`
-- pub `capture` module L5 — `-`
+- pub `capture` module L1 — `-`
+- pub `create` module L2 — `-`
+- pub `delete` module L3 — `-`
+- pub `get` module L4 — `-`
+- pub `init` module L5 — `-`
 - pub `list` module L6 — `-`
 - pub `ontology` module L7 — `-`
 - pub `processed` module L8 — `-`
@@ -175,41 +181,41 @@
 
 #### clotho-cli/src/commands/ontology.rs
 
-- pub `OntologyGetArgs` struct L11-14 — `{ id: String }`
-- pub `OntologySetArgs` struct L17-44 — `{ id: String, add_keywords: Option<String>, remove_keywords: Option<String>, add...`
-- pub `OntologySearchArgs` struct L47-50 — `{ query: String }`
-- pub `run_get` function L52-87 — `(args: OntologyGetArgs, json: bool) -> Result<(), Box<dyn std::error::Error>>`
-- pub `run_set` function L89-139 — `(args: OntologySetArgs, json: bool) -> Result<(), Box<dyn std::error::Error>>`
-- pub `run_search` function L141-168 — `(args: OntologySearchArgs, json: bool) -> Result<(), Box<dyn std::error::Error>>`
+- pub `OntologyGetArgs` struct L13-16 — `{ id: String }`
+- pub `OntologySetArgs` struct L19-46 — `{ id: String, add_keywords: Option<String>, remove_keywords: Option<String>, add...`
+- pub `OntologySearchArgs` struct L49-52 — `{ query: String }`
+- pub `run_get` function L54-103 — `(args: OntologyGetArgs, json: bool) -> Result<(), Box<dyn std::error::Error>>`
+- pub `run_set` function L105-154 — `(args: OntologySetArgs, json: bool) -> Result<(), Box<dyn std::error::Error>>`
+- pub `run_search` function L156-183 — `(args: OntologySearchArgs, json: bool) -> Result<(), Box<dyn std::error::Error>>`
 
 #### clotho-cli/src/commands/processed.rs
 
-- pub `ProcessedCheckArgs` struct L7-14 — `{ id: String, process: Option<String> }`
-- pub `ProcessedMarkArgs` struct L17-40 — `{ id: String, process: String, ontology_ids: Option<String>, by: Option<String>,...`
-- pub `run_check` function L42-80 — `(args: ProcessedCheckArgs, json: bool) -> Result<(), Box<dyn std::error::Error>>`
-- pub `run_mark` function L82-111 — `(args: ProcessedMarkArgs, json: bool) -> Result<(), Box<dyn std::error::Error>>`
+- pub `ProcessedCheckArgs` struct L10-17 — `{ id: String, process: Option<String> }`
+- pub `ProcessedMarkArgs` struct L20-43 — `{ id: String, process: String, ontology_ids: Option<String>, by: Option<String>,...`
+- pub `run_check` function L45-89 — `(args: ProcessedCheckArgs, json: bool) -> Result<(), Box<dyn std::error::Error>>`
+- pub `run_mark` function L91-130 — `(args: ProcessedMarkArgs, json: bool) -> Result<(), Box<dyn std::error::Error>>`
 
 #### clotho-cli/src/commands/query.rs
 
 - pub `QueryArgs` struct L7-10 — `{ cypher: String }`
-- pub `run` function L12-66 — `(args: QueryArgs, json: bool) -> Result<(), Box<dyn std::error::Error>>`
+- pub `run` function L12-69 — `(args: QueryArgs, json: bool) -> Result<(), Box<dyn std::error::Error>>`
 
 #### clotho-cli/src/commands/reflect.rs
 
 - pub `ReflectArgs` struct L13-25 — `{ period: String, title: Option<String>, program: Option<String> }`
-- pub `run` function L27-122 — `(args: ReflectArgs, json: bool) -> Result<(), Box<dyn std::error::Error>>`
--  `parse_period_type` function L124-137 — `(s: &str) -> Result<PeriodType, Box<dyn std::error::Error>>`
+- pub `run` function L27-128 — `(args: ReflectArgs, json: bool) -> Result<(), Box<dyn std::error::Error>>`
+-  `parse_period_type` function L130-143 — `(s: &str) -> Result<PeriodType, Box<dyn std::error::Error>>`
 
 #### clotho-cli/src/commands/relate.rs
 
-- pub `RelateArgs` struct L9-19 — `{ source_id: String, relation_type: String, target_id: String }`
-- pub `UnrelateArgs` struct L22-31 — `{ source_id: String, relation_type: String, target_id: String }`
-- pub `RelationsArgs` struct L34-37 — `{ id: String }`
-- pub `run_relate` function L39-78 — `(args: RelateArgs, json: bool) -> Result<(), Box<dyn std::error::Error>>`
-- pub `run_unrelate` function L80-109 — `(args: UnrelateArgs, json: bool) -> Result<(), Box<dyn std::error::Error>>`
-- pub `run_relations` function L111-166 — `(args: RelationsArgs, json: bool) -> Result<(), Box<dyn std::error::Error>>`
-- pub `parse_relation_type` function L168-187 — `(s: &str) -> Result<RelationType, Box<dyn std::error::Error>>`
--  `parse_id` function L189-193 — `(s: &str) -> Result<EntityId, Box<dyn std::error::Error>>`
+- pub `RelateArgs` struct L12-22 — `{ source_id: String, relation_type: String, target_id: String }`
+- pub `UnrelateArgs` struct L25-34 — `{ source_id: String, relation_type: String, target_id: String }`
+- pub `RelationsArgs` struct L37-40 — `{ id: String }`
+- pub `run_relate` function L42-86 — `(args: RelateArgs, json: bool) -> Result<(), Box<dyn std::error::Error>>`
+- pub `run_unrelate` function L88-122 — `(args: UnrelateArgs, json: bool) -> Result<(), Box<dyn std::error::Error>>`
+- pub `run_relations` function L124-177 — `(args: RelationsArgs, json: bool) -> Result<(), Box<dyn std::error::Error>>`
+- pub `parse_relation_type` function L179-198 — `(s: &str) -> Result<RelationType, Box<dyn std::error::Error>>`
+-  `parse_id` function L200-204 — `(s: &str) -> Result<EntityId, Box<dyn std::error::Error>>`
 
 #### clotho-cli/src/commands/search.rs
 
@@ -219,18 +225,18 @@
 #### clotho-cli/src/commands/status.rs
 
 - pub `StatusArgs` struct L8 — `-`
-- pub `run` function L10-144 — `(_args: StatusArgs, json: bool) -> Result<(), Box<dyn std::error::Error>>`
+- pub `run` function L10-195 — `(_args: StatusArgs, json: bool) -> Result<(), Box<dyn std::error::Error>>`
 
 #### clotho-cli/src/commands/sync.rs
 
 - pub `SyncArgs` struct L7-15 — `{ prune: bool, keep: usize }`
-- pub `run` function L17-57 — `(args: SyncArgs, json: bool) -> Result<(), Box<dyn std::error::Error>>`
+- pub `run` function L17-55 — `(args: SyncArgs, json: bool) -> Result<(), Box<dyn std::error::Error>>`
 
 #### clotho-cli/src/commands/update.rs
 
-- pub `UpdateArgs` struct L9-24 — `{ id: String, title: Option<String>, status: Option<String>, state: Option<Strin...`
-- pub `run` function L26-88 — `(args: UpdateArgs, json: bool) -> Result<(), Box<dyn std::error::Error>>`
--  `parse_entity_type_str` function L90-111 — `(s: &str) -> Result<clotho_core::domain::types::EntityType, String>`
+- pub `UpdateArgs` struct L11-26 — `{ id: String, title: Option<String>, status: Option<String>, state: Option<Strin...`
+- pub `run` function L28-92 — `(args: UpdateArgs, json: bool) -> Result<(), Box<dyn std::error::Error>>`
+-  `parse_entity_type_str` function L94-116 — `(s: &str) -> Result<clotho_core::domain::types::EntityType, String>`
 
 ### clotho-cli/src
 
@@ -238,10 +244,17 @@
 
 #### clotho-cli/src/main.rs
 
+- pub `resolve` module L2 — `-`
 -  `commands` module L1 — `-`
--  `Cli` struct L9-16 — `{ json: bool, command: Commands }` — Clotho — Personal work and time management through reflection,
--  `Commands` enum L19-79 — `Init | Create | Get | Update | Delete | Capture | List | Search | Query | Reflec...`
--  `main` function L81-116 — `()`
+-  `Cli` struct L10-17 — `{ json: bool, command: Commands }` — Clotho — Personal work and time management through reflection,
+-  `Commands` enum L20-80 — `Init | Create | Get | Update | Delete | Capture | List | Search | Query | Reflec...`
+-  `main` function L82-117 — `()`
+
+#### clotho-cli/src/resolve.rs
+
+- pub `resolve_for_read` function L5-14 — `( store: &EntityStore, input: &str, ) -> Result<EntityRow, Box<dyn std::error::E...` — Resolve an entity ID (full or prefix) for read-only operations.
+- pub `resolve_for_write` function L18-31 — `( store: &EntityStore, input: &str, ) -> Result<EntityRow, Box<dyn std::error::E...` — Resolve an entity ID for destructive operations.
+-  `format_ambiguous` function L33-52 — `(input: &str, rows: &[EntityRow]) -> String`
 
 ### clotho-cli/tests
 
@@ -253,14 +266,14 @@
 -  `create_sample_file` function L20-24 — `(tmp: &tempfile::TempDir, name: &str, content: &str) -> std::path::PathBuf` — Helper: create a sample file in the temp dir.
 -  `test_init_creates_workspace` function L31-37 — `()`
 -  `test_init_fails_if_exists` function L40-44 — `()`
--  `test_capture_stores_content_and_entity` function L51-91 — `()`
--  `test_capture_registers_graph_node` function L94-101 — `()`
--  `test_capture_indexes_in_fts5` function L104-114 — `()`
--  `test_list_entities` function L121-172 — `()`
--  `test_search_finds_content` function L179-193 — `()`
--  `test_search_empty_results` function L196-203 — `()`
--  `test_query_cypher` function L210-225 — `()`
--  `test_reflect_creates_entity_and_content` function L232-267 — `()`
+-  `test_capture_stores_content_and_entity` function L51-100 — `()`
+-  `test_capture_registers_graph_node` function L103-112 — `()`
+-  `test_capture_indexes_in_fts5` function L115-132 — `()`
+-  `test_list_entities` function L139-194 — `()`
+-  `test_search_finds_content` function L201-224 — `()`
+-  `test_search_empty_results` function L227-236 — `()`
+-  `test_query_cypher` function L243-262 — `()`
+-  `test_reflect_creates_entity_and_content` function L269-311 — `()`
 
 ### clotho-core/src/domain/entities
 
@@ -270,233 +283,233 @@
 
 - pub `Meeting` struct L17-27 — `{ id: EntityId, title: String, created_at: DateTime<Utc>, updated_at: DateTime<U...` — Container entity for a meeting occurrence.
 - pub `new` function L30-43 — `(title: impl Into<String>, date: DateTime<Utc>) -> Self`
-- pub `Transcript` struct L106-115 — `{ id: EntityId, title: String, created_at: DateTime<Utc>, updated_at: DateTime<U...` — Raw meeting content, typically from a transcription service.
-- pub `new` function L118-129 — `(title: impl Into<String>, meeting_id: EntityId) -> Self`
-- pub `Note` struct L183-192 — `{ id: EntityId, title: String, created_at: DateTime<Utc>, updated_at: DateTime<U...` — Authored content, freeform.
-- pub `new` function L195-206 — `(title: impl Into<String>) -> Self`
-- pub `for_meeting` function L208-212 — `(title: impl Into<String>, meeting_id: EntityId) -> Self`
-- pub `Reflection` struct L267-280 — `{ id: EntityId, title: String, created_at: DateTime<Utc>, updated_at: DateTime<U...` — Time-period bound thinking.
-- pub `new` function L283-303 — `( title: impl Into<String>, period_type: PeriodType, period_start: DateTime<Utc>...`
-- pub `Artifact` struct L365-375 — `{ id: EntityId, title: String, created_at: DateTime<Utc>, updated_at: DateTime<U...` — Deliverable with external source link.
-- pub `new` function L378-390 — `(title: impl Into<String>, source_url: impl Into<String>) -> Self`
+- pub `Transcript` struct L129-138 — `{ id: EntityId, title: String, created_at: DateTime<Utc>, updated_at: DateTime<U...` — Raw meeting content, typically from a transcription service.
+- pub `new` function L141-152 — `(title: impl Into<String>, meeting_id: EntityId) -> Self`
+- pub `Note` struct L227-236 — `{ id: EntityId, title: String, created_at: DateTime<Utc>, updated_at: DateTime<U...` — Authored content, freeform.
+- pub `new` function L239-250 — `(title: impl Into<String>) -> Self`
+- pub `for_meeting` function L252-256 — `(title: impl Into<String>, meeting_id: EntityId) -> Self`
+- pub `Reflection` struct L332-345 — `{ id: EntityId, title: String, created_at: DateTime<Utc>, updated_at: DateTime<U...` — Time-period bound thinking.
+- pub `new` function L348-368 — `( title: impl Into<String>, period_type: PeriodType, period_start: DateTime<Utc>...`
+- pub `Artifact` struct L451-461 — `{ id: EntityId, title: String, created_at: DateTime<Utc>, updated_at: DateTime<U...` — Deliverable with external source link.
+- pub `new` function L464-476 — `(title: impl Into<String>, source_url: impl Into<String>) -> Self`
 -  `Meeting` type L29-44 — `= Meeting`
--  `Meeting` type L46-52 — `impl Entity for Meeting`
--  `id` function L47 — `(&self) -> &EntityId`
--  `entity_type` function L48 — `(&self) -> EntityType`
--  `title` function L49 — `(&self) -> &str`
--  `created_at` function L50 — `(&self) -> DateTime<Utc>`
--  `updated_at` function L51 — `(&self) -> DateTime<Utc>`
--  `Meeting` type L54-59 — `impl Relatable for Meeting`
--  `relations` function L55-57 — `(&self, graph: &GraphStore) -> Vec<Relation>`
--  `graph_label` function L58 — `(&self) -> &'static str`
--  `Meeting` type L61-76 — `impl Taggable for Meeting`
--  `tags` function L62 — `(&self) -> &[Tag]`
--  `add_tag` function L63-68 — `(&mut self, tag: Tag)`
--  `remove_tag` function L69-75 — `(&mut self, tag: &str)`
--  `Meeting` type L78-88 — `impl ContentBearing for Meeting`
--  `content` function L79 — `(&self) -> &str`
--  `set_content` function L80-83 — `(&mut self, content: String)`
--  `content_path` function L84-87 — `(&self) -> PathBuf`
--  `Meeting` type L90-96 — `impl HasSchedule for Meeting`
--  `scheduled_at` function L91 — `(&self) -> Option<DateTime<Utc>>`
--  `set_scheduled_at` function L92-95 — `(&mut self, at: Option<DateTime<Utc>>)`
--  `Transcript` type L117-130 — `= Transcript`
--  `Transcript` type L132-138 — `impl Entity for Transcript`
--  `id` function L133 — `(&self) -> &EntityId`
--  `entity_type` function L134 — `(&self) -> EntityType`
--  `title` function L135 — `(&self) -> &str`
--  `created_at` function L136 — `(&self) -> DateTime<Utc>`
--  `updated_at` function L137 — `(&self) -> DateTime<Utc>`
--  `Transcript` type L140-145 — `impl Relatable for Transcript`
--  `relations` function L141-143 — `(&self, graph: &GraphStore) -> Vec<Relation>`
--  `graph_label` function L144 — `(&self) -> &'static str`
--  `Transcript` type L147-162 — `impl Taggable for Transcript`
--  `tags` function L148 — `(&self) -> &[Tag]`
--  `add_tag` function L149-154 — `(&mut self, tag: Tag)`
--  `remove_tag` function L155-161 — `(&mut self, tag: &str)`
--  `Transcript` type L164-173 — `impl ContentBearing for Transcript`
--  `content` function L165 — `(&self) -> &str`
--  `set_content` function L166-169 — `(&mut self, content: String)`
--  `content_path` function L170-172 — `(&self) -> PathBuf`
--  `Note` type L194-213 — `= Note`
--  `Note` type L215-221 — `impl Entity for Note`
--  `id` function L216 — `(&self) -> &EntityId`
--  `entity_type` function L217 — `(&self) -> EntityType`
--  `title` function L218 — `(&self) -> &str`
--  `created_at` function L219 — `(&self) -> DateTime<Utc>`
--  `updated_at` function L220 — `(&self) -> DateTime<Utc>`
--  `Note` type L223-228 — `impl Relatable for Note`
--  `relations` function L224-226 — `(&self, graph: &GraphStore) -> Vec<Relation>`
--  `graph_label` function L227 — `(&self) -> &'static str`
--  `Note` type L230-245 — `impl Taggable for Note`
--  `tags` function L231 — `(&self) -> &[Tag]`
--  `add_tag` function L232-237 — `(&mut self, tag: Tag)`
--  `remove_tag` function L238-244 — `(&mut self, tag: &str)`
--  `Note` type L247-256 — `impl ContentBearing for Note`
--  `content` function L248 — `(&self) -> &str`
--  `set_content` function L249-252 — `(&mut self, content: String)`
--  `content_path` function L253-255 — `(&self) -> PathBuf`
--  `Reflection` type L282-304 — `= Reflection`
--  `Reflection` type L306-312 — `impl Entity for Reflection`
--  `id` function L307 — `(&self) -> &EntityId`
--  `entity_type` function L308 — `(&self) -> EntityType`
--  `title` function L309 — `(&self) -> &str`
--  `created_at` function L310 — `(&self) -> DateTime<Utc>`
--  `updated_at` function L311 — `(&self) -> DateTime<Utc>`
--  `Reflection` type L314-319 — `impl Relatable for Reflection`
--  `relations` function L315-317 — `(&self, graph: &GraphStore) -> Vec<Relation>`
--  `graph_label` function L318 — `(&self) -> &'static str`
--  `Reflection` type L321-336 — `impl Taggable for Reflection`
--  `tags` function L322 — `(&self) -> &[Tag]`
--  `add_tag` function L323-328 — `(&mut self, tag: Tag)`
--  `remove_tag` function L329-335 — `(&mut self, tag: &str)`
--  `Reflection` type L338-354 — `impl ContentBearing for Reflection`
--  `content` function L339 — `(&self) -> &str`
--  `set_content` function L340-343 — `(&mut self, content: String)`
--  `content_path` function L344-353 — `(&self) -> PathBuf`
--  `Artifact` type L377-391 — `= Artifact`
--  `Artifact` type L393-399 — `impl Entity for Artifact`
--  `id` function L394 — `(&self) -> &EntityId`
--  `entity_type` function L395 — `(&self) -> EntityType`
--  `title` function L396 — `(&self) -> &str`
--  `created_at` function L397 — `(&self) -> DateTime<Utc>`
--  `updated_at` function L398 — `(&self) -> DateTime<Utc>`
--  `Artifact` type L401-406 — `impl Relatable for Artifact`
--  `relations` function L402-404 — `(&self, graph: &GraphStore) -> Vec<Relation>`
--  `graph_label` function L405 — `(&self) -> &'static str`
--  `Artifact` type L408-423 — `impl Taggable for Artifact`
--  `tags` function L409 — `(&self) -> &[Tag]`
--  `add_tag` function L410-415 — `(&mut self, tag: Tag)`
--  `remove_tag` function L416-422 — `(&mut self, tag: &str)`
--  `Artifact` type L425-434 — `impl ContentBearing for Artifact`
--  `content` function L426 — `(&self) -> &str`
--  `set_content` function L427-430 — `(&mut self, content: String)`
--  `content_path` function L431-433 — `(&self) -> PathBuf`
--  `Artifact` type L436-442 — `impl HasDeadline for Artifact`
--  `deadline` function L437 — `(&self) -> Option<DateTime<Utc>>`
--  `set_deadline` function L438-441 — `(&mut self, deadline: Option<DateTime<Utc>>)`
+-  `Meeting` type L46-62 — `impl Entity for Meeting`
+-  `id` function L47-49 — `(&self) -> &EntityId`
+-  `entity_type` function L50-52 — `(&self) -> EntityType`
+-  `title` function L53-55 — `(&self) -> &str`
+-  `created_at` function L56-58 — `(&self) -> DateTime<Utc>`
+-  `updated_at` function L59-61 — `(&self) -> DateTime<Utc>`
+-  `Meeting` type L64-76 — `impl Relatable for Meeting`
+-  `relations` function L65-72 — `(&self, graph: &GraphStore) -> Vec<Relation>`
+-  `graph_label` function L73-75 — `(&self) -> &'static str`
+-  `Meeting` type L78-95 — `impl Taggable for Meeting`
+-  `tags` function L79-81 — `(&self) -> &[Tag]`
+-  `add_tag` function L82-87 — `(&mut self, tag: Tag)`
+-  `remove_tag` function L88-94 — `(&mut self, tag: &str)`
+-  `Meeting` type L97-109 — `impl ContentBearing for Meeting`
+-  `content` function L98-100 — `(&self) -> &str`
+-  `set_content` function L101-104 — `(&mut self, content: String)`
+-  `content_path` function L105-108 — `(&self) -> PathBuf`
+-  `Meeting` type L111-119 — `impl HasSchedule for Meeting`
+-  `scheduled_at` function L112-114 — `(&self) -> Option<DateTime<Utc>>`
+-  `set_scheduled_at` function L115-118 — `(&mut self, at: Option<DateTime<Utc>>)`
+-  `Transcript` type L140-153 — `= Transcript`
+-  `Transcript` type L155-171 — `impl Entity for Transcript`
+-  `id` function L156-158 — `(&self) -> &EntityId`
+-  `entity_type` function L159-161 — `(&self) -> EntityType`
+-  `title` function L162-164 — `(&self) -> &str`
+-  `created_at` function L165-167 — `(&self) -> DateTime<Utc>`
+-  `updated_at` function L168-170 — `(&self) -> DateTime<Utc>`
+-  `Transcript` type L173-185 — `impl Relatable for Transcript`
+-  `relations` function L174-181 — `(&self, graph: &GraphStore) -> Vec<Relation>`
+-  `graph_label` function L182-184 — `(&self) -> &'static str`
+-  `Transcript` type L187-204 — `impl Taggable for Transcript`
+-  `tags` function L188-190 — `(&self) -> &[Tag]`
+-  `add_tag` function L191-196 — `(&mut self, tag: Tag)`
+-  `remove_tag` function L197-203 — `(&mut self, tag: &str)`
+-  `Transcript` type L206-217 — `impl ContentBearing for Transcript`
+-  `content` function L207-209 — `(&self) -> &str`
+-  `set_content` function L210-213 — `(&mut self, content: String)`
+-  `content_path` function L214-216 — `(&self) -> PathBuf`
+-  `Note` type L238-257 — `= Note`
+-  `Note` type L259-275 — `impl Entity for Note`
+-  `id` function L260-262 — `(&self) -> &EntityId`
+-  `entity_type` function L263-265 — `(&self) -> EntityType`
+-  `title` function L266-268 — `(&self) -> &str`
+-  `created_at` function L269-271 — `(&self) -> DateTime<Utc>`
+-  `updated_at` function L272-274 — `(&self) -> DateTime<Utc>`
+-  `Note` type L277-289 — `impl Relatable for Note`
+-  `relations` function L278-285 — `(&self, graph: &GraphStore) -> Vec<Relation>`
+-  `graph_label` function L286-288 — `(&self) -> &'static str`
+-  `Note` type L291-308 — `impl Taggable for Note`
+-  `tags` function L292-294 — `(&self) -> &[Tag]`
+-  `add_tag` function L295-300 — `(&mut self, tag: Tag)`
+-  `remove_tag` function L301-307 — `(&mut self, tag: &str)`
+-  `Note` type L310-321 — `impl ContentBearing for Note`
+-  `content` function L311-313 — `(&self) -> &str`
+-  `set_content` function L314-317 — `(&mut self, content: String)`
+-  `content_path` function L318-320 — `(&self) -> PathBuf`
+-  `Reflection` type L347-369 — `= Reflection`
+-  `Reflection` type L371-387 — `impl Entity for Reflection`
+-  `id` function L372-374 — `(&self) -> &EntityId`
+-  `entity_type` function L375-377 — `(&self) -> EntityType`
+-  `title` function L378-380 — `(&self) -> &str`
+-  `created_at` function L381-383 — `(&self) -> DateTime<Utc>`
+-  `updated_at` function L384-386 — `(&self) -> DateTime<Utc>`
+-  `Reflection` type L389-401 — `impl Relatable for Reflection`
+-  `relations` function L390-397 — `(&self, graph: &GraphStore) -> Vec<Relation>`
+-  `graph_label` function L398-400 — `(&self) -> &'static str`
+-  `Reflection` type L403-420 — `impl Taggable for Reflection`
+-  `tags` function L404-406 — `(&self) -> &[Tag]`
+-  `add_tag` function L407-412 — `(&mut self, tag: Tag)`
+-  `remove_tag` function L413-419 — `(&mut self, tag: &str)`
+-  `Reflection` type L422-440 — `impl ContentBearing for Reflection`
+-  `content` function L423-425 — `(&self) -> &str`
+-  `set_content` function L426-429 — `(&mut self, content: String)`
+-  `content_path` function L430-439 — `(&self) -> PathBuf`
+-  `Artifact` type L463-477 — `= Artifact`
+-  `Artifact` type L479-495 — `impl Entity for Artifact`
+-  `id` function L480-482 — `(&self) -> &EntityId`
+-  `entity_type` function L483-485 — `(&self) -> EntityType`
+-  `title` function L486-488 — `(&self) -> &str`
+-  `created_at` function L489-491 — `(&self) -> DateTime<Utc>`
+-  `updated_at` function L492-494 — `(&self) -> DateTime<Utc>`
+-  `Artifact` type L497-509 — `impl Relatable for Artifact`
+-  `relations` function L498-505 — `(&self, graph: &GraphStore) -> Vec<Relation>`
+-  `graph_label` function L506-508 — `(&self) -> &'static str`
+-  `Artifact` type L511-528 — `impl Taggable for Artifact`
+-  `tags` function L512-514 — `(&self) -> &[Tag]`
+-  `add_tag` function L515-520 — `(&mut self, tag: Tag)`
+-  `remove_tag` function L521-527 — `(&mut self, tag: &str)`
+-  `Artifact` type L530-541 — `impl ContentBearing for Artifact`
+-  `content` function L531-533 — `(&self) -> &str`
+-  `set_content` function L534-537 — `(&mut self, content: String)`
+-  `content_path` function L538-540 — `(&self) -> PathBuf`
+-  `Artifact` type L543-551 — `impl HasDeadline for Artifact`
+-  `deadline` function L544-546 — `(&self) -> Option<DateTime<Utc>>`
+-  `set_deadline` function L547-550 — `(&mut self, deadline: Option<DateTime<Utc>>)`
 
 #### clotho-core/src/domain/entities/derived.rs
 
-- pub `Decision` struct L88-97 — `{ id: EntityId, title: String, created_at: DateTime<Utc>, updated_at: DateTime<U...` — Recorded decision point, extracted from transcripts.
-- pub `draft` function L100-112 — `(title: impl Into<String>, confidence: f32, source_span: Option<SourceSpan>) -> ...`
-- pub `Risk` struct L133-143 — `{ id: EntityId, title: String, created_at: DateTime<Utc>, updated_at: DateTime<U...` — Identified risk, extracted from transcripts.
-- pub `draft` function L146-159 — `(title: impl Into<String>, confidence: f32, source_span: Option<SourceSpan>) -> ...`
-- pub `Blocker` struct L188-198 — `{ id: EntityId, title: String, created_at: DateTime<Utc>, updated_at: DateTime<U...` — Impediment to progress, extracted from transcripts.
-- pub `draft` function L201-214 — `(title: impl Into<String>, confidence: f32, source_span: Option<SourceSpan>) -> ...`
-- pub `Question` struct L243-253 — `{ id: EntityId, title: String, created_at: DateTime<Utc>, updated_at: DateTime<U...` — Open question requiring resolution, extracted from transcripts.
-- pub `draft` function L256-269 — `(title: impl Into<String>, confidence: f32, source_span: Option<SourceSpan>) -> ...`
-- pub `Insight` struct L298-307 — `{ id: EntityId, title: String, created_at: DateTime<Utc>, updated_at: DateTime<U...` — Learning or observation worth preserving, extracted from transcripts.
-- pub `draft` function L310-322 — `(title: impl Into<String>, confidence: f32, source_span: Option<SourceSpan>) -> ...`
+- pub `Decision` struct L97-106 — `{ id: EntityId, title: String, created_at: DateTime<Utc>, updated_at: DateTime<U...` — Recorded decision point, extracted from transcripts.
+- pub `draft` function L109-125 — `( title: impl Into<String>, confidence: f32, source_span: Option<SourceSpan>, ) ...`
+- pub `Risk` struct L156-166 — `{ id: EntityId, title: String, created_at: DateTime<Utc>, updated_at: DateTime<U...` — Identified risk, extracted from transcripts.
+- pub `draft` function L169-186 — `( title: impl Into<String>, confidence: f32, source_span: Option<SourceSpan>, ) ...`
+- pub `Blocker` struct L227-237 — `{ id: EntityId, title: String, created_at: DateTime<Utc>, updated_at: DateTime<U...` — Impediment to progress, extracted from transcripts.
+- pub `draft` function L240-257 — `( title: impl Into<String>, confidence: f32, source_span: Option<SourceSpan>, ) ...`
+- pub `Question` struct L298-308 — `{ id: EntityId, title: String, created_at: DateTime<Utc>, updated_at: DateTime<U...` — Open question requiring resolution, extracted from transcripts.
+- pub `draft` function L311-328 — `( title: impl Into<String>, confidence: f32, source_span: Option<SourceSpan>, ) ...`
+- pub `Insight` struct L369-378 — `{ id: EntityId, title: String, created_at: DateTime<Utc>, updated_at: DateTime<U...` — Learning or observation worth preserving, extracted from transcripts.
+- pub `draft` function L381-397 — `( title: impl Into<String>, confidence: f32, source_span: Option<SourceSpan>, ) ...`
 -  `impl_extractable` macro L13-48 — `-` — Common fields for all derived (extractable) entities.
--  `impl_relatable` macro L50-59 — `-`
--  `impl_taggable` macro L61-80 — `-`
--  `Decision` type L99-113 — `= Decision`
--  `Decision` type L115-121 — `impl Entity for Decision`
--  `id` function L116 — `(&self) -> &EntityId`
--  `entity_type` function L117 — `(&self) -> EntityType`
--  `title` function L118 — `(&self) -> &str`
--  `created_at` function L119 — `(&self) -> DateTime<Utc>`
--  `updated_at` function L120 — `(&self) -> DateTime<Utc>`
--  `Risk` type L145-160 — `= Risk`
--  `Risk` type L162-168 — `impl Entity for Risk`
--  `id` function L163 — `(&self) -> &EntityId`
--  `entity_type` function L164 — `(&self) -> EntityType`
--  `title` function L165 — `(&self) -> &str`
--  `created_at` function L166 — `(&self) -> DateTime<Utc>`
--  `updated_at` function L167 — `(&self) -> DateTime<Utc>`
--  `Risk` type L174-180 — `impl HasDeadline for Risk`
--  `deadline` function L175 — `(&self) -> Option<DateTime<Utc>>`
--  `set_deadline` function L176-179 — `(&mut self, deadline: Option<DateTime<Utc>>)`
--  `Blocker` type L200-215 — `= Blocker`
--  `Blocker` type L217-223 — `impl Entity for Blocker`
--  `id` function L218 — `(&self) -> &EntityId`
--  `entity_type` function L219 — `(&self) -> EntityType`
--  `title` function L220 — `(&self) -> &str`
--  `created_at` function L221 — `(&self) -> DateTime<Utc>`
--  `updated_at` function L222 — `(&self) -> DateTime<Utc>`
--  `Blocker` type L229-235 — `impl HasDeadline for Blocker`
--  `deadline` function L230 — `(&self) -> Option<DateTime<Utc>>`
--  `set_deadline` function L231-234 — `(&mut self, deadline: Option<DateTime<Utc>>)`
--  `Question` type L255-270 — `= Question`
--  `Question` type L272-278 — `impl Entity for Question`
--  `id` function L273 — `(&self) -> &EntityId`
--  `entity_type` function L274 — `(&self) -> EntityType`
--  `title` function L275 — `(&self) -> &str`
--  `created_at` function L276 — `(&self) -> DateTime<Utc>`
--  `updated_at` function L277 — `(&self) -> DateTime<Utc>`
--  `Question` type L284-290 — `impl HasDeadline for Question`
--  `deadline` function L285 — `(&self) -> Option<DateTime<Utc>>`
+-  `impl_relatable` macro L50-66 — `-`
+-  `impl_taggable` macro L68-89 — `-`
+-  `Decision` type L108-126 — `= Decision`
+-  `Decision` type L128-144 — `impl Entity for Decision`
+-  `id` function L129-131 — `(&self) -> &EntityId`
+-  `entity_type` function L132-134 — `(&self) -> EntityType`
+-  `title` function L135-137 — `(&self) -> &str`
+-  `created_at` function L138-140 — `(&self) -> DateTime<Utc>`
+-  `updated_at` function L141-143 — `(&self) -> DateTime<Utc>`
+-  `Risk` type L168-187 — `= Risk`
+-  `Risk` type L189-205 — `impl Entity for Risk`
+-  `id` function L190-192 — `(&self) -> &EntityId`
+-  `entity_type` function L193-195 — `(&self) -> EntityType`
+-  `title` function L196-198 — `(&self) -> &str`
+-  `created_at` function L199-201 — `(&self) -> DateTime<Utc>`
+-  `updated_at` function L202-204 — `(&self) -> DateTime<Utc>`
+-  `Risk` type L211-219 — `impl HasDeadline for Risk`
+-  `deadline` function L212-214 — `(&self) -> Option<DateTime<Utc>>`
+-  `set_deadline` function L215-218 — `(&mut self, deadline: Option<DateTime<Utc>>)`
+-  `Blocker` type L239-258 — `= Blocker`
+-  `Blocker` type L260-276 — `impl Entity for Blocker`
+-  `id` function L261-263 — `(&self) -> &EntityId`
+-  `entity_type` function L264-266 — `(&self) -> EntityType`
+-  `title` function L267-269 — `(&self) -> &str`
+-  `created_at` function L270-272 — `(&self) -> DateTime<Utc>`
+-  `updated_at` function L273-275 — `(&self) -> DateTime<Utc>`
+-  `Blocker` type L282-290 — `impl HasDeadline for Blocker`
+-  `deadline` function L283-285 — `(&self) -> Option<DateTime<Utc>>`
 -  `set_deadline` function L286-289 — `(&mut self, deadline: Option<DateTime<Utc>>)`
--  `Insight` type L309-323 — `= Insight`
--  `Insight` type L325-331 — `impl Entity for Insight`
--  `id` function L326 — `(&self) -> &EntityId`
--  `entity_type` function L327 — `(&self) -> EntityType`
--  `title` function L328 — `(&self) -> &str`
--  `created_at` function L329 — `(&self) -> DateTime<Utc>`
--  `updated_at` function L330 — `(&self) -> DateTime<Utc>`
+-  `Question` type L310-329 — `= Question`
+-  `Question` type L331-347 — `impl Entity for Question`
+-  `id` function L332-334 — `(&self) -> &EntityId`
+-  `entity_type` function L335-337 — `(&self) -> EntityType`
+-  `title` function L338-340 — `(&self) -> &str`
+-  `created_at` function L341-343 — `(&self) -> DateTime<Utc>`
+-  `updated_at` function L344-346 — `(&self) -> DateTime<Utc>`
+-  `Question` type L353-361 — `impl HasDeadline for Question`
+-  `deadline` function L354-356 — `(&self) -> Option<DateTime<Utc>>`
+-  `set_deadline` function L357-360 — `(&mut self, deadline: Option<DateTime<Utc>>)`
+-  `Insight` type L380-398 — `= Insight`
+-  `Insight` type L400-416 — `impl Entity for Insight`
+-  `id` function L401-403 — `(&self) -> &EntityId`
+-  `entity_type` function L404-406 — `(&self) -> EntityType`
+-  `title` function L407-409 — `(&self) -> &str`
+-  `created_at` function L410-412 — `(&self) -> DateTime<Utc>`
+-  `updated_at` function L413-415 — `(&self) -> DateTime<Utc>`
 
 #### clotho-core/src/domain/entities/execution.rs
 
 - pub `Workstream` struct L15-24 — `{ id: EntityId, title: String, created_at: DateTime<Utc>, updated_at: DateTime<U...` — Long-running work thread.
 - pub `new` function L27-39 — `(title: impl Into<String>) -> Self`
-- pub `Task` struct L113-124 — `{ id: EntityId, title: String, created_at: DateTime<Utc>, updated_at: DateTime<U...` — Discrete work item with a state machine lifecycle.
-- pub `new` function L127-141 — `(title: impl Into<String>) -> Self`
+- pub `Task` struct L138-149 — `{ id: EntityId, title: String, created_at: DateTime<Utc>, updated_at: DateTime<U...` — Discrete work item with a state machine lifecycle.
+- pub `new` function L152-166 — `(title: impl Into<String>) -> Self`
 -  `Workstream` type L26-40 — `= Workstream`
--  `Workstream` type L42-48 — `impl Entity for Workstream`
--  `id` function L43 — `(&self) -> &EntityId`
--  `entity_type` function L44 — `(&self) -> EntityType`
--  `title` function L45 — `(&self) -> &str`
--  `created_at` function L46 — `(&self) -> DateTime<Utc>`
--  `updated_at` function L47 — `(&self) -> DateTime<Utc>`
--  `Workstream` type L50-56 — `impl Activatable for Workstream`
--  `status` function L51 — `(&self) -> Status`
--  `set_status` function L52-55 — `(&mut self, status: Status)`
--  `Workstream` type L58-63 — `impl Relatable for Workstream`
--  `relations` function L59-61 — `(&self, graph: &GraphStore) -> Vec<Relation>`
--  `graph_label` function L62 — `(&self) -> &'static str`
--  `Workstream` type L65-80 — `impl Taggable for Workstream`
--  `tags` function L66 — `(&self) -> &[Tag]`
--  `add_tag` function L67-72 — `(&mut self, tag: Tag)`
--  `remove_tag` function L73-79 — `(&mut self, tag: &str)`
--  `Workstream` type L82-91 — `impl ContentBearing for Workstream`
--  `content` function L83 — `(&self) -> &str`
--  `set_content` function L84-87 — `(&mut self, content: String)`
--  `content_path` function L88-90 — `(&self) -> PathBuf`
--  `Workstream` type L93-99 — `impl HasCadence for Workstream`
--  `cadence` function L94 — `(&self) -> Option<&Cadence>`
--  `set_cadence` function L95-98 — `(&mut self, cadence: Option<Cadence>)`
--  `Task` type L126-142 — `= Task`
--  `Task` type L144-150 — `impl Entity for Task`
--  `id` function L145 — `(&self) -> &EntityId`
--  `entity_type` function L146 — `(&self) -> EntityType`
--  `title` function L147 — `(&self) -> &str`
--  `created_at` function L148 — `(&self) -> DateTime<Utc>`
--  `updated_at` function L149 — `(&self) -> DateTime<Utc>`
--  `Task` type L152-177 — `impl Taskable for Task`
--  `state` function L153 — `(&self) -> TaskState`
--  `transition` function L155-167 — `(&mut self, to: TaskState) -> Result<(), TransitionError>`
--  `valid_transitions` function L169-176 — `(&self) -> Vec<TaskState>`
--  `Task` type L179-184 — `impl Relatable for Task`
--  `relations` function L180-182 — `(&self, graph: &GraphStore) -> Vec<Relation>`
--  `graph_label` function L183 — `(&self) -> &'static str`
--  `Task` type L186-201 — `impl Taggable for Task`
--  `tags` function L187 — `(&self) -> &[Tag]`
--  `add_tag` function L188-193 — `(&mut self, tag: Tag)`
--  `remove_tag` function L194-200 — `(&mut self, tag: &str)`
--  `Task` type L203-212 — `impl ContentBearing for Task`
--  `content` function L204 — `(&self) -> &str`
--  `set_content` function L205-208 — `(&mut self, content: String)`
--  `content_path` function L209-211 — `(&self) -> PathBuf`
--  `Task` type L214-220 — `impl HasCadence for Task`
--  `cadence` function L215 — `(&self) -> Option<&Cadence>`
--  `set_cadence` function L216-219 — `(&mut self, cadence: Option<Cadence>)`
--  `Task` type L222-228 — `impl HasDeadline for Task`
--  `deadline` function L223 — `(&self) -> Option<DateTime<Utc>>`
--  `set_deadline` function L224-227 — `(&mut self, deadline: Option<DateTime<Utc>>)`
--  `Task` type L230-236 — `impl HasSchedule for Task`
--  `scheduled_at` function L231 — `(&self) -> Option<DateTime<Utc>>`
--  `set_scheduled_at` function L232-235 — `(&mut self, at: Option<DateTime<Utc>>)`
+-  `Workstream` type L42-58 — `impl Entity for Workstream`
+-  `id` function L43-45 — `(&self) -> &EntityId`
+-  `entity_type` function L46-48 — `(&self) -> EntityType`
+-  `title` function L49-51 — `(&self) -> &str`
+-  `created_at` function L52-54 — `(&self) -> DateTime<Utc>`
+-  `updated_at` function L55-57 — `(&self) -> DateTime<Utc>`
+-  `Workstream` type L60-68 — `impl Activatable for Workstream`
+-  `status` function L61-63 — `(&self) -> Status`
+-  `set_status` function L64-67 — `(&mut self, status: Status)`
+-  `Workstream` type L70-82 — `impl Relatable for Workstream`
+-  `relations` function L71-78 — `(&self, graph: &GraphStore) -> Vec<Relation>`
+-  `graph_label` function L79-81 — `(&self) -> &'static str`
+-  `Workstream` type L84-101 — `impl Taggable for Workstream`
+-  `tags` function L85-87 — `(&self) -> &[Tag]`
+-  `add_tag` function L88-93 — `(&mut self, tag: Tag)`
+-  `remove_tag` function L94-100 — `(&mut self, tag: &str)`
+-  `Workstream` type L103-114 — `impl ContentBearing for Workstream`
+-  `content` function L104-106 — `(&self) -> &str`
+-  `set_content` function L107-110 — `(&mut self, content: String)`
+-  `content_path` function L111-113 — `(&self) -> PathBuf`
+-  `Workstream` type L116-124 — `impl HasCadence for Workstream`
+-  `cadence` function L117-119 — `(&self) -> Option<&Cadence>`
+-  `set_cadence` function L120-123 — `(&mut self, cadence: Option<Cadence>)`
+-  `Task` type L151-167 — `= Task`
+-  `Task` type L169-185 — `impl Entity for Task`
+-  `id` function L170-172 — `(&self) -> &EntityId`
+-  `entity_type` function L173-175 — `(&self) -> EntityType`
+-  `title` function L176-178 — `(&self) -> &str`
+-  `created_at` function L179-181 — `(&self) -> DateTime<Utc>`
+-  `updated_at` function L182-184 — `(&self) -> DateTime<Utc>`
+-  `Task` type L187-214 — `impl Taskable for Task`
+-  `state` function L188-190 — `(&self) -> TaskState`
+-  `transition` function L192-204 — `(&mut self, to: TaskState) -> Result<(), TransitionError>`
+-  `valid_transitions` function L206-213 — `(&self) -> Vec<TaskState>`
+-  `Task` type L216-228 — `impl Relatable for Task`
+-  `relations` function L217-224 — `(&self, graph: &GraphStore) -> Vec<Relation>`
+-  `graph_label` function L225-227 — `(&self) -> &'static str`
+-  `Task` type L230-247 — `impl Taggable for Task`
+-  `tags` function L231-233 — `(&self) -> &[Tag]`
+-  `add_tag` function L234-239 — `(&mut self, tag: Tag)`
+-  `remove_tag` function L240-246 — `(&mut self, tag: &str)`
+-  `Task` type L249-260 — `impl ContentBearing for Task`
+-  `content` function L250-252 — `(&self) -> &str`
+-  `set_content` function L253-256 — `(&mut self, content: String)`
+-  `content_path` function L257-259 — `(&self) -> PathBuf`
+-  `Task` type L262-270 — `impl HasCadence for Task`
+-  `cadence` function L263-265 — `(&self) -> Option<&Cadence>`
+-  `set_cadence` function L266-269 — `(&mut self, cadence: Option<Cadence>)`
+-  `Task` type L272-280 — `impl HasDeadline for Task`
+-  `deadline` function L273-275 — `(&self) -> Option<DateTime<Utc>>`
+-  `set_deadline` function L276-279 — `(&mut self, deadline: Option<DateTime<Utc>>)`
+-  `Task` type L282-290 — `impl HasSchedule for Task`
+-  `scheduled_at` function L283-285 — `(&self) -> Option<DateTime<Utc>>`
+-  `set_scheduled_at` function L286-289 — `(&mut self, at: Option<DateTime<Utc>>)`
 
 #### clotho-core/src/domain/entities/mod.rs
 
@@ -512,104 +525,104 @@
 - pub `new` function L25-36 — `(name: impl Into<String>) -> Self`
 - pub `with_email` function L38-41 — `(mut self, email: impl Into<String>) -> Self`
 -  `Person` type L24-42 — `= Person`
--  `Person` type L44-50 — `impl Entity for Person`
--  `id` function L45 — `(&self) -> &EntityId`
--  `entity_type` function L46 — `(&self) -> EntityType`
--  `title` function L47 — `(&self) -> &str`
--  `created_at` function L48 — `(&self) -> DateTime<Utc>`
--  `updated_at` function L49 — `(&self) -> DateTime<Utc>`
--  `Person` type L52-57 — `impl Relatable for Person`
--  `relations` function L53-55 — `(&self, graph: &GraphStore) -> Vec<Relation>`
--  `graph_label` function L56 — `(&self) -> &'static str`
--  `Person` type L59-74 — `impl Taggable for Person`
--  `tags` function L60 — `(&self) -> &[Tag]`
--  `add_tag` function L61-66 — `(&mut self, tag: Tag)`
--  `remove_tag` function L67-73 — `(&mut self, tag: &str)`
--  `Person` type L76-85 — `impl ContentBearing for Person`
--  `content` function L77 — `(&self) -> &str`
--  `set_content` function L78-81 — `(&mut self, content: String)`
--  `content_path` function L82-84 — `(&self) -> PathBuf`
+-  `Person` type L44-60 — `impl Entity for Person`
+-  `id` function L45-47 — `(&self) -> &EntityId`
+-  `entity_type` function L48-50 — `(&self) -> EntityType`
+-  `title` function L51-53 — `(&self) -> &str`
+-  `created_at` function L54-56 — `(&self) -> DateTime<Utc>`
+-  `updated_at` function L57-59 — `(&self) -> DateTime<Utc>`
+-  `Person` type L62-74 — `impl Relatable for Person`
+-  `relations` function L63-70 — `(&self, graph: &GraphStore) -> Vec<Relation>`
+-  `graph_label` function L71-73 — `(&self) -> &'static str`
+-  `Person` type L76-93 — `impl Taggable for Person`
+-  `tags` function L77-79 — `(&self) -> &[Tag]`
+-  `add_tag` function L80-85 — `(&mut self, tag: Tag)`
+-  `remove_tag` function L86-92 — `(&mut self, tag: &str)`
+-  `Person` type L95-106 — `impl ContentBearing for Person`
+-  `content` function L96-98 — `(&self) -> &str`
+-  `set_content` function L99-102 — `(&mut self, content: String)`
+-  `content_path` function L103-105 — `(&self) -> PathBuf`
 
 #### clotho-core/src/domain/entities/structural.rs
 
 - pub `Program` struct L16-25 — `{ id: EntityId, title: String, created_at: DateTime<Utc>, updated_at: DateTime<U...` — Strategic initiative with explicit objectives.
 - pub `new` function L28-40 — `(title: impl Into<String>) -> Self`
-- pub `Responsibility` struct L110-119 — `{ id: EntityId, title: String, created_at: DateTime<Utc>, updated_at: DateTime<U...` — Ongoing role obligation that never "completes".
-- pub `new` function L122-134 — `(title: impl Into<String>) -> Self`
-- pub `Objective` struct L204-215 — `{ id: EntityId, title: String, created_at: DateTime<Utc>, updated_at: DateTime<U...` — Outcome within a Program.
-- pub `new` function L218-231 — `(title: impl Into<String>, program_id: EntityId) -> Self`
+- pub `Responsibility` struct L135-144 — `{ id: EntityId, title: String, created_at: DateTime<Utc>, updated_at: DateTime<U...` — Ongoing role obligation that never "completes".
+- pub `new` function L147-159 — `(title: impl Into<String>) -> Self`
+- pub `Objective` struct L254-265 — `{ id: EntityId, title: String, created_at: DateTime<Utc>, updated_at: DateTime<U...` — Outcome within a Program.
+- pub `new` function L268-281 — `(title: impl Into<String>, program_id: EntityId) -> Self`
 -  `Program` type L27-41 — `= Program`
--  `Program` type L43-49 — `impl Entity for Program`
--  `id` function L44 — `(&self) -> &EntityId`
--  `entity_type` function L45 — `(&self) -> EntityType`
--  `title` function L46 — `(&self) -> &str`
--  `created_at` function L47 — `(&self) -> DateTime<Utc>`
--  `updated_at` function L48 — `(&self) -> DateTime<Utc>`
--  `Program` type L51-57 — `impl Activatable for Program`
--  `status` function L52 — `(&self) -> Status`
--  `set_status` function L53-56 — `(&mut self, status: Status)`
--  `Program` type L59-64 — `impl Relatable for Program`
--  `relations` function L60-62 — `(&self, graph: &GraphStore) -> Vec<Relation>`
--  `graph_label` function L63 — `(&self) -> &'static str`
--  `Program` type L66-81 — `impl Taggable for Program`
--  `tags` function L67 — `(&self) -> &[Tag]`
--  `add_tag` function L68-73 — `(&mut self, tag: Tag)`
--  `remove_tag` function L74-80 — `(&mut self, tag: &str)`
--  `Program` type L83-92 — `impl ContentBearing for Program`
--  `content` function L84 — `(&self) -> &str`
--  `set_content` function L85-88 — `(&mut self, content: String)`
--  `content_path` function L89-91 — `(&self) -> PathBuf`
--  `Program` type L94-100 — `impl HasCadence for Program`
--  `cadence` function L95 — `(&self) -> Option<&Cadence>`
--  `set_cadence` function L96-99 — `(&mut self, cadence: Option<Cadence>)`
--  `Responsibility` type L121-135 — `= Responsibility`
--  `Responsibility` type L137-143 — `impl Entity for Responsibility`
--  `id` function L138 — `(&self) -> &EntityId`
--  `entity_type` function L139 — `(&self) -> EntityType`
--  `title` function L140 — `(&self) -> &str`
--  `created_at` function L141 — `(&self) -> DateTime<Utc>`
--  `updated_at` function L142 — `(&self) -> DateTime<Utc>`
--  `Responsibility` type L145-151 — `impl Activatable for Responsibility`
--  `status` function L146 — `(&self) -> Status`
--  `set_status` function L147-150 — `(&mut self, status: Status)`
--  `Responsibility` type L153-158 — `impl Relatable for Responsibility`
--  `relations` function L154-156 — `(&self, graph: &GraphStore) -> Vec<Relation>`
--  `graph_label` function L157 — `(&self) -> &'static str`
--  `Responsibility` type L160-175 — `impl Taggable for Responsibility`
--  `tags` function L161 — `(&self) -> &[Tag]`
--  `add_tag` function L162-167 — `(&mut self, tag: Tag)`
--  `remove_tag` function L168-174 — `(&mut self, tag: &str)`
--  `Responsibility` type L177-186 — `impl ContentBearing for Responsibility`
--  `content` function L178 — `(&self) -> &str`
--  `set_content` function L179-182 — `(&mut self, content: String)`
--  `content_path` function L183-185 — `(&self) -> PathBuf`
--  `Responsibility` type L188-194 — `impl HasCadence for Responsibility`
--  `cadence` function L189 — `(&self) -> Option<&Cadence>`
--  `set_cadence` function L190-193 — `(&mut self, cadence: Option<Cadence>)`
--  `Objective` type L217-232 — `= Objective`
--  `Objective` type L234-240 — `impl Entity for Objective`
--  `id` function L235 — `(&self) -> &EntityId`
--  `entity_type` function L236 — `(&self) -> EntityType`
--  `title` function L237 — `(&self) -> &str`
--  `created_at` function L238 — `(&self) -> DateTime<Utc>`
--  `updated_at` function L239 — `(&self) -> DateTime<Utc>`
--  `Objective` type L242-248 — `impl Activatable for Objective`
--  `status` function L243 — `(&self) -> Status`
--  `set_status` function L244-247 — `(&mut self, status: Status)`
--  `Objective` type L250-255 — `impl Relatable for Objective`
--  `relations` function L251-253 — `(&self, graph: &GraphStore) -> Vec<Relation>`
--  `graph_label` function L254 — `(&self) -> &'static str`
--  `Objective` type L257-272 — `impl Taggable for Objective`
--  `tags` function L258 — `(&self) -> &[Tag]`
--  `add_tag` function L259-264 — `(&mut self, tag: Tag)`
--  `remove_tag` function L265-271 — `(&mut self, tag: &str)`
--  `Objective` type L274-283 — `impl ContentBearing for Objective`
--  `content` function L275 — `(&self) -> &str`
--  `set_content` function L276-279 — `(&mut self, content: String)`
--  `content_path` function L280-282 — `(&self) -> PathBuf`
--  `Objective` type L285-291 — `impl HasDeadline for Objective`
--  `deadline` function L286 — `(&self) -> Option<DateTime<Utc>>`
--  `set_deadline` function L287-290 — `(&mut self, deadline: Option<DateTime<Utc>>)`
+-  `Program` type L43-59 — `impl Entity for Program`
+-  `id` function L44-46 — `(&self) -> &EntityId`
+-  `entity_type` function L47-49 — `(&self) -> EntityType`
+-  `title` function L50-52 — `(&self) -> &str`
+-  `created_at` function L53-55 — `(&self) -> DateTime<Utc>`
+-  `updated_at` function L56-58 — `(&self) -> DateTime<Utc>`
+-  `Program` type L61-69 — `impl Activatable for Program`
+-  `status` function L62-64 — `(&self) -> Status`
+-  `set_status` function L65-68 — `(&mut self, status: Status)`
+-  `Program` type L71-83 — `impl Relatable for Program`
+-  `relations` function L72-79 — `(&self, graph: &GraphStore) -> Vec<Relation>`
+-  `graph_label` function L80-82 — `(&self) -> &'static str`
+-  `Program` type L85-102 — `impl Taggable for Program`
+-  `tags` function L86-88 — `(&self) -> &[Tag]`
+-  `add_tag` function L89-94 — `(&mut self, tag: Tag)`
+-  `remove_tag` function L95-101 — `(&mut self, tag: &str)`
+-  `Program` type L104-115 — `impl ContentBearing for Program`
+-  `content` function L105-107 — `(&self) -> &str`
+-  `set_content` function L108-111 — `(&mut self, content: String)`
+-  `content_path` function L112-114 — `(&self) -> PathBuf`
+-  `Program` type L117-125 — `impl HasCadence for Program`
+-  `cadence` function L118-120 — `(&self) -> Option<&Cadence>`
+-  `set_cadence` function L121-124 — `(&mut self, cadence: Option<Cadence>)`
+-  `Responsibility` type L146-160 — `= Responsibility`
+-  `Responsibility` type L162-178 — `impl Entity for Responsibility`
+-  `id` function L163-165 — `(&self) -> &EntityId`
+-  `entity_type` function L166-168 — `(&self) -> EntityType`
+-  `title` function L169-171 — `(&self) -> &str`
+-  `created_at` function L172-174 — `(&self) -> DateTime<Utc>`
+-  `updated_at` function L175-177 — `(&self) -> DateTime<Utc>`
+-  `Responsibility` type L180-188 — `impl Activatable for Responsibility`
+-  `status` function L181-183 — `(&self) -> Status`
+-  `set_status` function L184-187 — `(&mut self, status: Status)`
+-  `Responsibility` type L190-202 — `impl Relatable for Responsibility`
+-  `relations` function L191-198 — `(&self, graph: &GraphStore) -> Vec<Relation>`
+-  `graph_label` function L199-201 — `(&self) -> &'static str`
+-  `Responsibility` type L204-221 — `impl Taggable for Responsibility`
+-  `tags` function L205-207 — `(&self) -> &[Tag]`
+-  `add_tag` function L208-213 — `(&mut self, tag: Tag)`
+-  `remove_tag` function L214-220 — `(&mut self, tag: &str)`
+-  `Responsibility` type L223-234 — `impl ContentBearing for Responsibility`
+-  `content` function L224-226 — `(&self) -> &str`
+-  `set_content` function L227-230 — `(&mut self, content: String)`
+-  `content_path` function L231-233 — `(&self) -> PathBuf`
+-  `Responsibility` type L236-244 — `impl HasCadence for Responsibility`
+-  `cadence` function L237-239 — `(&self) -> Option<&Cadence>`
+-  `set_cadence` function L240-243 — `(&mut self, cadence: Option<Cadence>)`
+-  `Objective` type L267-282 — `= Objective`
+-  `Objective` type L284-300 — `impl Entity for Objective`
+-  `id` function L285-287 — `(&self) -> &EntityId`
+-  `entity_type` function L288-290 — `(&self) -> EntityType`
+-  `title` function L291-293 — `(&self) -> &str`
+-  `created_at` function L294-296 — `(&self) -> DateTime<Utc>`
+-  `updated_at` function L297-299 — `(&self) -> DateTime<Utc>`
+-  `Objective` type L302-310 — `impl Activatable for Objective`
+-  `status` function L303-305 — `(&self) -> Status`
+-  `set_status` function L306-309 — `(&mut self, status: Status)`
+-  `Objective` type L312-324 — `impl Relatable for Objective`
+-  `relations` function L313-320 — `(&self, graph: &GraphStore) -> Vec<Relation>`
+-  `graph_label` function L321-323 — `(&self) -> &'static str`
+-  `Objective` type L326-343 — `impl Taggable for Objective`
+-  `tags` function L327-329 — `(&self) -> &[Tag]`
+-  `add_tag` function L330-335 — `(&mut self, tag: Tag)`
+-  `remove_tag` function L336-342 — `(&mut self, tag: &str)`
+-  `Objective` type L345-356 — `impl ContentBearing for Objective`
+-  `content` function L346-348 — `(&self) -> &str`
+-  `set_content` function L349-352 — `(&mut self, content: String)`
+-  `content_path` function L353-355 — `(&self) -> PathBuf`
+-  `Objective` type L358-366 — `impl HasDeadline for Objective`
+-  `deadline` function L359-361 — `(&self) -> Option<DateTime<Utc>>`
+-  `set_deadline` function L362-365 — `(&mut self, deadline: Option<DateTime<Utc>>)`
 
 ### clotho-core/src/domain
 
@@ -624,18 +637,18 @@
 - pub `KnownEntity` struct L66-71 — `{ id: EntityId, entity_type: EntityType, title: String, aliases: Vec<String> }` — A known entity provided for extraction resolution context.
 - pub `ExtractionResult` struct L75-77 — `{ extractions: Vec<Extraction> }` — Result of extraction from a transcript.
 - pub `ExtractorError` enum L80-87 — `Failed | Unavailable | RateLimited` — live in clotho-extract/backends/.
-- pub `Extractor` interface L91-93 — `{ fn extract() }` — Core trait for LLM-powered extraction from transcripts.
-- pub `SummaryRequest` struct L101-108 — `{ content: String, context: Option<String>, max_length: Option<usize> }` — Request to generate a summary from content.
-- pub `SummaryResult` struct L112-114 — `{ summary: String }` — Result of summarization.
-- pub `SummarizerError` enum L117-124 — `Failed | Unavailable | RateLimited` — live in clotho-extract/backends/.
-- pub `Summarizer` interface L128-133 — `{ fn summarize() }` — Core trait for LLM-powered summarization.
-- pub `ResolutionRequest` struct L141-148 — `{ mentions: Vec<EntityMention>, known_entities: Vec<KnownEntity>, context: Strin...` — Request to resolve ambiguous entity mentions.
-- pub `ResolvedMention` struct L152-156 — `{ original: EntityMention, resolved_id: Option<EntityId>, confidence: f32 }` — A single resolution result for one mention.
-- pub `ResolutionResult` struct L160-162 — `{ resolutions: Vec<ResolvedMention> }` — Result of entity resolution.
-- pub `ResolverError` enum L165-172 — `Failed | Unavailable | RateLimited` — live in clotho-extract/backends/.
-- pub `Resolver` interface L176-181 — `{ fn resolve() }` — Core trait for LLM-assisted entity resolution.
-- pub `EmbedderError` enum L188-197 — `Failed | Unavailable | RateLimited | InputTooLarge` — live in clotho-extract/backends/.
-- pub `Embedder` interface L204-210 — `{ fn embed(), fn dimension() }` — Core trait for generating vector embeddings from text.
+- pub `Extractor` interface L91-94 — `{ fn extract() }` — Core trait for LLM-powered extraction from transcripts.
+- pub `SummaryRequest` struct L102-109 — `{ content: String, context: Option<String>, max_length: Option<usize> }` — Request to generate a summary from content.
+- pub `SummaryResult` struct L113-115 — `{ summary: String }` — Result of summarization.
+- pub `SummarizerError` enum L118-125 — `Failed | Unavailable | RateLimited` — live in clotho-extract/backends/.
+- pub `Summarizer` interface L129-131 — `{ fn summarize() }` — Core trait for LLM-powered summarization.
+- pub `ResolutionRequest` struct L139-146 — `{ mentions: Vec<EntityMention>, known_entities: Vec<KnownEntity>, context: Strin...` — Request to resolve ambiguous entity mentions.
+- pub `ResolvedMention` struct L150-154 — `{ original: EntityMention, resolved_id: Option<EntityId>, confidence: f32 }` — A single resolution result for one mention.
+- pub `ResolutionResult` struct L158-160 — `{ resolutions: Vec<ResolvedMention> }` — Result of entity resolution.
+- pub `ResolverError` enum L163-170 — `Failed | Unavailable | RateLimited` — live in clotho-extract/backends/.
+- pub `Resolver` interface L174-176 — `{ fn resolve() }` — Core trait for LLM-assisted entity resolution.
+- pub `EmbedderError` enum L183-192 — `Failed | Unavailable | RateLimited | InputTooLarge` — live in clotho-extract/backends/.
+- pub `Embedder` interface L199-205 — `{ fn embed(), fn dimension() }` — Core trait for generating vector embeddings from text.
 
 #### clotho-core/src/domain/mod.rs
 
@@ -665,17 +678,17 @@
 
 - pub `EntityId` struct L8 — `-` — Unique identifier for all entities.
 - pub `new` function L11-13 — `() -> Self`
-- pub `EntityType` enum L43-65 — `Program | Responsibility | Objective | Workstream | Task | Meeting | Transcript ...` — Enum of all 15 entity types.
-- pub `Status` enum L94-97 — `Active | Inactive` — Lifecycle status for Activatable entities.
-- pub `TaskState` enum L102-107 — `Todo | Doing | Blocked | Done` — Workflow state for Taskable entities.
-- pub `ExtractionStatus` enum L112-116 — `Draft | Promoted | Discarded` — Extraction lifecycle for Extractable entities.
-- pub `SourceSpan` struct L120-124 — `{ transcript_id: EntityId, start: usize, end: usize }` — Reference to a span within a transcript.
-- pub `Tag` struct L128 — `-` — Freeform tag.
-- pub `new` function L131-133 — `(value: impl Into<String>) -> Self`
-- pub `as_str` function L135-137 — `(&self) -> &str`
-- pub `PeriodType` enum L161-167 — `Daily | Weekly | Monthly | Quarterly | Adhoc` — Period type for Reflections.
-- pub `Frequency` enum L172-180 — `Daily | Weekly | Biweekly | Monthly | Quarterly | Yearly | Custom` — Recurring schedule frequency.
-- pub `Cadence` struct L187-195 — `{ frequency: Frequency, cron: Option<String>, label: Option<String>, next_occurr...` — Recurring schedule metadata.
+- pub `EntityType` enum L43-66 — `Program | Responsibility | Objective | Workstream | Task | Meeting | Transcript ...` — Enum of all entity types.
+- pub `Status` enum L96-99 — `Active | Inactive` — Lifecycle status for Activatable entities.
+- pub `TaskState` enum L104-109 — `Todo | Doing | Blocked | Done` — Workflow state for Taskable entities.
+- pub `ExtractionStatus` enum L114-118 — `Draft | Promoted | Discarded` — Extraction lifecycle for Extractable entities.
+- pub `SourceSpan` struct L122-126 — `{ transcript_id: EntityId, start: usize, end: usize }` — Reference to a span within a transcript.
+- pub `Tag` struct L130 — `-` — Freeform tag.
+- pub `new` function L133-135 — `(value: impl Into<String>) -> Self`
+- pub `as_str` function L137-139 — `(&self) -> &str`
+- pub `PeriodType` enum L163-169 — `Daily | Weekly | Monthly | Quarterly | Adhoc` — Period type for Reflections.
+- pub `Frequency` enum L174-182 — `Daily | Weekly | Biweekly | Monthly | Quarterly | Yearly | Custom` — Recurring schedule frequency.
+- pub `Cadence` struct L189-197 — `{ frequency: Frequency, cron: Option<String>, label: Option<String>, next_occurr...` — Recurring schedule metadata.
 -  `EntityId` type L10-14 — `= EntityId`
 -  `EntityId` type L16-20 — `impl Default for EntityId`
 -  `default` function L17-19 — `() -> Self`
@@ -685,15 +698,15 @@
 -  `from` function L29-31 — `(uuid: Uuid) -> Self`
 -  `Uuid` type L34-38 — `= Uuid`
 -  `from` function L35-37 — `(id: EntityId) -> Self`
--  `EntityType` type L67-89 — `= EntityType`
--  `fmt` function L68-88 — `(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result`
--  `Tag` type L130-138 — `= Tag`
--  `Tag` type L140-144 — `= Tag`
--  `fmt` function L141-143 — `(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result`
--  `Tag` type L146-150 — `= Tag`
--  `from` function L147-149 — `(s: &str) -> Self`
--  `Tag` type L152-156 — `= Tag`
--  `from` function L153-155 — `(s: String) -> Self`
+-  `EntityType` type L68-91 — `= EntityType`
+-  `fmt` function L69-90 — `(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result`
+-  `Tag` type L132-140 — `= Tag`
+-  `Tag` type L142-146 — `= Tag`
+-  `fmt` function L143-145 — `(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result`
+-  `Tag` type L148-152 — `= Tag`
+-  `from` function L149-151 — `(s: &str) -> Self`
+-  `Tag` type L154-158 — `= Tag`
+-  `from` function L155-157 — `(s: String) -> Self`
 
 ### clotho-core/src
 
@@ -739,19 +752,19 @@
 - pub `queries` module L3 — `-`
 - pub `GraphStore` struct L15-17 — `{ inner: Graph }` — The core graph store wrapping graphqlite.
 - pub `open` function L21-24 — `(path: &Path) -> Result<Self, GraphError>` — Open a file-backed graph database.
-- pub `in_memory` function L27-31 — `() -> Result<Self, GraphError>` — Create an in-memory graph database (for tests).
-- pub `graph` function L34-36 — `(&self) -> &Graph` — Access the underlying graphqlite Graph for advanced operations.
--  `GraphStore` type L19-37 — `= GraphStore`
+- pub `in_memory` function L27-30 — `() -> Result<Self, GraphError>` — Create an in-memory graph database (for tests).
+- pub `graph` function L33-35 — `(&self) -> &Graph` — Access the underlying graphqlite Graph for advanced operations.
+-  `GraphStore` type L19-36 — `= GraphStore`
 
 #### clotho-core/src/graph/nodes.rs
 
 - pub `NodeInfo` struct L9-13 — `{ id: EntityId, entity_type: EntityType, title: String }` — Metadata about a node in the graph.
-- pub `register_node` function L19-38 — `( &self, id: &EntityId, entity_type: EntityType, title: &str, ) -> Result<(), Gr...` — Register an entity as a node in the graph.
-- pub `remove_node` function L41-45 — `(&self, id: &EntityId) -> Result<(), GraphError>` — Remove a node and all its edges from the graph.
-- pub `get_node` function L48-74 — `(&self, id: &EntityId) -> Result<Option<NodeInfo>, GraphError>` — Get metadata about a node by querying with Cypher.
-- pub `has_node` function L77-81 — `(&self, id: &EntityId) -> Result<bool, GraphError>` — Check whether a node exists in the graph.
--  `GraphStore` type L15-82 — `= GraphStore`
--  `parse_entity_type` function L85-105 — `(s: &str) -> Option<EntityType>` — Parse an EntityType from its Display string.
+- pub `register_node` function L19-36 — `( &self, id: &EntityId, entity_type: EntityType, title: &str, ) -> Result<(), Gr...` — Register an entity as a node in the graph.
+- pub `remove_node` function L39-43 — `(&self, id: &EntityId) -> Result<(), GraphError>` — Remove a node and all its edges from the graph.
+- pub `get_node` function L46-73 — `(&self, id: &EntityId) -> Result<Option<NodeInfo>, GraphError>` — Get metadata about a node by querying with Cypher.
+- pub `has_node` function L76-80 — `(&self, id: &EntityId) -> Result<bool, GraphError>` — Check whether a node exists in the graph.
+-  `GraphStore` type L15-81 — `= GraphStore`
+-  `parse_entity_type` function L84-104 — `(s: &str) -> Option<EntityType>` — Parse an EntityType from its Display string.
 
 #### clotho-core/src/graph/queries.rs
 
@@ -779,71 +792,71 @@
 -  `task_todo_to_done_invalid` function L53-58 — `()`
 -  `task_todo_to_blocked_invalid` function L61-66 — `()`
 -  `task_done_is_terminal` function L69-77 — `()`
--  `task_valid_transitions` function L80-89 — `()`
--  `decision_starts_as_draft` function L96-99 — `()`
--  `decision_draft_to_promoted` function L102-106 — `()`
--  `decision_draft_to_discarded` function L109-113 — `()`
--  `promote_on_promoted_fails` function L116-121 — `()`
--  `promote_on_discarded_fails` function L124-129 — `()`
--  `discard_on_discarded_is_noop` function L132-139 — `()`
--  `extractable_confidence_and_source_span` function L142-151 — `()`
--  `program_starts_active` function L158-161 — `()`
--  `program_active_to_inactive` function L164-168 — `()`
--  `program_inactive_to_active` function L171-176 — `()`
--  `taggable_add_and_get` function L183-189 — `()`
--  `taggable_no_duplicates` function L192-197 — `()`
--  `taggable_remove` function L200-207 — `()`
--  `taggable_remove_nonexistent_is_noop` function L210-215 — `()`
--  `has_cadence_set_get` function L222-235 — `()`
--  `has_cadence_clear` function L238-248 — `()`
--  `has_deadline_set_get` function L251-258 — `()`
--  `has_schedule_set_get` function L261-268 — `()`
--  `entity_id_unique` function L275-279 — `()`
--  `entity_id_display` function L282-288 — `()`
--  `entity_id_equality` function L291-295 — `()`
--  `program_serde_roundtrip` function L302-309 — `()`
--  `task_serde_roundtrip` function L312-318 — `()`
--  `meeting_serde_roundtrip` function L321-326 — `()`
--  `decision_serde_roundtrip` function L329-335 — `()`
--  `person_serde_roundtrip` function L338-344 — `()`
--  `assert_structural` function L350 — `(_: &T)`
--  `assert_taskable_entity` function L351 — `(_: &T)`
--  `assert_extractable_entity` function L352 — `(_: &T)`
--  `assert_person_entity` function L353 — `(_: &T)`
--  `assert_has_cadence` function L354 — `(_: &T)`
--  `assert_has_deadline` function L355 — `(_: &T)`
--  `assert_has_schedule` function L356 — `(_: &T)`
--  `trait_composition_structural` function L359-371 — `()`
--  `trait_composition_execution` function L374-381 — `()`
--  `trait_composition_capture` function L384-390 — `()`
--  `trait_composition_derived` function L393-411 — `()`
--  `trait_composition_person` function L414-417 — `()`
+-  `task_valid_transitions` function L80-92 — `()`
+-  `decision_starts_as_draft` function L99-102 — `()`
+-  `decision_draft_to_promoted` function L105-109 — `()`
+-  `decision_draft_to_discarded` function L112-116 — `()`
+-  `promote_on_promoted_fails` function L119-124 — `()`
+-  `promote_on_discarded_fails` function L127-132 — `()`
+-  `discard_on_discarded_is_noop` function L135-142 — `()`
+-  `extractable_confidence_and_source_span` function L145-154 — `()`
+-  `program_starts_active` function L161-164 — `()`
+-  `program_active_to_inactive` function L167-171 — `()`
+-  `program_inactive_to_active` function L174-179 — `()`
+-  `taggable_add_and_get` function L186-192 — `()`
+-  `taggable_no_duplicates` function L195-200 — `()`
+-  `taggable_remove` function L203-210 — `()`
+-  `taggable_remove_nonexistent_is_noop` function L213-218 — `()`
+-  `has_cadence_set_get` function L225-238 — `()`
+-  `has_cadence_clear` function L241-251 — `()`
+-  `has_deadline_set_get` function L254-261 — `()`
+-  `has_schedule_set_get` function L264-271 — `()`
+-  `entity_id_unique` function L278-282 — `()`
+-  `entity_id_display` function L285-291 — `()`
+-  `entity_id_equality` function L294-298 — `()`
+-  `program_serde_roundtrip` function L305-312 — `()`
+-  `task_serde_roundtrip` function L315-321 — `()`
+-  `meeting_serde_roundtrip` function L324-329 — `()`
+-  `decision_serde_roundtrip` function L332-338 — `()`
+-  `person_serde_roundtrip` function L341-347 — `()`
+-  `assert_structural` function L353 — `(_: &T)`
+-  `assert_taskable_entity` function L354-366 — `( _: &T, )`
+-  `assert_extractable_entity` function L367 — `(_: &T)`
+-  `assert_person_entity` function L368 — `(_: &T)`
+-  `assert_has_cadence` function L369 — `(_: &T)`
+-  `assert_has_deadline` function L370 — `(_: &T)`
+-  `assert_has_schedule` function L371 — `(_: &T)`
+-  `trait_composition_structural` function L374-386 — `()`
+-  `trait_composition_execution` function L389-396 — `()`
+-  `trait_composition_capture` function L399-405 — `()`
+-  `trait_composition_derived` function L408-426 — `()`
+-  `trait_composition_person` function L429-432 — `()`
 
 #### clotho-core/tests/graph_tests.rs
 
 -  `setup` function L7-9 — `() -> GraphStore`
 -  `graph_store_in_memory_empty` function L16-21 — `()`
--  `register_and_get_node` function L28-39 — `()`
--  `has_node_false_for_missing` function L42-46 — `()`
--  `get_node_returns_none_for_missing` function L49-53 — `()`
--  `remove_node` function L56-64 — `()`
--  `upsert_node_updates_title` function L67-79 — `()`
--  `add_and_has_edge` function L86-95 — `()`
--  `has_edge_false_when_missing` function L98-106 — `()`
--  `remove_edge` function L109-121 — `()`
--  `get_edges_from` function L124-139 — `()`
--  `get_edges_by_type_filters` function L142-161 — `()`
--  `get_edges_to` function L164-178 — `()`
--  `add_edge_with_props` function L185-197 — `()`
--  `relatable_returns_real_edges` function L204-217 — `()`
--  `relatable_empty_when_no_edges` function L220-227 — `()`
--  `get_neighbors` function L234-248 — `()`
--  `get_related_by_type` function L251-266 — `()`
--  `get_incoming_by_type` function L269-283 — `()`
--  `get_entities_by_label` function L286-297 — `()`
--  `raw_cypher_query` function L304-317 — `()`
--  `remove_node_cascades_edges` function L324-337 — `()`
--  `stats_counts` function L344-355 — `()`
+-  `register_and_get_node` function L28-40 — `()`
+-  `has_node_false_for_missing` function L43-47 — `()`
+-  `get_node_returns_none_for_missing` function L50-54 — `()`
+-  `remove_node` function L57-65 — `()`
+-  `upsert_node_updates_title` function L68-82 — `()`
+-  `add_and_has_edge` function L89-99 — `()`
+-  `has_edge_false_when_missing` function L102-111 — `()`
+-  `remove_edge` function L114-127 — `()`
+-  `get_edges_from` function L130-149 — `()`
+-  `get_edges_by_type_filters` function L152-173 — `()`
+-  `get_edges_to` function L176-191 — `()`
+-  `add_edge_with_props` function L198-210 — `()`
+-  `relatable_returns_real_edges` function L217-233 — `()`
+-  `relatable_empty_when_no_edges` function L236-244 — `()`
+-  `get_neighbors` function L251-265 — `()`
+-  `get_related_by_type` function L268-289 — `()`
+-  `get_incoming_by_type` function L292-313 — `()`
+-  `get_entities_by_label` function L316-330 — `()`
+-  `raw_cypher_query` function L337-352 — `()`
+-  `remove_node_cascades_edges` function L359-373 — `()`
+-  `stats_counts` function L380-391 — `()`
 
 ### clotho-mcp/src
 
@@ -857,30 +870,43 @@
 #### clotho-mcp/src/lib.rs
 
 - pub `formatting` module L1 — `-`
-- pub `server` module L2 — `-`
-- pub `tools` module L3 — `-`
-- pub `workspace_resolver` module L4 — `-`
-- pub `run` function L20-78 — `() -> AnyhowResult<()>` — Run the Clotho MCP server on stdio transport.
+- pub `resolve` module L2 — `-`
+- pub `server` module L3 — `-`
+- pub `tools` module L4 — `-`
+- pub `workspace_resolver` module L5 — `-`
+- pub `run` function L21-79 — `() -> AnyhowResult<()>` — Run the Clotho MCP server on stdio transport.
 
 #### clotho-mcp/src/main.rs
 
 -  `main` function L4-6 — `() -> Result<()>`
 
+#### clotho-mcp/src/resolve.rs
+
+- pub `resolve_for_read` function L6-13 — `(store: &EntityStore, input: &str) -> Result<EntityRow, CallToolResult>` — Resolve an entity ID (full or prefix) for MCP read-only tools.
+- pub `resolve_for_write` function L17-24 — `(store: &EntityStore, input: &str) -> Result<EntityRow, CallToolResult>` — Resolve an entity ID for MCP destructive tools.
+-  `format_ambiguous_table` function L26-44 — `(input: &str, rows: &[EntityRow]) -> String`
+-  `ambiguity_result` function L46-56 — `(input: &str, rows: &[EntityRow]) -> CallToolResult`
+-  `ambiguity_result_destructive` function L58-68 — `(input: &str, rows: &[EntityRow]) -> CallToolResult`
+-  `not_found_result` function L70-79 — `(input: &str) -> CallToolResult`
+-  `error_result` function L81-88 — `(msg: &str) -> CallToolResult`
+
 #### clotho-mcp/src/server.rs
 
-- pub `ClothoServerHandler` struct L19 — `-`
-- pub `new` function L22-25 — `() -> Self`
--  `ClothoServerHandler` type L21-26 — `= ClothoServerHandler`
--  `ClothoServerHandler` type L29-160 — `impl ServerHandler for ClothoServerHandler`
--  `handle_list_tools_request` function L30-40 — `( &self, _params: Option<PaginatedRequestParams>, _runtime: Arc<dyn McpServer>, ...`
--  `handle_call_tool_request` function L42-159 — `( &self, params: CallToolRequestParams, _runtime: Arc<dyn McpServer>, ) -> Resul...`
+- pub `ClothoServerHandler` struct L20 — `-`
+- pub `new` function L29-32 — `() -> Self`
+-  `ClothoServerHandler` type L22-26 — `impl Default for ClothoServerHandler`
+-  `default` function L23-25 — `() -> Self`
+-  `ClothoServerHandler` type L28-33 — `= ClothoServerHandler`
+-  `ClothoServerHandler` type L36-185 — `impl ServerHandler for ClothoServerHandler`
+-  `handle_list_tools_request` function L37-47 — `( &self, _params: Option<PaginatedRequestParams>, _runtime: Arc<dyn McpServer>, ...`
+-  `handle_call_tool_request` function L49-184 — `( &self, params: CallToolRequestParams, _runtime: Arc<dyn McpServer>, ) -> Resul...`
 
 #### clotho-mcp/src/workspace_resolver.rs
 
 - pub `set_workspace` function L9-12 — `(path: String)` — Set the workspace path.
 - pub `get_workspace` function L15-17 — `() -> Option<String>` — Get the workspace path.
-- pub `require_workspace` function L20-24 — `() -> Result<String, String>` — Get the workspace path or error.
-- pub `detect_and_set` function L28-43 — `() -> Option<String>` — Try to detect a workspace by walking up from cwd.
+- pub `require_workspace` function L20-23 — `() -> Result<String, String>` — Get the workspace path or error.
+- pub `detect_and_set` function L27-42 — `() -> Option<String>` — Try to detect a workspace by walking up from cwd.
 -  `WORKSPACE_PATH` variable L6 — `: Lazy<Mutex<Option<String>>>` — Session-level workspace path.
 
 ### clotho-mcp/src/tools
@@ -889,64 +915,81 @@
 
 #### clotho-mcp/src/tools/all_tools.rs
 
-- pub `ClothoTools` struct L12 — `-` — Registry of all Clotho MCP tools.
-- pub `tools` function L15-47 — `() -> Vec<Tool>`
--  `ClothoTools` type L14-48 — `= ClothoTools`
+- pub `ClothoTools` struct L13 — `-` — Registry of all Clotho MCP tools.
+- pub `tools` function L16-52 — `() -> Vec<Tool>`
+-  `ClothoTools` type L15-53 — `= ClothoTools`
+
+#### clotho-mcp/src/tools/batch_relations.rs
+
+- pub `RelationSpec` struct L18-25 — `{ source_id: String, relation_type: String, target_id: String }` — A single relation spec within a batch.
+- pub `BatchCreateRelationsTool` struct L36-39 — `{ relations: Vec<RelationSpec> }`
+- pub `call_tool` function L42-180 — `(&self) -> Result<CallToolResult, CallToolError>`
+-  `BatchCreateRelationsTool` type L41-181 — `= BatchCreateRelationsTool`
+-  `parse_id` function L183-187 — `(s: &str) -> Result<EntityId, CallToolError>`
+-  `parse_relation_type` function L189-208 — `(s: &str) -> Result<RelationType, CallToolError>`
 
 #### clotho-mcp/src/tools/capture.rs
 
 - pub `CaptureTool` struct L27-34 — `{ file_path: String, entity_type: Option<String>, title: Option<String> }`
-- pub `call_tool` function L37-116 — `(&self) -> Result<CallToolResult, CallToolError>`
--  `CaptureTool` type L36-117 — `= CaptureTool`
--  `parse_entity_type` function L119-129 — `(s: &str) -> Result<EntityType, CallToolError>`
+- pub `call_tool` function L37-122 — `(&self) -> Result<CallToolResult, CallToolError>`
+-  `CaptureTool` type L36-123 — `= CaptureTool`
+-  `parse_entity_type` function L125-136 — `(s: &str) -> Result<EntityType, CallToolError>`
+
+#### clotho-mcp/src/tools/capture_directory.rs
+
+- pub `CaptureDirectoryTool` struct L27-34 — `{ path: String, pattern: Option<String>, entity_type: Option<String> }`
+- pub `call_tool` function L37-180 — `(&self) -> Result<CallToolResult, CallToolError>`
+-  `CaptureDirectoryTool` type L36-181 — `= CaptureDirectoryTool`
+-  `matches_glob` function L183-196 — `(path: &Path, pattern: &str) -> bool`
+-  `parse_entity_type` function L198-209 — `(s: &str) -> Result<EntityType, CallToolError>`
 
 #### clotho-mcp/src/tools/create_entity.rs
 
-- pub `CreateEntityTool` struct L27-42 — `{ entity_type: String, title: String, status: Option<String>, state: Option<Stri...`
-- pub `call_tool` function L45-114 — `(&self) -> Result<CallToolResult, CallToolError>`
--  `CreateEntityTool` type L44-115 — `= CreateEntityTool`
--  `parse_entity_type` function L117-129 — `(s: &str) -> Result<EntityType, CallToolError>`
--  `defaults_for_type` function L131-138 — `(et: EntityType) -> (Option<String>, Option<String>, Option<String>)`
--  `is_content_bearing` function L140-142 — `(et: EntityType) -> bool`
+- pub `CreateEntityTool` struct L27-44 — `{ entity_type: String, title: String, status: Option<String>, state: Option<Stri...`
+- pub `call_tool` function L47-163 — `(&self) -> Result<CallToolResult, CallToolError>`
+-  `CreateEntityTool` type L46-164 — `= CreateEntityTool`
+-  `parse_entity_type` function L166-190 — `(s: &str) -> Result<EntityType, CallToolError>`
+-  `defaults_for_type` function L192-206 — `(et: EntityType) -> (Option<String>, Option<String>, Option<String>)`
+-  `is_content_bearing` function L208-217 — `(et: EntityType) -> bool`
 
 #### clotho-mcp/src/tools/create_note.rs
 
-- pub `CreateNoteTool` struct L27-32 — `{ title: String, content: String }`
-- pub `call_tool` function L35-95 — `(&self) -> Result<CallToolResult, CallToolError>`
--  `CreateNoteTool` type L34-96 — `= CreateNoteTool`
+- pub `CreateNoteTool` struct L29-36 — `{ title: String, content: String, parent_id: Option<String> }`
+- pub `call_tool` function L39-121 — `(&self) -> Result<CallToolResult, CallToolError>`
+-  `CreateNoteTool` type L38-122 — `= CreateNoteTool`
 
 #### clotho-mcp/src/tools/create_reflection.rs
 
 - pub `CreateReflectionTool` struct L27-34 — `{ period: String, title: Option<String>, program_id: Option<String> }`
-- pub `call_tool` function L37-112 — `(&self) -> Result<CallToolResult, CallToolError>`
--  `CreateReflectionTool` type L36-113 — `= CreateReflectionTool`
+- pub `call_tool` function L37-119 — `(&self) -> Result<CallToolResult, CallToolError>`
+-  `CreateReflectionTool` type L36-120 — `= CreateReflectionTool`
 
 #### clotho-mcp/src/tools/create_relation.rs
 
-- pub `CreateRelationTool` struct L23-30 — `{ source_id: String, relation_type: String, target_id: String }`
-- pub `call_tool` function L33-52 — `(&self) -> Result<CallToolResult, CallToolError>`
--  `CreateRelationTool` type L32-53 — `= CreateRelationTool`
--  `parse_id` function L55-59 — `(s: &str) -> Result<EntityId, CallToolError>`
--  `parse_relation_type` function L61-77 — `(s: &str) -> Result<RelationType, CallToolError>`
+- pub `CreateRelationTool` struct L25-32 — `{ source_id: String, relation_type: String, target_id: String }`
+- pub `call_tool` function L35-69 — `(&self) -> Result<CallToolResult, CallToolError>`
+-  `CreateRelationTool` type L34-70 — `= CreateRelationTool`
+-  `parse_id` function L72-76 — `(s: &str) -> Result<EntityId, CallToolError>`
+-  `parse_relation_type` function L78-97 — `(s: &str) -> Result<RelationType, CallToolError>`
 
 #### clotho-mcp/src/tools/delete_entity.rs
 
-- pub `DeleteEntityTool` struct L26-29 — `{ entity_id: String }`
-- pub `call_tool` function L32-73 — `(&self) -> Result<CallToolResult, CallToolError>`
--  `DeleteEntityTool` type L31-74 — `= DeleteEntityTool`
+- pub `DeleteEntityTool` struct L27-30 — `{ entity_id: String }`
+- pub `call_tool` function L33-87 — `(&self) -> Result<CallToolResult, CallToolError>`
+-  `DeleteEntityTool` type L32-88 — `= DeleteEntityTool`
 
 #### clotho-mcp/src/tools/delete_relation.rs
 
-- pub `DeleteRelationTool` struct L23-30 — `{ source_id: String, relation_type: String, target_id: String }`
-- pub `call_tool` function L33-52 — `(&self) -> Result<CallToolResult, CallToolError>`
--  `DeleteRelationTool` type L32-53 — `= DeleteRelationTool`
--  `parse_rel` function L55-65 — `(s: &str) -> Result<RelationType, CallToolError>`
+- pub `DeleteRelationTool` struct L25-32 — `{ source_id: String, relation_type: String, target_id: String }`
+- pub `call_tool` function L35-77 — `(&self) -> Result<CallToolResult, CallToolError>`
+-  `DeleteRelationTool` type L34-78 — `= DeleteRelationTool`
+-  `parse_rel` function L80-99 — `(s: &str) -> Result<RelationType, CallToolError>`
 
 #### clotho-mcp/src/tools/get_relations.rs
 
-- pub `GetRelationsTool` struct L22-25 — `{ entity_id: String }`
-- pub `call_tool` function L28-68 — `(&self) -> Result<CallToolResult, CallToolError>`
--  `GetRelationsTool` type L27-69 — `= GetRelationsTool`
+- pub `GetRelationsTool` struct L24-27 — `{ entity_id: String }`
+- pub `call_tool` function L30-85 — `(&self) -> Result<CallToolResult, CallToolError>`
+-  `GetRelationsTool` type L29-86 — `= GetRelationsTool`
 
 #### clotho-mcp/src/tools/init.rs
 
@@ -957,69 +1000,79 @@
 #### clotho-mcp/src/tools/list_entities.rs
 
 - pub `ListEntitiesTool` struct L21-28 — `{ entity_type: Option<String>, status: Option<String>, state: Option<String> }`
-- pub `call_tool` function L31-74 — `(&self) -> Result<CallToolResult, CallToolError>`
--  `ListEntitiesTool` type L30-75 — `= ListEntitiesTool`
+- pub `call_tool` function L31-78 — `(&self) -> Result<CallToolResult, CallToolError>`
+-  `ListEntitiesTool` type L30-79 — `= ListEntitiesTool`
+
+#### clotho-mcp/src/tools/list_unprocessed.rs
+
+- pub `ListUnprocessedTool` struct L22-25 — `{ entity_type: Option<String> }`
+- pub `call_tool` function L28-98 — `(&self) -> Result<CallToolResult, CallToolError>`
+-  `ListUnprocessedTool` type L27-99 — `= ListUnprocessedTool`
 
 #### clotho-mcp/src/tools/mod.rs
 
 - pub `all_tools` module L1 — `-`
-- pub `create_entity` module L2 — `-`
-- pub `create_note` module L3 — `-`
-- pub `create_reflection` module L4 — `-`
-- pub `create_relation` module L5 — `-`
-- pub `delete_entity` module L6 — `-`
-- pub `delete_relation` module L7 — `-`
-- pub `get_relations` module L8 — `-`
-- pub `capture` module L9 — `-`
-- pub `init` module L10 — `-`
-- pub `list_entities` module L11 — `-`
-- pub `ontology` module L12 — `-`
-- pub `processing` module L13 — `-`
-- pub `query` module L14 — `-`
-- pub `read_entity` module L15 — `-`
-- pub `search` module L16 — `-`
-- pub `set_workspace` module L17 — `-`
-- pub `sync` module L18 — `-`
-- pub `update_entity` module L19 — `-`
+- pub `batch_relations` module L2 — `-`
+- pub `capture` module L3 — `-`
+- pub `capture_directory` module L4 — `-`
+- pub `create_entity` module L5 — `-`
+- pub `create_note` module L6 — `-`
+- pub `create_reflection` module L7 — `-`
+- pub `create_relation` module L8 — `-`
+- pub `delete_entity` module L9 — `-`
+- pub `delete_relation` module L10 — `-`
+- pub `get_relations` module L11 — `-`
+- pub `init` module L12 — `-`
+- pub `list_entities` module L13 — `-`
+- pub `list_unprocessed` module L14 — `-`
+- pub `ontology` module L15 — `-`
+- pub `processing` module L16 — `-`
+- pub `query` module L17 — `-`
+- pub `read_entity` module L18 — `-`
+- pub `search` module L19 — `-`
+- pub `set_workspace` module L20 — `-`
+- pub `sync` module L21 — `-`
+- pub `update_entity` module L22 — `-`
+- pub `workspace_summary` module L23 — `-`
 
 #### clotho-mcp/src/tools/ontology.rs
 
-- pub `GetOntologyTool` struct L25-28 — `{ entity_id: String }`
-- pub `call_tool` function L31-70 — `(&self) -> Result<CallToolResult, CallToolError>`
-- pub `UpdateOntologyTool` struct L82-99 — `{ entity_id: String, add_keywords: Option<String>, remove_keywords: Option<Strin...`
-- pub `call_tool` function L102-147 — `(&self) -> Result<CallToolResult, CallToolError>`
-- pub `SearchOntologyTool` struct L159-162 — `{ query: String }`
-- pub `call_tool` function L165-190 — `(&self) -> Result<CallToolResult, CallToolError>`
--  `GetOntologyTool` type L30-71 — `= GetOntologyTool`
--  `UpdateOntologyTool` type L101-148 — `= UpdateOntologyTool`
--  `SearchOntologyTool` type L164-191 — `= SearchOntologyTool`
+- pub `GetOntologyTool` struct L26-29 — `{ entity_id: String }`
+- pub `call_tool` function L32-87 — `(&self) -> Result<CallToolResult, CallToolError>`
+- pub `UpdateOntologyTool` struct L99-116 — `{ entity_id: String, add_keywords: Option<String>, remove_keywords: Option<Strin...`
+- pub `call_tool` function L119-187 — `(&self) -> Result<CallToolResult, CallToolError>`
+- pub `SearchOntologyTool` struct L199-202 — `{ query: String }`
+- pub `call_tool` function L205-239 — `(&self) -> Result<CallToolResult, CallToolError>`
+-  `GetOntologyTool` type L31-88 — `= GetOntologyTool`
+-  `UpdateOntologyTool` type L118-188 — `= UpdateOntologyTool`
+-  `SearchOntologyTool` type L204-240 — `= SearchOntologyTool`
 
 #### clotho-mcp/src/tools/processing.rs
 
-- pub `CheckProcessedTool` struct L21-26 — `{ entity_id: String, process_name: Option<String> }`
-- pub `call_tool` function L29-62 — `(&self) -> Result<CallToolResult, CallToolError>`
-- pub `MarkProcessedTool` struct L74-87 — `{ entity_id: String, process_name: String, ontology_ids: Option<String>, process...`
-- pub `call_tool` function L90-112 — `(&self) -> Result<CallToolResult, CallToolError>`
--  `CheckProcessedTool` type L28-63 — `= CheckProcessedTool`
--  `MarkProcessedTool` type L89-113 — `= MarkProcessedTool`
+- pub `CheckProcessedTool` struct L23-28 — `{ entity_id: String, process_name: Option<String> }`
+- pub `call_tool` function L31-79 — `(&self) -> Result<CallToolResult, CallToolError>`
+- pub `MarkProcessedTool` struct L91-104 — `{ entity_id: String, process_name: String, ontology_ids: Option<String>, process...`
+- pub `call_tool` function L107-148 — `(&self) -> Result<CallToolResult, CallToolError>`
+-  `CheckProcessedTool` type L30-80 — `= CheckProcessedTool`
+-  `MarkProcessedTool` type L106-149 — `= MarkProcessedTool`
 
 #### clotho-mcp/src/tools/query.rs
 
 - pub `QueryTool` struct L21-24 — `{ cypher: String }`
-- pub `call_tool` function L27-64 — `(&self) -> Result<CallToolResult, CallToolError>`
--  `QueryTool` type L26-65 — `= QueryTool`
+- pub `call_tool` function L27-65 — `(&self) -> Result<CallToolResult, CallToolError>`
+-  `QueryTool` type L26-66 — `= QueryTool`
 
 #### clotho-mcp/src/tools/read_entity.rs
 
-- pub `ReadEntityTool` struct L21-24 — `{ entity_id: String }`
-- pub `call_tool` function L27-75 — `(&self) -> Result<CallToolResult, CallToolError>`
--  `ReadEntityTool` type L26-76 — `= ReadEntityTool`
+- pub `ReadEntityTool` struct L24-29 — `{ entity_id: String, include_relations: Option<bool> }`
+- pub `call_tool` function L32-124 — `(&self) -> Result<CallToolResult, CallToolError>`
+-  `ReadEntityTool` type L31-125 — `= ReadEntityTool`
 
 #### clotho-mcp/src/tools/search.rs
 
 - pub `SearchTool` struct L21-26 — `{ query: String, limit: Option<u32> }`
-- pub `call_tool` function L29-58 — `(&self) -> Result<CallToolResult, CallToolError>`
--  `SearchTool` type L28-59 — `= SearchTool`
+- pub `call_tool` function L29-69 — `(&self) -> Result<CallToolResult, CallToolError>`
+-  `SearchTool` type L28-70 — `= SearchTool`
 
 #### clotho-mcp/src/tools/set_workspace.rs
 
@@ -1030,14 +1083,21 @@
 #### clotho-mcp/src/tools/sync.rs
 
 - pub `SyncTool` struct L21-26 — `{ prune: Option<bool>, keep: Option<u32> }`
-- pub `call_tool` function L29-65 — `(&self) -> Result<CallToolResult, CallToolError>`
--  `SyncTool` type L28-66 — `= SyncTool`
+- pub `call_tool` function L29-66 — `(&self) -> Result<CallToolResult, CallToolError>`
+-  `SyncTool` type L28-67 — `= SyncTool`
 
 #### clotho-mcp/src/tools/update_entity.rs
 
-- pub `UpdateEntityTool` struct L23-32 — `{ entity_id: String, title: Option<String>, status: Option<String>, state: Optio...`
-- pub `call_tool` function L35-59 — `(&self) -> Result<CallToolResult, CallToolError>`
--  `UpdateEntityTool` type L34-60 — `= UpdateEntityTool`
+- pub `UpdateEntityTool` struct L27-42 — `{ entity_id: String, title: Option<String>, status: Option<String>, state: Optio...`
+- pub `call_tool` function L45-131 — `(&self) -> Result<CallToolResult, CallToolError>`
+-  `UpdateEntityTool` type L44-132 — `= UpdateEntityTool`
+-  `parse_entity_type_str` function L134-155 — `(s: &str) -> Result<EntityType, String>`
+
+#### clotho-mcp/src/tools/workspace_summary.rs
+
+- pub `WorkspaceSummaryTool` struct L23 — `-`
+- pub `call_tool` function L26-148 — `(&self) -> Result<CallToolResult, CallToolError>`
+-  `WorkspaceSummaryTool` type L25-149 — `= WorkspaceSummaryTool`
 
 ### clotho-mcp/tests
 
@@ -1046,25 +1106,25 @@
 #### clotho-mcp/tests/entity_mgmt_tests.rs
 
 -  `tools_now_fifteen` function L20-30 — `()`
--  `create_program` function L38-57 — `()`
--  `create_responsibility` function L61-78 — `()`
--  `create_objective_with_parent` function L82-116 — `()`
--  `create_task_defaults_to_todo` function L124-140 — `()`
--  `create_person_with_email` function L148-167 — `()`
--  `update_entity_title` function L175-200 — `()`
--  `delete_entity_removes_from_all` function L208-235 — `()`
--  `create_and_get_relations` function L243-279 — `()`
+-  `create_program` function L38-62 — `()`
+-  `create_responsibility` function L66-88 — `()`
+-  `create_objective_with_parent` function L92-140 — `()`
+-  `create_task_defaults_to_todo` function L148-169 — `()`
+-  `create_person_with_email` function L177-203 — `()`
+-  `update_entity_title` function L211-245 — `()`
+-  `delete_entity_removes_from_all` function L253-284 — `()`
+-  `create_and_get_relations` function L292-343 — `()`
 
 #### clotho-mcp/tests/mcp_tests.rs
 
--  `list_tools_returns_all_fifteen` function L17-30 — `()`
--  `all_tools_have_descriptions` function L33-42 — `()`
--  `test_init_tool` function L50-60 — `()`
--  `test_capture_tool` function L64-87 — `()`
--  `test_create_note_tool` function L91-110 — `()`
--  `test_create_reflection_tool` function L114-134 — `()`
--  `test_search_tool_finds_content` function L138-160 — `()`
--  `test_list_entities_tool` function L164-190 — `()`
+-  `list_tools_returns_all_fifteen` function L17-34 — `()`
+-  `all_tools_have_descriptions` function L37-46 — `()`
+-  `test_init_tool` function L54-64 — `()`
+-  `test_capture_tool` function L68-95 — `()`
+-  `test_create_note_tool` function L99-119 — `()`
+-  `test_create_reflection_tool` function L123-143 — `()`
+-  `test_search_tool_finds_content` function L147-170 — `()`
+-  `test_list_entities_tool` function L174-201 — `()`
 
 ### clotho-store/src
 
@@ -1074,13 +1134,13 @@
 
 - pub `ContentStore` struct L14-17 — `{ project_root: PathBuf }` — Manages markdown content files at the project root.
 - pub `new` function L24-28 — `(project_root: &Path) -> Self` — Create a new ContentStore rooted at the project directory.
-- pub `content_path` function L31-36 — `(&self, entity_type: EntityType, id: &EntityId) -> PathBuf` — Resolve the filesystem path for an entity's content file (no I/O).
-- pub `write_content` function L41-53 — `( &self, entity_type: EntityType, id: &EntityId, content: &str, ) -> Result<Path...` — Write markdown content for an entity.
-- pub `read_content` function L58-70 — `( &self, entity_type: EntityType, id: &EntityId, ) -> Result<Option<String>, Sto...` — Read markdown content for an entity.
-- pub `delete_content` function L73-83 — `( &self, entity_type: EntityType, id: &EntityId, ) -> Result<(), StoreError>` — Delete the content file for an entity.
-- pub `list_content` function L86-103 — `(&self, entity_type: EntityType) -> Result<Vec<PathBuf>, StoreError>` — List all content files in a subdirectory for a given entity type.
--  `ContentStore` type L19-104 — `= ContentStore`
--  `entity_type_to_subdir` function L107-125 — `(entity_type: EntityType) -> &'static str` — Map an EntityType to its visible content directory name at project root.
+- pub `content_path` function L31-34 — `(&self, entity_type: EntityType, id: &EntityId) -> PathBuf` — Resolve the filesystem path for an entity's content file (no I/O).
+- pub `write_content` function L39-51 — `( &self, entity_type: EntityType, id: &EntityId, content: &str, ) -> Result<Path...` — Write markdown content for an entity.
+- pub `read_content` function L56-68 — `( &self, entity_type: EntityType, id: &EntityId, ) -> Result<Option<String>, Sto...` — Read markdown content for an entity.
+- pub `delete_content` function L71-77 — `(&self, entity_type: EntityType, id: &EntityId) -> Result<(), StoreError>` — Delete the content file for an entity.
+- pub `list_content` function L80-97 — `(&self, entity_type: EntityType) -> Result<Vec<PathBuf>, StoreError>` — List all content files in a subdirectory for a given entity type.
+-  `ContentStore` type L19-98 — `= ContentStore`
+-  `entity_type_to_subdir` function L101-120 — `(entity_type: EntityType) -> &'static str` — Map an EntityType to its visible content directory name at project root.
 
 #### clotho-store/src/error.rs
 
@@ -1091,10 +1151,10 @@
 - pub `Federation` struct L12-16 — `{ entities_db: PathBuf, relations_db: PathBuf, search_db: PathBuf }` — Thin federation layer using SQLite ATTACH DATABASE (CLO-A-0002).
 - pub `FederationRow` type L19 — `= std::collections::HashMap<String, Value>` — A row from a federation query, represented as a map of column names to values.
 - pub `open` function L23-41 — `(workspace_path: &Path) -> Result<Self, StoreError>` — Create a federation handle for a workspace.
-- pub `connect` function L47-75 — `(&self) -> Result<Connection, StoreError>` — Create a connection with all databases attached.
-- pub `query` function L78-105 — `(&self, sql: &str) -> Result<Vec<FederationRow>, StoreError>` — Execute a cross-database SQL query and return results as rows of JSON values.
--  `Federation` type L21-106 — `= Federation`
--  `sqlite_to_json` function L109-123 — `(val: rusqlite::types::Value) -> Value` — Convert a rusqlite Value to a serde_json Value.
+- pub `connect` function L47-69 — `(&self) -> Result<Connection, StoreError>` — Create a connection with all databases attached.
+- pub `query` function L72-95 — `(&self, sql: &str) -> Result<Vec<FederationRow>, StoreError>` — Execute a cross-database SQL query and return results as rows of JSON values.
+-  `Federation` type L21-96 — `= Federation`
+-  `sqlite_to_json` function L99-109 — `(val: rusqlite::types::Value) -> Value` — Convert a rusqlite Value to a serde_json Value.
 
 #### clotho-store/src/index.rs
 
@@ -1105,10 +1165,10 @@
 - pub `index_entity` function L53-68 — `( &self, entity_id: &str, entity_type: &str, title: &str, content: &str, ) -> Re...` — Index an entity's content.
 - pub `remove_entity` function L71-77 — `(&self, entity_id: &str) -> Result<(), StoreError>` — Remove an entity from the search index.
 - pub `search` function L80-106 — `(&self, query: &str) -> Result<Vec<SearchResult>, StoreError>` — Search by keyword using FTS5 MATCH with BM25 ranking.
-- pub `rebuild` function L109-145 — `( &self, entity_store: &EntityStore, _content_store: &ContentStore, ) -> Result<...` — Drop and rebuild the entire index from entities.db and content files.
-- pub `connection` function L148-150 — `(&self) -> &Connection` — Access the underlying connection (for federation ATTACH).
+- pub `rebuild` function L109-139 — `( &self, entity_store: &EntityStore, _content_store: &ContentStore, ) -> Result<...` — Drop and rebuild the entire index from entities.db and content files.
+- pub `connection` function L142-144 — `(&self) -> &Connection` — Access the underlying connection (for federation ATTACH).
 -  `SCHEMA` variable L10-18 — `: &str`
--  `SearchIndex` type L37-151 — `= SearchIndex`
+-  `SearchIndex` type L37-145 — `= SearchIndex`
 
 #### clotho-store/src/lib.rs
 
@@ -1130,14 +1190,14 @@
 #### clotho-store/src/sync.rs
 
 - pub `StoreSync` struct L18-25 — `{ content: &'a ContentStore, entities: &'a EntityStore, extractions: &'a Extract...` — Coordinated write layer across all storage backends.
-- pub `save_entity` function L35-81 — `( &self, row: &EntityRow, content: Option<&str>, entity_type: EntityType, ) -> R...` — Save an entity across all backends.
-- pub `delete_entity` function L84-109 — `( &self, id_str: &str, entity_type: EntityType, ) -> Result<(), StoreError>` — Delete an entity from all backends.
-- pub `promote_extraction` function L113-161 — `( &self, id_str: &str, ) -> Result<EntityRow, StoreError>` — Promote a draft extraction: move from extractions.db to entities.db,
-- pub `discard_extraction` function L164-168 — `(&self, id_str: &str) -> Result<(), StoreError>` — Discard a draft extraction.
-- pub `materialize_temporal_edges` function L174-207 — `( &self, id_str: &str, _entity_type: EntityType, has_cadence: bool, has_deadline...` — Materialize temporal edges for an entity in the graph.
--  `log_event` function L209-221 — `( &self, event_type: EventType, entity_id: &str, details: Option<serde_json::Val...`
--  `parse_entity_id` function L224-228 — `(s: &str) -> Result<EntityId, StoreError>`
--  `parse_entity_type_str` function L230-253 — `(s: &str) -> Result<EntityType, StoreError>`
+- pub `save_entity` function L35-77 — `( &self, row: &EntityRow, content: Option<&str>, entity_type: EntityType, ) -> R...` — Save an entity across all backends.
+- pub `delete_entity` function L80-101 — `(&self, id_str: &str, entity_type: EntityType) -> Result<(), StoreError>` — Delete an entity from all backends.
+- pub `promote_extraction` function L105-150 — `(&self, id_str: &str) -> Result<EntityRow, StoreError>` — Promote a draft extraction: move from extractions.db to entities.db,
+- pub `discard_extraction` function L153-157 — `(&self, id_str: &str) -> Result<(), StoreError>` — Discard a draft extraction.
+- pub `materialize_temporal_edges` function L163-196 — `( &self, id_str: &str, _entity_type: EntityType, has_cadence: bool, has_deadline...` — Materialize temporal edges for an entity in the graph.
+-  `log_event` function L198-210 — `( &self, event_type: EventType, entity_id: &str, details: Option<serde_json::Val...`
+-  `parse_entity_id` function L213-217 — `(s: &str) -> Result<EntityId, StoreError>`
+-  `parse_entity_type_str` function L219-243 — `(s: &str) -> Result<EntityType, StoreError>`
 
 #### clotho-store/src/workspace.rs
 
@@ -1145,24 +1205,24 @@
 - pub `SyncConfig` struct L16-20 — `{ auto_commit: bool, debounce_seconds: u64, shallow_history_limit: u32 }`
 - pub `OntologyConfig` struct L37-40 — `{ known_entities: Vec<String>, extraction: ExtractionConfig }` — Default ontology configuration.
 - pub `ExtractionConfig` struct L43-45 — `{ default_confidence_threshold: f32 }`
-- pub `Workspace` struct L86-89 — `{ path: PathBuf }` — A Clotho workspace.
-- pub `init` function L96-133 — `(base_path: &Path) -> Result<Self, StoreError>` — Initialize a new workspace at the given path.
-- pub `open` function L138-170 — `(base_path: &Path) -> Result<Self, StoreError>` — Open an existing workspace.
-- pub `project_root` function L175-180 — `(&self) -> PathBuf` — Path to the project root (parent of .clotho/).
-- pub `data_path` function L183-185 — `(&self) -> PathBuf` — Path to the data directory (.clotho/data/).
-- pub `graph_path` function L188-190 — `(&self) -> PathBuf` — Path to the graph directory (.clotho/graph/).
-- pub `index_path` function L193-195 — `(&self) -> PathBuf` — Path to the index directory (.clotho/index/).
-- pub `inbox_path` function L198-200 — `(&self) -> PathBuf` — Path to the inbox directory (.clotho/inbox/).
-- pub `config_path` function L203-205 — `(&self) -> PathBuf` — Path to the config directory (.clotho/config/).
-- pub `read_config` function L208-212 — `(&self) -> Result<WorkspaceConfig, StoreError>` — Read the workspace configuration.
-- pub `read_ontology` function L215-219 — `(&self) -> Result<OntologyConfig, StoreError>` — Read the ontology configuration.
+- pub `Workspace` struct L81-84 — `{ path: PathBuf }` — A Clotho workspace.
+- pub `init` function L91-128 — `(base_path: &Path) -> Result<Self, StoreError>` — Initialize a new workspace at the given path.
+- pub `open` function L133-165 — `(base_path: &Path) -> Result<Self, StoreError>` — Open an existing workspace.
+- pub `project_root` function L170-175 — `(&self) -> PathBuf` — Path to the project root (parent of .clotho/).
+- pub `data_path` function L178-180 — `(&self) -> PathBuf` — Path to the data directory (.clotho/data/).
+- pub `graph_path` function L183-185 — `(&self) -> PathBuf` — Path to the graph directory (.clotho/graph/).
+- pub `index_path` function L188-190 — `(&self) -> PathBuf` — Path to the index directory (.clotho/index/).
+- pub `inbox_path` function L193-195 — `(&self) -> PathBuf` — Path to the inbox directory (.clotho/inbox/).
+- pub `config_path` function L198-200 — `(&self) -> PathBuf` — Path to the config directory (.clotho/config/).
+- pub `read_config` function L203-207 — `(&self) -> Result<WorkspaceConfig, StoreError>` — Read the workspace configuration.
+- pub `read_ontology` function L210-214 — `(&self) -> Result<OntologyConfig, StoreError>` — Read the ontology configuration.
 -  `WorkspaceConfig` type L22-33 — `impl Default for WorkspaceConfig`
 -  `default` function L23-32 — `() -> Self`
 -  `OntologyConfig` type L47-56 — `impl Default for OntologyConfig`
 -  `default` function L48-55 — `() -> Self`
--  `VISIBLE_DIRS` variable L59-71 — `: &[&str]` — Visible content directories created at project root.
--  `HIDDEN_DIRS` variable L74-80 — `: &[&str]` — Machine-managed directories created inside .clotho/.
--  `Workspace` type L91-220 — `= Workspace`
+-  `VISIBLE_DIRS` variable L59-72 — `: &[&str]` — Visible content directories created at project root.
+-  `HIDDEN_DIRS` variable L75 — `: &[&str]` — Machine-managed directories created inside .clotho/.
+-  `Workspace` type L86-215 — `= Workspace`
 
 ### clotho-store/src/data
 
@@ -1170,22 +1230,25 @@
 
 #### clotho-store/src/data/entities.rs
 
-- pub `EntityRow` struct L37-52 — `{ id: String, entity_type: String, title: String, created_at: String, updated_at...` — A flat row representing an entity in SQLite.
-- pub `EntityStore` struct L55-57 — `{ conn: Connection }` — SQLite-backed entity storage (data/entities.db).
-- pub `open` function L61-65 — `(path: &Path) -> Result<Self, StoreError>` — Open or create the entity store at the given path.
-- pub `in_memory` function L68-72 — `() -> Result<Self, StoreError>` — Open an in-memory entity store (for tests).
-- pub `insert` function L75-97 — `(&self, row: &EntityRow) -> Result<(), StoreError>` — Insert a new entity row.
-- pub `update` function L100-125 — `(&self, row: &EntityRow) -> Result<(), StoreError>` — Update an existing entity row.
-- pub `get` function L128-138 — `(&self, id: &str) -> Result<Option<EntityRow>, StoreError>` — Get an entity by ID.
-- pub `delete` function L141-145 — `(&self, id: &str) -> Result<(), StoreError>` — Delete an entity by ID.
-- pub `list_by_type` function L148-156 — `(&self, entity_type: &str) -> Result<Vec<EntityRow>, StoreError>` — List entities by type.
-- pub `list_by_status` function L159-167 — `(&self, status: &str) -> Result<Vec<EntityRow>, StoreError>` — List entities by status (Active/Inactive).
-- pub `list_by_state` function L170-178 — `(&self, state: &str) -> Result<Vec<EntityRow>, StoreError>` — List entities by task state (Todo/Doing/Blocked/Done).
-- pub `list_all` function L181-189 — `(&self) -> Result<Vec<EntityRow>, StoreError>` — List all entities.
-- pub `connection` function L192-194 — `(&self) -> &Connection` — Access the underlying connection (for federation ATTACH).
--  `SCHEMA` variable L8-30 — `: &str`
--  `EntityStore` type L59-195 — `= EntityStore`
--  `row_to_entity_row` function L197-214 — `(row: &rusqlite::Row) -> rusqlite::Result<EntityRow>`
+- pub `ResolveResult` enum L10-19 — `Exact | Unique | Ambiguous | NotFound` — Result of resolving a potentially-partial entity ID.
+- pub `EntityRow` struct L50-65 — `{ id: String, entity_type: String, title: String, created_at: String, updated_at...` — A flat row representing an entity in SQLite.
+- pub `EntityStore` struct L68-70 — `{ conn: Connection }` — SQLite-backed entity storage (data/entities.db).
+- pub `open` function L74-78 — `(path: &Path) -> Result<Self, StoreError>` — Open or create the entity store at the given path.
+- pub `in_memory` function L81-85 — `() -> Result<Self, StoreError>` — Open an in-memory entity store (for tests).
+- pub `insert` function L88-110 — `(&self, row: &EntityRow) -> Result<(), StoreError>` — Insert a new entity row.
+- pub `update` function L113-138 — `(&self, row: &EntityRow) -> Result<(), StoreError>` — Update an existing entity row.
+- pub `get` function L141-151 — `(&self, id: &str) -> Result<Option<EntityRow>, StoreError>` — Get an entity by ID.
+- pub `delete` function L154-158 — `(&self, id: &str) -> Result<(), StoreError>` — Delete an entity by ID.
+- pub `list_by_type` function L161-169 — `(&self, entity_type: &str) -> Result<Vec<EntityRow>, StoreError>` — List entities by type.
+- pub `list_by_status` function L172-180 — `(&self, status: &str) -> Result<Vec<EntityRow>, StoreError>` — List entities by status (Active/Inactive).
+- pub `list_by_state` function L183-191 — `(&self, state: &str) -> Result<Vec<EntityRow>, StoreError>` — List entities by task state (Todo/Doing/Blocked/Done).
+- pub `list_all` function L194-202 — `(&self) -> Result<Vec<EntityRow>, StoreError>` — List all entities.
+- pub `get_by_prefix` function L205-214 — `(&self, prefix: &str) -> Result<Vec<EntityRow>, StoreError>` — Find entities whose ID starts with the given prefix.
+- pub `resolve_id` function L217-230 — `(&self, input: &str) -> Result<ResolveResult, StoreError>` — Resolve a full or partial entity ID.
+- pub `connection` function L233-235 — `(&self) -> &Connection` — Access the underlying connection (for federation ATTACH).
+-  `SCHEMA` variable L21-43 — `: &str`
+-  `EntityStore` type L72-236 — `= EntityStore`
+-  `row_to_entity_row` function L238-255 — `(row: &rusqlite::Row) -> rusqlite::Result<EntityRow>`
 
 #### clotho-store/src/data/extractions.rs
 
@@ -1278,30 +1341,38 @@
 -  `workspace_open_fails_if_missing` function L55-59 — `()`
 -  `workspace_read_config` function L62-67 — `()`
 -  `content_write_read_delete` function L74-90 — `()`
--  `content_list` function L93-107 — `()`
--  `content_read_nonexistent` function L110-117 — `()`
--  `make_entity_row` function L123-140 — `(entity_type: &str, title: &str) -> EntityRow`
--  `entity_insert_and_get` function L143-151 — `()`
--  `entity_update` function L154-164 — `()`
--  `entity_delete` function L167-173 — `()`
--  `entity_list_by_type` function L176-187 — `()`
--  `entity_list_by_status` function L190-203 — `()`
--  `entity_list_by_state` function L206-214 — `()`
--  `make_extraction_row` function L220-234 — `(title: &str, confidence: f64) -> ExtractionRow`
--  `extraction_insert_and_list_pending` function L237-246 — `()`
--  `extraction_promote` function L249-261 — `()`
--  `extraction_discard` function L264-272 — `()`
--  `extraction_list_by_confidence` function L275-283 — `()`
--  `tags_add_get_remove` function L290-306 — `()`
--  `tags_no_duplicates` function L309-319 — `()`
--  `tags_get_entities_by_tag` function L322-333 — `()`
--  `events_log_and_read` function L340-366 — `()`
--  `search_index_and_query` function L373-383 — `()`
--  `search_remove_entity` function L386-396 — `()`
--  `search_empty_query` function L399-404 — `()`
--  `search_rebuild` function L407-419 — `()`
--  `sync_save_entity_across_backends` function L426-469 — `()`
--  `sync_temporal_materialization` function L476-510 — `()`
+-  `content_list` function L93-113 — `()`
+-  `content_read_nonexistent` function L116-125 — `()`
+-  `make_entity_row` function L131-148 — `(entity_type: &str, title: &str) -> EntityRow`
+-  `entity_insert_and_get` function L151-159 — `()`
+-  `entity_update` function L162-172 — `()`
+-  `entity_delete` function L175-181 — `()`
+-  `entity_list_by_type` function L184-195 — `()`
+-  `entity_list_by_status` function L198-211 — `()`
+-  `entity_list_by_state` function L214-222 — `()`
+-  `make_entity_row_with_id` function L228-245 — `(id: &str, entity_type: &str, title: &str) -> EntityRow`
+-  `resolve_id_exact_match` function L248-259 — `()`
+-  `resolve_id_prefix_unique` function L262-273 — `()`
+-  `resolve_id_prefix_ambiguous` function L276-296 — `()`
+-  `resolve_id_not_found` function L299-306 — `()`
+-  `resolve_id_longer_prefix_disambiguates` function L309-331 — `()`
+-  `get_by_prefix_returns_matching` function L334-354 — `()`
+-  `get_unchanged_by_prefix_changes` function L357-370 — `()`
+-  `make_extraction_row` function L376-390 — `(title: &str, confidence: f64) -> ExtractionRow`
+-  `extraction_insert_and_list_pending` function L393-406 — `()`
+-  `extraction_promote` function L409-421 — `()`
+-  `extraction_discard` function L424-432 — `()`
+-  `extraction_list_by_confidence` function L435-447 — `()`
+-  `tags_add_get_remove` function L454-470 — `()`
+-  `tags_no_duplicates` function L473-483 — `()`
+-  `tags_get_entities_by_tag` function L486-497 — `()`
+-  `events_log_and_read` function L504-530 — `()`
+-  `search_index_and_query` function L537-565 — `()`
+-  `search_remove_entity` function L568-579 — `()`
+-  `search_empty_query` function L582-587 — `()`
+-  `search_rebuild` function L590-606 — `()`
+-  `sync_save_entity_across_backends` function L613-659 — `()`
+-  `sync_temporal_materialization` function L666-705 — `()`
 
 ### clotho-sync/src
 
@@ -1313,15 +1384,15 @@
 - pub `SyncResult` struct L28-35 — `{ committed: bool, pushed: bool, files_changed: usize }` — Result of a sync operation.
 - pub `SyncEngine` struct L49-51 — `{ repo: Repository }` — Git-based sync engine for Clotho workspaces.
 - pub `init` function L59-89 — `(workspace_path: &Path) -> Result<Self, SyncError>` — Initialize a git repository for a Clotho workspace.
-- pub `open` function L92-105 — `(workspace_path: &Path) -> Result<Self, SyncError>` — Open an existing git repository for a Clotho workspace.
-- pub `has_remote` function L108-110 — `(&self) -> bool` — Check whether the repository has a remote named "origin".
-- pub `repository` function L113-115 — `(&self) -> &Repository` — Access the underlying git2 Repository.
-- pub `sync` function L120-191 — `(&self) -> Result<SyncResult, SyncError>` — Sync the workspace: stage all changes, commit, and push (if remote).
-- pub `prune_history` function L219-297 — `(&self, keep: usize) -> Result<usize, SyncError>` — Prune history to keep only the most recent `keep` commits.
-- pub `commit_count` function L300-309 — `(&self) -> Result<usize, SyncError>` — Count the number of commits in the repository.
+- pub `open` function L92-103 — `(workspace_path: &Path) -> Result<Self, SyncError>` — Open an existing git repository for a Clotho workspace.
+- pub `has_remote` function L106-108 — `(&self) -> bool` — Check whether the repository has a remote named "origin".
+- pub `repository` function L111-113 — `(&self) -> &Repository` — Access the underlying git2 Repository.
+- pub `sync` function L118-185 — `(&self) -> Result<SyncResult, SyncError>` — Sync the workspace: stage all changes, commit, and push (if remote).
+- pub `prune_history` function L213-290 — `(&self, keep: usize) -> Result<usize, SyncError>` — Prune history to keep only the most recent `keep` commits.
+- pub `commit_count` function L293-302 — `(&self) -> Result<usize, SyncError>` — Count the number of commits in the repository.
 -  `GITIGNORE_CONTENT` variable L38-43 — `: &str` — .gitignore content for Clotho workspaces.
--  `SyncEngine` type L53-310 — `= SyncEngine`
--  `push` function L194-213 — `(&self) -> Result<bool, SyncError>` — Push to origin/main.
+-  `SyncEngine` type L53-303 — `= SyncEngine`
+-  `push` function L188-207 — `(&self) -> Result<bool, SyncError>` — Push to origin/main.
 
 #### clotho-sync/src/lib.rs
 
@@ -1333,20 +1404,20 @@
 
 #### clotho-sync/tests/sync_tests.rs
 
--  `setup_workspace` function L8-22 — `(tmp: &tempfile::TempDir) -> std::path::PathBuf` — Helper: create a .clotho/ directory structure + visible dirs in a temp dir.
--  `init_creates_git_repo` function L29-36 — `()`
--  `init_creates_gitignore` function L39-47 — `()`
--  `init_is_idempotent` function L50-57 — `()`
--  `open_existing_repo` function L64-71 — `()`
--  `open_fails_without_git` function L74-80 — `()`
--  `sync_no_changes` function L87-100 — `()`
--  `sync_commits_new_file` function L103-117 — `()`
--  `sync_commits_modified_file` function L120-132 — `()`
--  `sync_has_remote_false` function L135-141 — `()`
--  `commit_count_tracks` function L148-165 — `()`
--  `prune_reduces_commit_count` function L172-189 — `()`
--  `prune_noop_when_under_limit` function L192-202 — `()`
--  `index_directory_not_committed` function L209-237 — `()`
+-  `setup_workspace` function L8-26 — `(tmp: &tempfile::TempDir) -> std::path::PathBuf` — Helper: create a .clotho/ directory structure + visible dirs in a temp dir.
+-  `init_creates_git_repo` function L33-40 — `()`
+-  `init_creates_gitignore` function L43-51 — `()`
+-  `init_is_idempotent` function L54-61 — `()`
+-  `open_existing_repo` function L68-75 — `()`
+-  `open_fails_without_git` function L78-84 — `()`
+-  `sync_no_changes` function L91-104 — `()`
+-  `sync_commits_new_file` function L107-121 — `()`
+-  `sync_commits_modified_file` function L124-136 — `()`
+-  `sync_has_remote_false` function L139-145 — `()`
+-  `commit_count_tracks` function L152-169 — `()`
+-  `prune_reduces_commit_count` function L176-197 — `()`
+-  `prune_noop_when_under_limit` function L200-210 — `()`
+-  `index_directory_not_committed` function L217-246 — `()`
 
 ### clotho-tests/tests
 
@@ -1355,7 +1426,7 @@
 #### clotho-tests/tests/e2e_workflows.rs
 
 -  `TestWorkspace` struct L23-26 — `{ _tmp: tempfile::TempDir, ws: Workspace }` — Helper: init workspace + all stores, returns everything needed.
--  `TestWorkspace` type L28-124 — `= TestWorkspace` — ingest content, build the graph, search, query, reflect, sync.
+-  `TestWorkspace` type L28-141 — `= TestWorkspace` — ingest content, build the graph, search, query, reflect, sync.
 -  `new` function L29-33 — `() -> Self` — ingest content, build the graph, search, query, reflect, sync.
 -  `entities` function L35-37 — `(&self) -> EntityStore` — ingest content, build the graph, search, query, reflect, sync.
 -  `extractions` function L39-41 — `(&self) -> ExtractionStore` — ingest content, build the graph, search, query, reflect, sync.
@@ -1365,16 +1436,16 @@
 -  `tags` function L55-57 — `(&self) -> TagStore` — ingest content, build the graph, search, query, reflect, sync.
 -  `events` function L59-61 — `(&self) -> EventStore` — ingest content, build the graph, search, query, reflect, sync.
 -  `sync_engine` function L63-65 — `(&self) -> SyncEngine` — ingest content, build the graph, search, query, reflect, sync.
--  `insert_entity` function L67-90 — `(&self, entity_type: &str, title: &str) -> String` — ingest content, build the graph, search, query, reflect, sync.
--  `insert_entity_with_content` function L92-117 — `(&self, entity_type: &str, title: &str, content: &str) -> String` — ingest content, build the graph, search, query, reflect, sync.
--  `relate` function L119-123 — `(&self, source: &str, rel_type: RelationType, target: &str)` — ingest content, build the graph, search, query, reflect, sync.
--  `parse_entity_type` function L126-146 — `(s: &str) -> EntityType` — ingest content, build the graph, search, query, reflect, sync.
--  `defaults` function L148-157 — `(et: EntityType) -> (Option<String>, Option<String>, Option<String>)` — ingest content, build the graph, search, query, reflect, sync.
--  `scenario_work_management_lifecycle` function L166-227 — `()` — ingest content, build the graph, search, query, reflect, sync.
--  `scenario_content_capture_and_search` function L236-302 — `()` — ingest content, build the graph, search, query, reflect, sync.
--  `scenario_extraction_lifecycle` function L311-420 — `()` — ingest content, build the graph, search, query, reflect, sync.
--  `scenario_reflection_workflow` function L429-475 — `()` — ingest content, build the graph, search, query, reflect, sync.
--  `scenario_git_sync_lifecycle` function L484-534 — `()` — ingest content, build the graph, search, query, reflect, sync.
--  `scenario_graph_traversal` function L543-604 — `()` — ingest content, build the graph, search, query, reflect, sync.
--  `scenario_event_log_integrity` function L613-660 — `()` — ingest content, build the graph, search, query, reflect, sync.
+-  `insert_entity` function L67-99 — `(&self, entity_type: &str, title: &str) -> String` — ingest content, build the graph, search, query, reflect, sync.
+-  `insert_entity_with_content` function L101-134 — `(&self, entity_type: &str, title: &str, content: &str) -> String` — ingest content, build the graph, search, query, reflect, sync.
+-  `relate` function L136-140 — `(&self, source: &str, rel_type: RelationType, target: &str)` — ingest content, build the graph, search, query, reflect, sync.
+-  `parse_entity_type` function L143-164 — `(s: &str) -> EntityType` — ingest content, build the graph, search, query, reflect, sync.
+-  `defaults` function L166-180 — `(et: EntityType) -> (Option<String>, Option<String>, Option<String>)` — ingest content, build the graph, search, query, reflect, sync.
+-  `scenario_work_management_lifecycle` function L189-256 — `()` — ingest content, build the graph, search, query, reflect, sync.
+-  `scenario_content_capture_and_search` function L265-341 — `()` — ingest content, build the graph, search, query, reflect, sync.
+-  `scenario_extraction_lifecycle` function L350-474 — `()` — ingest content, build the graph, search, query, reflect, sync.
+-  `scenario_reflection_workflow` function L483-532 — `()` — ingest content, build the graph, search, query, reflect, sync.
+-  `scenario_git_sync_lifecycle` function L541-596 — `()` — ingest content, build the graph, search, query, reflect, sync.
+-  `scenario_graph_traversal` function L605-681 — `()` — ingest content, build the graph, search, query, reflect, sync.
+-  `scenario_event_log_integrity` function L690-745 — `()` — ingest content, build the graph, search, query, reflect, sync.
 

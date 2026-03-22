@@ -82,7 +82,10 @@ fn task_valid_transitions() {
     assert_eq!(task.valid_transitions(), vec![TaskState::Doing]);
 
     task.transition(TaskState::Doing).unwrap();
-    assert_eq!(task.valid_transitions(), vec![TaskState::Blocked, TaskState::Done]);
+    assert_eq!(
+        task.valid_transitions(),
+        vec![TaskState::Blocked, TaskState::Done]
+    );
 
     task.transition(TaskState::Blocked).unwrap();
     assert_eq!(task.valid_transitions(), vec![TaskState::Doing]);
@@ -348,7 +351,19 @@ fn person_serde_roundtrip() {
 // ===========================================================================
 
 fn assert_structural<T: Entity + Activatable + Relatable + Taggable + ContentBearing>(_: &T) {}
-fn assert_taskable_entity<T: Entity + Taskable + Relatable + Taggable + ContentBearing + HasCadence + HasDeadline + HasSchedule>(_: &T) {}
+fn assert_taskable_entity<
+    T: Entity
+        + Taskable
+        + Relatable
+        + Taggable
+        + ContentBearing
+        + HasCadence
+        + HasDeadline
+        + HasSchedule,
+>(
+    _: &T,
+) {
+}
 fn assert_extractable_entity<T: Entity + Extractable + Relatable + Taggable>(_: &T) {}
 fn assert_person_entity<T: Entity + Relatable + Taggable + ContentBearing>(_: &T) {}
 fn assert_has_cadence<T: HasCadence>(_: &T) {}

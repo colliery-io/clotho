@@ -62,12 +62,8 @@ impl<'a> StoreSync<'a> {
             .map_err(|e| StoreError::SearchError(e.to_string()))?;
 
         // 4. Index in FTS5
-        self.search.index_entity(
-            id_str,
-            &row.entity_type,
-            &row.title,
-            content.unwrap_or(""),
-        )?;
+        self.search
+            .index_entity(id_str, &row.entity_type, &row.title, content.unwrap_or(""))?;
 
         // 5. Log event
         let event_type = if is_update {
@@ -81,11 +77,7 @@ impl<'a> StoreSync<'a> {
     }
 
     /// Delete an entity from all backends.
-    pub fn delete_entity(
-        &self,
-        id_str: &str,
-        entity_type: EntityType,
-    ) -> Result<(), StoreError> {
+    pub fn delete_entity(&self, id_str: &str, entity_type: EntityType) -> Result<(), StoreError> {
         let id = parse_entity_id(id_str)?;
 
         // Content
@@ -110,10 +102,7 @@ impl<'a> StoreSync<'a> {
 
     /// Promote a draft extraction: move from extractions.db to entities.db,
     /// register graph node, index in FTS5, and log event.
-    pub fn promote_extraction(
-        &self,
-        id_str: &str,
-    ) -> Result<EntityRow, StoreError> {
+    pub fn promote_extraction(&self, id_str: &str) -> Result<EntityRow, StoreError> {
         // Promote in extractions.db (validates it's a draft)
         let extraction = self.extractions.promote(id_str)?;
 
@@ -239,6 +228,7 @@ fn parse_entity_type_str(s: &str) -> Result<EntityType, StoreError> {
         "Note" => Ok(EntityType::Note),
         "Reflection" => Ok(EntityType::Reflection),
         "Artifact" => Ok(EntityType::Artifact),
+        "Reference" => Ok(EntityType::Reference),
         "Decision" => Ok(EntityType::Decision),
         "Risk" => Ok(EntityType::Risk),
         "Blocker" => Ok(EntityType::Blocker),

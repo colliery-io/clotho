@@ -1,6 +1,6 @@
 [package]
 name = "clotho-sync"
-version = "0.0.0"
+version.workspace = true
 edition = "2021"
 description = "Git sync layer for Clotho workspaces"
 license = "Apache-2.0"

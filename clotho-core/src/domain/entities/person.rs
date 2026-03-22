@@ -42,22 +42,41 @@ impl Person {
 }
 
 impl Entity for Person {
-    fn id(&self) -> &EntityId { &self.id }
-    fn entity_type(&self) -> EntityType { EntityType::Person }
-    fn title(&self) -> &str { &self.name }
-    fn created_at(&self) -> DateTime<Utc> { self.created_at }
-    fn updated_at(&self) -> DateTime<Utc> { self.updated_at }
+    fn id(&self) -> &EntityId {
+        &self.id
+    }
+    fn entity_type(&self) -> EntityType {
+        EntityType::Person
+    }
+    fn title(&self) -> &str {
+        &self.name
+    }
+    fn created_at(&self) -> DateTime<Utc> {
+        self.created_at
+    }
+    fn updated_at(&self) -> DateTime<Utc> {
+        self.updated_at
+    }
 }
 
 impl Relatable for Person {
     fn relations(&self, graph: &GraphStore) -> Vec<Relation> {
-        graph.get_edges_from(self.id()).unwrap_or_default().into_iter().map(Relation::from).collect()
+        graph
+            .get_edges_from(self.id())
+            .unwrap_or_default()
+            .into_iter()
+            .map(Relation::from)
+            .collect()
     }
-    fn graph_label(&self) -> &'static str { "Person" }
+    fn graph_label(&self) -> &'static str {
+        "Person"
+    }
 }
 
 impl Taggable for Person {
-    fn tags(&self) -> &[Tag] { &self.tags }
+    fn tags(&self) -> &[Tag] {
+        &self.tags
+    }
     fn add_tag(&mut self, tag: Tag) {
         if !self.tags.contains(&tag) {
             self.tags.push(tag);
@@ -74,7 +93,9 @@ impl Taggable for Person {
 }
 
 impl ContentBearing for Person {
-    fn content(&self) -> &str { &self.content }
+    fn content(&self) -> &str {
+        &self.content
+    }
     fn set_content(&mut self, content: String) {
         self.content = content;
         self.updated_at = Utc::now();

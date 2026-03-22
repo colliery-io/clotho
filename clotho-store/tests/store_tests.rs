@@ -6,7 +6,7 @@ use clotho_core::domain::types::*;
 use clotho_core::graph::GraphStore;
 
 use clotho_store::content::ContentStore;
-use clotho_store::data::entities::{EntityRow, EntityStore};
+use clotho_store::data::entities::{EntityRow, EntityStore, ResolveResult};
 use clotho_store::data::extractions::{ExtractionRow, ExtractionStore};
 use clotho_store::data::jsonl::{Event, EventStore, EventType, TagStore};
 use clotho_store::index::SearchIndex;
@@ -95,9 +95,15 @@ fn content_list() {
     let ws = Workspace::init(tmp.path()).unwrap();
     let store = ContentStore::new(&ws.project_root());
 
-    store.write_content(EntityType::Note, &EntityId::new(), "Note 1").unwrap();
-    store.write_content(EntityType::Note, &EntityId::new(), "Note 2").unwrap();
-    store.write_content(EntityType::Meeting, &EntityId::new(), "Meeting").unwrap();
+    store
+        .write_content(EntityType::Note, &EntityId::new(), "Note 1")
+        .unwrap();
+    store
+        .write_content(EntityType::Note, &EntityId::new(), "Note 2")
+        .unwrap();
+    store
+        .write_content(EntityType::Meeting, &EntityId::new(), "Meeting")
+        .unwrap();
 
     let notes = store.list_content(EntityType::Note).unwrap();
     assert_eq!(notes.len(), 2);
@@ -112,7 +118,9 @@ fn content_read_nonexistent() {
     let ws = Workspace::init(tmp.path()).unwrap();
     let store = ContentStore::new(&ws.project_root());
 
-    let result = store.read_content(EntityType::Note, &EntityId::new()).unwrap();
+    let result = store
+        .read_content(EntityType::Note, &EntityId::new())
+        .unwrap();
     assert!(result.is_none());
 }
 
@@ -214,6 +222,154 @@ fn entity_list_by_state() {
 }
 
 // ===========================================================================
+// Prefix / resolve_id
+// ===========================================================================
+
+fn make_entity_row_with_id(id: &str, entity_type: &str, title: &str) -> EntityRow {
+    EntityRow {
+        id: id.to_string(),
+        entity_type: entity_type.to_string(),
+        title: title.to_string(),
+        created_at: Utc::now().to_rfc3339(),
+        updated_at: Utc::now().to_rfc3339(),
+        status: Some("active".to_string()),
+        task_state: None,
+        extraction_status: None,
+        source_transcript_id: None,
+        source_span_start: None,
+        source_span_end: None,
+        confidence: None,
+        content_path: None,
+        metadata: None,
+    }
+}
+
+#[test]
+fn resolve_id_exact_match() {
+    let store = EntityStore::in_memory().unwrap();
+    let id = "f47ac10b-58cc-4372-a567-0e02b2c3d479";
+    store
+        .insert(&make_entity_row_with_id(id, "Program", "Test"))
+        .unwrap();
+
+    match store.resolve_id(id).unwrap() {
+        ResolveResult::Exact(row) => assert_eq!(row.id, id),
+        other => panic!("Expected Exact, got {:?}", other),
+    }
+}
+
+#[test]
+fn resolve_id_prefix_unique() {
+    let store = EntityStore::in_memory().unwrap();
+    let id = "f47ac10b-58cc-4372-a567-0e02b2c3d479";
+    store
+        .insert(&make_entity_row_with_id(id, "Program", "Test"))
+        .unwrap();
+
+    match store.resolve_id("f47ac10b").unwrap() {
+        ResolveResult::Unique(row) => assert_eq!(row.id, id),
+        other => panic!("Expected Unique, got {:?}", other),
+    }
+}
+
+#[test]
+fn resolve_id_prefix_ambiguous() {
+    let store = EntityStore::in_memory().unwrap();
+    let id1 = "f47ac10b-58cc-4372-a567-0e02b2c3d479";
+    let id2 = "f47ac10b-9999-4444-bbbb-ccccddddeeee";
+    store
+        .insert(&make_entity_row_with_id(id1, "Program", "One"))
+        .unwrap();
+    store
+        .insert(&make_entity_row_with_id(id2, "Task", "Two"))
+        .unwrap();
+
+    match store.resolve_id("f47ac10b").unwrap() {
+        ResolveResult::Ambiguous(rows) => {
+            assert_eq!(rows.len(), 2);
+            let titles: Vec<&str> = rows.iter().map(|r| r.title.as_str()).collect();
+            assert!(titles.contains(&"One"));
+            assert!(titles.contains(&"Two"));
+        }
+        other => panic!("Expected Ambiguous, got {:?}", other),
+    }
+}
+
+#[test]
+fn resolve_id_not_found() {
+    let store = EntityStore::in_memory().unwrap();
+
+    match store.resolve_id("nonexistent").unwrap() {
+        ResolveResult::NotFound => {}
+        other => panic!("Expected NotFound, got {:?}", other),
+    }
+}
+
+#[test]
+fn resolve_id_longer_prefix_disambiguates() {
+    let store = EntityStore::in_memory().unwrap();
+    let id1 = "f47ac10b-58cc-4372-a567-0e02b2c3d479";
+    let id2 = "f47ac10b-9999-4444-bbbb-ccccddddeeee";
+    store
+        .insert(&make_entity_row_with_id(id1, "Program", "One"))
+        .unwrap();
+    store
+        .insert(&make_entity_row_with_id(id2, "Task", "Two"))
+        .unwrap();
+
+    // Ambiguous with short prefix
+    assert!(matches!(
+        store.resolve_id("f47ac10b").unwrap(),
+        ResolveResult::Ambiguous(_)
+    ));
+
+    // Unique with longer prefix
+    match store.resolve_id("f47ac10b-58cc").unwrap() {
+        ResolveResult::Unique(row) => assert_eq!(row.title, "One"),
+        other => panic!("Expected Unique, got {:?}", other),
+    }
+}
+
+#[test]
+fn get_by_prefix_returns_matching() {
+    let store = EntityStore::in_memory().unwrap();
+    store
+        .insert(&make_entity_row_with_id("aaa-111", "Program", "A"))
+        .unwrap();
+    store
+        .insert(&make_entity_row_with_id("aaa-222", "Task", "B"))
+        .unwrap();
+    store
+        .insert(&make_entity_row_with_id("bbb-111", "Note", "C"))
+        .unwrap();
+
+    let matches = store.get_by_prefix("aaa").unwrap();
+    assert_eq!(matches.len(), 2);
+
+    let matches = store.get_by_prefix("bbb").unwrap();
+    assert_eq!(matches.len(), 1);
+
+    let matches = store.get_by_prefix("zzz").unwrap();
+    assert_eq!(matches.len(), 0);
+}
+
+#[test]
+fn get_unchanged_by_prefix_changes() {
+    // Verify get() still only does exact match
+    let store = EntityStore::in_memory().unwrap();
+    let id = "f47ac10b-58cc-4372-a567-0e02b2c3d479";
+    store
+        .insert(&make_entity_row_with_id(id, "Program", "Test"))
+        .unwrap();
+
+    // Exact match works
+    assert!(store.get(id).unwrap().is_some());
+
+    // Prefix does NOT match via get()
+    assert!(store.get("f47ac10b").unwrap().is_none());
+}
+
+// ===========================================================================
 // Extraction lifecycle
 // ===========================================================================
 
@@ -236,8 +392,12 @@ fn make_extraction_row(title: &str, confidence: f64) -> ExtractionRow {
 #[test]
 fn extraction_insert_and_list_pending() {
     let store = ExtractionStore::in_memory().unwrap();
-    store.insert_draft(&make_extraction_row("Decision A", 0.9)).unwrap();
-    store.insert_draft(&make_extraction_row("Decision B", 0.7)).unwrap();
+    store
+        .insert_draft(&make_extraction_row("Decision A", 0.9))
+        .unwrap();
+    store
+        .insert_draft(&make_extraction_row("Decision B", 0.7))
+        .unwrap();
 
     let pending = store.list_pending().unwrap();
     assert_eq!(pending.len(), 2);
@@ -274,8 +434,12 @@ fn extraction_discard() {
 #[test]
 fn extraction_list_by_confidence() {
     let store = ExtractionStore::in_memory().unwrap();
-    store.insert_draft(&make_extraction_row("High", 0.9)).unwrap();
-    store.insert_draft(&make_extraction_row("Low", 0.3)).unwrap();
+    store
+        .insert_draft(&make_extraction_row("High", 0.9))
+        .unwrap();
+    store
+        .insert_draft(&make_extraction_row("Low", 0.3))
+        .unwrap();
 
     let high = store.list_by_confidence(0.8).unwrap();
     assert_eq!(high.len(), 1);
@@ -373,9 +537,27 @@ fn events_log_and_read() {
 fn search_index_and_query() {
     let idx = SearchIndex::in_memory().unwrap();
 
-    idx.index_entity("id1", "Program", "Technical Education", "Building a learning culture through workshops and mentorship").unwrap();
-    idx.index_entity("id2", "Program", "PMO Establishment", "Setting up project management office and governance").unwrap();
-    idx.index_entity("id3", "Note", "Architecture Thoughts", "Exploring microservice patterns and event-driven design").unwrap();
+    idx.index_entity(
+        "id1",
+        "Program",
+        "Technical Education",
+        "Building a learning culture through workshops and mentorship",
+    )
+    .unwrap();
+    idx.index_entity(
+        "id2",
+        "Program",
+        "PMO Establishment",
+        "Setting up project management office and governance",
+    )
+    .unwrap();
+    idx.index_entity(
+        "id3",
+        "Note",
+        "Architecture Thoughts",
+        "Exploring microservice patterns and event-driven design",
+    )
+    .unwrap();
 
     let results = idx.search("learning culture").unwrap();
     assert!(!results.is_empty());
@@ -385,7 +567,8 @@ fn search_index_and_query() {
 #[test]
 fn search_remove_entity() {
     let idx = SearchIndex::in_memory().unwrap();
-    idx.index_entity("id1", "Note", "Test", "searchable content here").unwrap();
+    idx.index_entity("id1", "Note", "Test", "searchable content here")
+        .unwrap();
 
     let results = idx.search("searchable").unwrap();
     assert_eq!(results.len(), 1);
@@ -411,8 +594,12 @@ fn search_rebuild() {
     let content_store = ContentStore::new(tmp.path());
 
     // Insert some entities
-    entity_store.insert(&make_entity_row("Program", "Rebuild Test")).unwrap();
-    entity_store.insert(&make_entity_row("Task", "Another Task")).unwrap();
+    entity_store
+        .insert(&make_entity_row("Program", "Rebuild Test"))
+        .unwrap();
+    entity_store
+        .insert(&make_entity_row("Task", "Another Task"))
+        .unwrap();
 
     let count = idx.rebuild(&entity_store, &content_store).unwrap();
     assert_eq!(count, 2);
@@ -445,14 +632,17 @@ fn sync_save_entity_across_backends() {
 
     let row = make_entity_row("Note", "My Note");
     let id_str = row.id.clone();
-    sync.save_entity(&row, Some("# My Note\n\nSome content."), EntityType::Note).unwrap();
+    sync.save_entity(&row, Some("# My Note\n\nSome content."), EntityType::Note)
+        .unwrap();
 
     // Verify in entities.db
     assert!(entity_store.get(&id_str).unwrap().is_some());
 
     // Verify content file
     let id = uuid::Uuid::parse_str(&id_str).unwrap();
-    let content = content_store.read_content(EntityType::Note, &EntityId::from(id)).unwrap();
+    let content = content_store
+        .read_content(EntityType::Note, &EntityId::from(id))
+        .unwrap();
     assert!(content.is_some());
 
     // Verify in search index
@@ -499,12 +689,17 @@ fn sync_temporal_materialization() {
     sync.save_entity(&row, None, EntityType::Task).unwrap();
 
     // Materialize temporal edges
-    sync.materialize_temporal_edges(&id_str, EntityType::Task, false, true, false).unwrap();
+    sync.materialize_temporal_edges(&id_str, EntityType::Task, false, true, false)
+        .unwrap();
 
     // Verify HAS_DEADLINE edge exists
     let eid = EntityId::from(uuid::Uuid::parse_str(&id_str).unwrap());
-    assert!(graph_store.has_edge(&eid, &eid, RelationType::HasDeadline).unwrap());
+    assert!(graph_store
+        .has_edge(&eid, &eid, RelationType::HasDeadline)
+        .unwrap());
 
     // HAS_CADENCE should not exist
-    assert!(!graph_store.has_edge(&eid, &eid, RelationType::HasCadence).unwrap());
+    assert!(!graph_store
+        .has_edge(&eid, &eid, RelationType::HasCadence)
+        .unwrap());
 }

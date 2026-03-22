@@ -30,9 +30,7 @@ impl ContentStore {
     /// Resolve the filesystem path for an entity's content file (no I/O).
     pub fn content_path(&self, entity_type: EntityType, id: &EntityId) -> PathBuf {
         let subdir = entity_type_to_subdir(entity_type);
-        self.project_root
-            .join(subdir)
-            .join(format!("{}.md", id))
+        self.project_root.join(subdir).join(format!("{}.md", id))
     }
 
     /// Write markdown content for an entity.
@@ -70,11 +68,7 @@ impl ContentStore {
     }
 
     /// Delete the content file for an entity.
-    pub fn delete_content(
-        &self,
-        entity_type: EntityType,
-        id: &EntityId,
-    ) -> Result<(), StoreError> {
+    pub fn delete_content(&self, entity_type: EntityType, id: &EntityId) -> Result<(), StoreError> {
         let path = self.content_path(entity_type, id);
         if path.exists() {
             fs::remove_file(&path)?;
@@ -114,6 +108,7 @@ fn entity_type_to_subdir(entity_type: EntityType) -> &'static str {
         EntityType::Meeting | EntityType::Transcript => "meetings",
         EntityType::Reflection => "reflections",
         EntityType::Artifact => "artifacts",
+        EntityType::Reference => "references",
         EntityType::Note => "notes",
         EntityType::Person => "people",
         EntityType::Decision

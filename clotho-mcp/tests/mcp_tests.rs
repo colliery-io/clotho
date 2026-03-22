@@ -16,13 +16,17 @@ use clotho_mcp_server::workspace_resolver;
 #[test]
 fn list_tools_returns_all_fifteen() {
     let tools = ClothoTools::tools();
-    assert_eq!(tools.len(), 21);
+    assert_eq!(tools.len(), 25);
 
     let names: Vec<&str> = tools.iter().map(|t| t.name.as_str()).collect();
     assert!(names.contains(&"clotho_search"));
     assert!(names.contains(&"clotho_query"));
     assert!(names.contains(&"clotho_read_entity"));
     assert!(names.contains(&"clotho_list_entities"));
+    assert!(names.contains(&"clotho_batch_create_relations"));
+    assert!(names.contains(&"clotho_capture_directory"));
+    assert!(names.contains(&"clotho_workspace_summary"));
+    assert!(names.contains(&"clotho_list_unprocessed"));
     assert!(names.contains(&"clotho_init"));
     assert!(names.contains(&"clotho_capture"));
     assert!(names.contains(&"clotho_create_note"));
@@ -69,7 +73,11 @@ async fn test_capture_tool() {
     workspace_resolver::set_workspace(tmp.path().display().to_string());
 
     let file_path = tmp.path().join("test-note.md");
-    fs::write(&file_path, "# Test Note\n\nSome interesting content about architecture.").unwrap();
+    fs::write(
+        &file_path,
+        "# Test Note\n\nSome interesting content about architecture.",
+    )
+    .unwrap();
 
     let tool = CaptureTool {
         file_path: file_path.display().to_string(),
@@ -98,6 +106,7 @@ async fn test_create_note_tool() {
     let tool = CreateNoteTool {
         title: "Architecture Thoughts".to_string(),
         content: "# Architecture\n\nThinking about microservices vs monolith.".to_string(),
+        parent_id: None,
     };
     let result = tool.call_tool().await.unwrap();
     assert!(result.is_error.is_none());
@@ -145,6 +154,7 @@ async fn test_search_tool_finds_content() {
     let create = CreateNoteTool {
         title: "Deployment Strategy".to_string(),
         content: "Blue-green deployment with rolling updates and canary releases.".to_string(),
+        parent_id: None,
     };
     create.call_tool().await.unwrap();
 
@@ -172,6 +182,7 @@ async fn test_list_entities_tool() {
         let tool = CreateNoteTool {
             title: title.to_string(),
             content: "Content".to_string(),
+            parent_id: None,
         };
         tool.call_tool().await.unwrap();
     }

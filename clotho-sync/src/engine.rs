@@ -95,9 +95,7 @@ impl SyncEngine {
             .ok_or_else(|| SyncError::NoRepository("workspace has no parent".into()))?;
 
         if !repo_path.join(".git").exists() {
-            return Err(SyncError::NoRepository(
-                repo_path.display().to_string(),
-            ));
+            return Err(SyncError::NoRepository(repo_path.display().to_string()));
         }
 
         let repo = Repository::open(repo_path)?;
@@ -148,7 +146,8 @@ impl SyncEngine {
 
         // Count changed files
         let diff = if let Some(ref parent) = parent_commit {
-            self.repo.diff_tree_to_tree(Some(&parent.tree()?), Some(&tree), None)?
+            self.repo
+                .diff_tree_to_tree(Some(&parent.tree()?), Some(&tree), None)?
         } else {
             self.repo.diff_tree_to_tree(None, Some(&tree), None)?
         };
@@ -158,23 +157,18 @@ impl SyncEngine {
         let now = chrono::Utc::now();
         let message = format!("clotho sync: {}", now.format("%Y-%m-%d %H:%M:%S"));
 
-        let sig = self.repo.signature().unwrap_or_else(|_| {
-            git2::Signature::now("clotho", "clotho@localhost").unwrap()
-        });
+        let sig = self
+            .repo
+            .signature()
+            .unwrap_or_else(|_| git2::Signature::now("clotho", "clotho@localhost").unwrap());
 
         let parents: Vec<&git2::Commit> = match parent_commit {
             Some(ref c) => vec![c],
             None => vec![],
         };
 
-        self.repo.commit(
-            Some("HEAD"),
-            &sig,
-            &sig,
-            &message,
-            &tree,
-            &parents,
-        )?;
+        self.repo
+            .commit(Some("HEAD"), &sig, &sig, &message, &tree, &parents)?;
 
         // Push if remote is configured
         let pushed = if self.has_remote() {
@@ -217,9 +211,12 @@ impl SyncEngine {
     /// Squashes all older commits into a single orphan root commit,
     /// preserving the current HEAD tree state.
     pub fn prune_history(&self, keep: usize) -> Result<usize, SyncError> {
-        let head = self.repo.head()
+        let head = self
+            .repo
+            .head()
             .map_err(|_| SyncError::PruneFailed("no HEAD".into()))?;
-        let head_commit = head.peel_to_commit()
+        let head_commit = head
+            .peel_to_commit()
             .map_err(|e| SyncError::PruneFailed(e.to_string()))?;
 
         // Walk history to count commits
@@ -227,9 +224,7 @@ impl SyncEngine {
         revwalk.push(head_commit.id())?;
         revwalk.set_sorting(git2::Sort::TOPOLOGICAL)?;
 
-        let commit_ids: Vec<git2::Oid> = revwalk
-            .filter_map(|r| r.ok())
-            .collect();
+        let commit_ids: Vec<git2::Oid> = revwalk.filter_map(|r| r.ok()).collect();
 
         let total = commit_ids.len();
         if total <= keep {
@@ -251,9 +246,10 @@ impl SyncEngine {
         let keep_oldest_id = commit_ids[keep - 1];
         let keep_oldest = self.repo.find_commit(keep_oldest_id)?;
 
-        let sig = self.repo.signature().unwrap_or_else(|_| {
-            git2::Signature::now("clotho", "clotho@localhost").unwrap()
-        });
+        let sig = self
+            .repo
+            .signature()
+            .unwrap_or_else(|_| git2::Signature::now("clotho", "clotho@localhost").unwrap());
 
         // Create orphan commit with the same tree as the oldest-kept commit
         let orphan_oid = self.repo.commit(
@@ -286,11 +282,8 @@ impl SyncEngine {
         }
 
         // Reset HEAD to the new tip
-        self.repo.reset(
-            new_parent.as_object(),
-            git2::ResetType::Soft,
-            None,
-        )?;
+        self.repo
+            .reset(new_parent.as_object(), git2::ResetType::Soft, None)?;
 
         let pruned = total - keep;
         Ok(pruned)

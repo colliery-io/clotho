@@ -1,6 +1,8 @@
 use crate::formatting::text_result;
+use crate::resolve;
 use crate::workspace_resolver;
 use chrono::Utc;
+use clotho_core::domain::traits::RelationType;
 use clotho_core::domain::types::{EntityId, EntityType};
 use clotho_core::graph::GraphStore;
 use clotho_store::content::ContentStore;
@@ -17,7 +19,7 @@ use std::path::Path;
 
 #[mcp_tool(
     name = "clotho_create_note",
-    description = "Create a new note entity in the Clotho workspace.",
+    description = "Create a new note entity in the Clotho workspace. Optionally link to a parent entity via belongs_to relation.",
     idempotent_hint = false,
     destructive_hint = false,
     open_world_hint = false,
@@ -29,6 +31,8 @@ pub struct CreateNoteTool {
     pub title: String,
     /// Markdown content of the note
     pub content: String,
+    /// Optional parent entity ID (full UUID or prefix) — auto-creates a belongs_to relation
+    pub parent_id: Option<String>,
 }
 
 impl CreateNoteTool {
@@ -88,9 +92,31 @@ impl CreateNoteTool {
             details: None,
         });
 
+        // Auto-create belongs_to relation if parent_id provided
+        let mut parent_info = String::new();
+        if let Some(ref parent_input) = self.parent_id {
+            let parent_row = match resolve::resolve_for_write(&entity_store, parent_input) {
+                Ok(row) => row,
+                Err(result) => return Ok(result),
+            };
+            let parent_eid = uuid::Uuid::parse_str(&parent_row.id)
+                .map(EntityId::from)
+                .map_err(|e| {
+                    CallToolError::new(std::io::Error::other(format!("invalid parent ID: {}", e)))
+                })?;
+            graph
+                .add_edge(&id, &parent_eid, RelationType::BelongsTo)
+                .map_err(|e| CallToolError::new(std::io::Error::other(e.to_string())))?;
+            parent_info = format!(
+                "\n| Parent | `{}` ({}) |",
+                &parent_row.id[..8],
+                parent_row.title
+            );
+        }
+
         Ok(text_result(format!(
-            "## Note Created\n\n| Field | Value |\n|---|---|\n| ID | `{}` |\n| Title | {} |\n| Content | `{}` |",
-            id, self.title, content_path.display()
+            "## Note Created\n\n| Field | Value |\n|---|---|\n| ID | `{}` |\n| Title | {} |\n| Content | `{}` |{}",
+            id, self.title, content_path.display(), parent_info
         )))
     }
 }

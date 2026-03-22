@@ -27,10 +27,8 @@ impl GraphStore {
             ("title", title.to_string()),
         ];
         // Convert to (String, String) pairs for graphqlite
-        let props: Vec<(String, String)> = props
-            .into_iter()
-            .map(|(k, v)| (k.to_string(), v))
-            .collect();
+        let props: Vec<(String, String)> =
+            props.into_iter().map(|(k, v)| (k.to_string(), v)).collect();
 
         self.graph()
             .upsert_node(&id.to_string(), props, &entity_type.to_string())
@@ -63,8 +61,9 @@ impl GraphStore {
         let entity_type_str: String = result[0].get("entity_type").unwrap_or_default();
         let title: String = result[0].get("title").unwrap_or_default();
 
-        let entity_type = parse_entity_type(&entity_type_str)
-            .ok_or_else(|| GraphError::QueryFailed(format!("unknown entity type: {}", entity_type_str)))?;
+        let entity_type = parse_entity_type(&entity_type_str).ok_or_else(|| {
+            GraphError::QueryFailed(format!("unknown entity type: {}", entity_type_str))
+        })?;
 
         Ok(Some(NodeInfo {
             id: id.clone(),

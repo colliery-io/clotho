@@ -15,14 +15,29 @@ pub fn run(_args: StatusArgs, json: bool) -> Result<(), Box<dyn std::error::Erro
 
     // Count by type
     let programs: Vec<_> = all.iter().filter(|r| r.entity_type == "Program").collect();
-    let responsibilities: Vec<_> = all.iter().filter(|r| r.entity_type == "Responsibility").collect();
-    let objectives: Vec<_> = all.iter().filter(|r| r.entity_type == "Objective").collect();
-    let workstreams: Vec<_> = all.iter().filter(|r| r.entity_type == "Workstream").collect();
+    let responsibilities: Vec<_> = all
+        .iter()
+        .filter(|r| r.entity_type == "Responsibility")
+        .collect();
+    let objectives: Vec<_> = all
+        .iter()
+        .filter(|r| r.entity_type == "Objective")
+        .collect();
+    let workstreams: Vec<_> = all
+        .iter()
+        .filter(|r| r.entity_type == "Workstream")
+        .collect();
     let tasks: Vec<_> = all.iter().filter(|r| r.entity_type == "Task").collect();
     let meetings: Vec<_> = all.iter().filter(|r| r.entity_type == "Meeting").collect();
-    let transcripts: Vec<_> = all.iter().filter(|r| r.entity_type == "Transcript").collect();
+    let transcripts: Vec<_> = all
+        .iter()
+        .filter(|r| r.entity_type == "Transcript")
+        .collect();
     let notes: Vec<_> = all.iter().filter(|r| r.entity_type == "Note").collect();
-    let reflections: Vec<_> = all.iter().filter(|r| r.entity_type == "Reflection").collect();
+    let reflections: Vec<_> = all
+        .iter()
+        .filter(|r| r.entity_type == "Reflection")
+        .collect();
     let people: Vec<_> = all.iter().filter(|r| r.entity_type == "Person").collect();
     let decisions: Vec<_> = all.iter().filter(|r| r.entity_type == "Decision").collect();
     let risks: Vec<_> = all.iter().filter(|r| r.entity_type == "Risk").collect();
@@ -31,16 +46,30 @@ pub fn run(_args: StatusArgs, json: bool) -> Result<(), Box<dyn std::error::Erro
     let insights: Vec<_> = all.iter().filter(|r| r.entity_type == "Insight").collect();
 
     // Task state counts
-    let tasks_todo = tasks.iter().filter(|t| t.task_state.as_deref() == Some("todo")).count();
-    let tasks_doing = tasks.iter().filter(|t| t.task_state.as_deref() == Some("doing")).count();
-    let tasks_blocked = tasks.iter().filter(|t| t.task_state.as_deref() == Some("blocked")).count();
-    let tasks_done = tasks.iter().filter(|t| t.task_state.as_deref() == Some("done")).count();
+    let tasks_todo = tasks
+        .iter()
+        .filter(|t| t.task_state.as_deref() == Some("todo"))
+        .count();
+    let tasks_doing = tasks
+        .iter()
+        .filter(|t| t.task_state.as_deref() == Some("doing"))
+        .count();
+    let tasks_blocked = tasks
+        .iter()
+        .filter(|t| t.task_state.as_deref() == Some("blocked"))
+        .count();
+    let tasks_done = tasks
+        .iter()
+        .filter(|t| t.task_state.as_deref() == Some("done"))
+        .count();
 
     // Check unprocessed transcripts
     let processing_log = ProcessingLog::open(&ws.data_path().join("entities.db")).ok();
     let unprocessed_transcripts = if let Some(ref log) = processing_log {
         let transcript_ids: Vec<&str> = transcripts.iter().map(|t| t.id.as_str()).collect();
-        log.get_unprocessed("extraction", &transcript_ids).unwrap_or_default().len()
+        log.get_unprocessed("extraction", &transcript_ids)
+            .unwrap_or_default()
+            .len()
     } else {
         transcripts.len()
     };
@@ -100,11 +129,20 @@ pub fn run(_args: StatusArgs, json: bool) -> Result<(), Box<dyn std::error::Erro
 
         // Tasks
         if !tasks.is_empty() {
-            println!("Tasks: {} ({} todo, {} doing, {} blocked, {} done)",
-                tasks.len(), tasks_todo, tasks_doing, tasks_blocked, tasks_done);
+            println!(
+                "Tasks: {} ({} todo, {} doing, {} blocked, {} done)",
+                tasks.len(),
+                tasks_todo,
+                tasks_doing,
+                tasks_blocked,
+                tasks_done
+            );
             if tasks_blocked > 0 {
                 println!("  Blocked:");
-                for t in tasks.iter().filter(|t| t.task_state.as_deref() == Some("blocked")) {
+                for t in tasks
+                    .iter()
+                    .filter(|t| t.task_state.as_deref() == Some("blocked"))
+                {
                     println!("    - {}", t.title);
                 }
             }
@@ -114,16 +152,29 @@ pub fn run(_args: StatusArgs, json: bool) -> Result<(), Box<dyn std::error::Erro
         // Capture stats
         let capture_total = meetings.len() + transcripts.len() + notes.len() + reflections.len();
         if capture_total > 0 {
-            println!("Captured: {} meetings, {} transcripts ({} unprocessed), {} notes, {} reflections",
-                meetings.len(), transcripts.len(), unprocessed_transcripts, notes.len(), reflections.len());
+            println!(
+                "Captured: {} meetings, {} transcripts ({} unprocessed), {} notes, {} reflections",
+                meetings.len(),
+                transcripts.len(),
+                unprocessed_transcripts,
+                notes.len(),
+                reflections.len()
+            );
             println!();
         }
 
         // Derived
-        let derived_total = decisions.len() + risks.len() + blockers.len() + questions.len() + insights.len();
+        let derived_total =
+            decisions.len() + risks.len() + blockers.len() + questions.len() + insights.len();
         if derived_total > 0 {
-            println!("Derived: {} decisions, {} risks, {} blockers, {} questions, {} insights",
-                decisions.len(), risks.len(), blockers.len(), questions.len(), insights.len());
+            println!(
+                "Derived: {} decisions, {} risks, {} blockers, {} questions, {} insights",
+                decisions.len(),
+                risks.len(),
+                blockers.len(),
+                questions.len(),
+                insights.len()
+            );
             println!();
         }
 

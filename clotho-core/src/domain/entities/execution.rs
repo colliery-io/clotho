@@ -40,15 +40,27 @@ impl Workstream {
 }
 
 impl Entity for Workstream {
-    fn id(&self) -> &EntityId { &self.id }
-    fn entity_type(&self) -> EntityType { EntityType::Workstream }
-    fn title(&self) -> &str { &self.title }
-    fn created_at(&self) -> DateTime<Utc> { self.created_at }
-    fn updated_at(&self) -> DateTime<Utc> { self.updated_at }
+    fn id(&self) -> &EntityId {
+        &self.id
+    }
+    fn entity_type(&self) -> EntityType {
+        EntityType::Workstream
+    }
+    fn title(&self) -> &str {
+        &self.title
+    }
+    fn created_at(&self) -> DateTime<Utc> {
+        self.created_at
+    }
+    fn updated_at(&self) -> DateTime<Utc> {
+        self.updated_at
+    }
 }
 
 impl Activatable for Workstream {
-    fn status(&self) -> Status { self.status }
+    fn status(&self) -> Status {
+        self.status
+    }
     fn set_status(&mut self, status: Status) {
         self.status = status;
         self.updated_at = Utc::now();
@@ -57,13 +69,22 @@ impl Activatable for Workstream {
 
 impl Relatable for Workstream {
     fn relations(&self, graph: &GraphStore) -> Vec<Relation> {
-        graph.get_edges_from(self.id()).unwrap_or_default().into_iter().map(Relation::from).collect()
+        graph
+            .get_edges_from(self.id())
+            .unwrap_or_default()
+            .into_iter()
+            .map(Relation::from)
+            .collect()
     }
-    fn graph_label(&self) -> &'static str { "Workstream" }
+    fn graph_label(&self) -> &'static str {
+        "Workstream"
+    }
 }
 
 impl Taggable for Workstream {
-    fn tags(&self) -> &[Tag] { &self.tags }
+    fn tags(&self) -> &[Tag] {
+        &self.tags
+    }
     fn add_tag(&mut self, tag: Tag) {
         if !self.tags.contains(&tag) {
             self.tags.push(tag);
@@ -80,7 +101,9 @@ impl Taggable for Workstream {
 }
 
 impl ContentBearing for Workstream {
-    fn content(&self) -> &str { &self.content }
+    fn content(&self) -> &str {
+        &self.content
+    }
     fn set_content(&mut self, content: String) {
         self.content = content;
         self.updated_at = Utc::now();
@@ -91,7 +114,9 @@ impl ContentBearing for Workstream {
 }
 
 impl HasCadence for Workstream {
-    fn cadence(&self) -> Option<&Cadence> { self.cadence.as_ref() }
+    fn cadence(&self) -> Option<&Cadence> {
+        self.cadence.as_ref()
+    }
     fn set_cadence(&mut self, cadence: Option<Cadence>) {
         self.cadence = cadence;
         self.updated_at = Utc::now();
@@ -142,15 +167,27 @@ impl Task {
 }
 
 impl Entity for Task {
-    fn id(&self) -> &EntityId { &self.id }
-    fn entity_type(&self) -> EntityType { EntityType::Task }
-    fn title(&self) -> &str { &self.title }
-    fn created_at(&self) -> DateTime<Utc> { self.created_at }
-    fn updated_at(&self) -> DateTime<Utc> { self.updated_at }
+    fn id(&self) -> &EntityId {
+        &self.id
+    }
+    fn entity_type(&self) -> EntityType {
+        EntityType::Task
+    }
+    fn title(&self) -> &str {
+        &self.title
+    }
+    fn created_at(&self) -> DateTime<Utc> {
+        self.created_at
+    }
+    fn updated_at(&self) -> DateTime<Utc> {
+        self.updated_at
+    }
 }
 
 impl Taskable for Task {
-    fn state(&self) -> TaskState { self.state }
+    fn state(&self) -> TaskState {
+        self.state
+    }
 
     fn transition(&mut self, to: TaskState) -> Result<(), TransitionError> {
         let valid = self.valid_transitions();
@@ -178,13 +215,22 @@ impl Taskable for Task {
 
 impl Relatable for Task {
     fn relations(&self, graph: &GraphStore) -> Vec<Relation> {
-        graph.get_edges_from(self.id()).unwrap_or_default().into_iter().map(Relation::from).collect()
+        graph
+            .get_edges_from(self.id())
+            .unwrap_or_default()
+            .into_iter()
+            .map(Relation::from)
+            .collect()
     }
-    fn graph_label(&self) -> &'static str { "Task" }
+    fn graph_label(&self) -> &'static str {
+        "Task"
+    }
 }
 
 impl Taggable for Task {
-    fn tags(&self) -> &[Tag] { &self.tags }
+    fn tags(&self) -> &[Tag] {
+        &self.tags
+    }
     fn add_tag(&mut self, tag: Tag) {
         if !self.tags.contains(&tag) {
             self.tags.push(tag);
@@ -201,7 +247,9 @@ impl Taggable for Task {
 }
 
 impl ContentBearing for Task {
-    fn content(&self) -> &str { &self.content }
+    fn content(&self) -> &str {
+        &self.content
+    }
     fn set_content(&mut self, content: String) {
         self.content = content;
         self.updated_at = Utc::now();
@@ -212,7 +260,9 @@ impl ContentBearing for Task {
 }
 
 impl HasCadence for Task {
-    fn cadence(&self) -> Option<&Cadence> { self.cadence.as_ref() }
+    fn cadence(&self) -> Option<&Cadence> {
+        self.cadence.as_ref()
+    }
     fn set_cadence(&mut self, cadence: Option<Cadence>) {
         self.cadence = cadence;
         self.updated_at = Utc::now();
@@ -220,7 +270,9 @@ impl HasCadence for Task {
 }
 
 impl HasDeadline for Task {
-    fn deadline(&self) -> Option<DateTime<Utc>> { self.deadline }
+    fn deadline(&self) -> Option<DateTime<Utc>> {
+        self.deadline
+    }
     fn set_deadline(&mut self, deadline: Option<DateTime<Utc>>) {
         self.deadline = deadline;
         self.updated_at = Utc::now();
@@ -228,7 +280,9 @@ impl HasDeadline for Task {
 }
 
 impl HasSchedule for Task {
-    fn scheduled_at(&self) -> Option<DateTime<Utc>> { self.scheduled_at }
+    fn scheduled_at(&self) -> Option<DateTime<Utc>> {
+        self.scheduled_at
+    }
     fn set_scheduled_at(&mut self, at: Option<DateTime<Utc>>) {
         self.scheduled_at = at;
         self.updated_at = Utc::now();

@@ -10,11 +10,14 @@ tools:
   - "mcp__clotho__clotho_read_entity"
   - "mcp__clotho__clotho_create_entity"
   - "mcp__clotho__clotho_create_relation"
+  - "mcp__clotho__clotho_batch_create_relations"
   - "mcp__clotho__clotho_search"
   - "mcp__clotho__clotho_list_entities"
+  - "mcp__clotho__clotho_list_unprocessed"
   - "mcp__clotho__clotho_get_relations"
   - "mcp__clotho__clotho_get_ontology"
   - "mcp__clotho__clotho_update_ontology"
+  - "mcp__clotho__clotho_mark_processed"
   - "mcp__clotho__clotho_query"
 ---
 
@@ -22,7 +25,11 @@ tools:
 
 You are the extraction engine for Clotho's daily debrief ceremony. You process today's unextracted transcripts and notes to create structured entities, routed to the right programs based on content context.
 
-## Step 0: Load extraction context
+## Step 0a: Check skip patterns
+
+Read `.clotho/extraction-config.toml` if it exists. It may contain `skip_titles` patterns — transcripts matching these should be auto-skipped and marked processed. Report skipped items in the summary.
+
+## Step 0b: Load extraction context
 
 Before processing any transcripts, load the ontology for each program and responsibility. This is lightweight — ontologies are compact keyword/signal metadata, not full markdown content.
 
@@ -91,6 +98,9 @@ Read carefully and identify:
 | "We need to figure out...", "How do we..." | Open question | Question |
 | "What we learned...", "Key takeaway..." | Learning | Insight |
 | "Can you take this?", "Assigning to X" | Delegation | Task |
+| "I need X from you", "Can you get me..." | Request | Task (inbound) |
+| "Let's schedule a meeting about...", "Set up time for...", "Let's follow up on..." | Follow-up | Task |
+| "Next steps:", "Action items:", "By next week we need..." | Next steps | Task(s) |
 
 **Domain-specific signals (from program context):**
 
@@ -102,8 +112,12 @@ Beyond generic speech acts, look for signals that matter to the specific program
 
 ### What to ignore
 - Routine status updates with no signal
-- Small talk, scheduling, admin
+- Small talk and pleasantries
 - Things that are already captured (check existing entities) — if you find reinforcing evidence for an existing risk or blocker, note it but don't create a duplicate
+
+### Pay extra attention to
+- **Meeting wrap-ups** — the last section of a meeting often contains explicit action items, next steps, and follow-up scheduling. These are high-signal.
+- **Follow-up actions** — "let's schedule a meeting", "set up time for", "circle back on" are real action items, not admin noise. Capture them as Tasks.
 
 ## Step 2: Create entities
 
@@ -179,6 +193,16 @@ If you find an existing entity that covers the same ground:
 >
 > **People identified:** N (M new, K existing)
 
+## Step 6: Mark processed
+
+After extraction is complete for each transcript/note, mark it as processed so it doesn't appear in the extraction queue again:
+
+```
+clotho_mark_processed(entity_id: "<transcript_id>", process_name: "extraction", processed_by: "debrief-processor")
+```
+
+Do this automatically — don't wait for the user to ask. This keeps the extraction queue clean.
+
 ## Rules
 
 - **Context-first extraction.** Read the program descriptions before extracting. The programs tell you what matters.
@@ -187,3 +211,4 @@ If you find an existing entity that covers the same ground:
 - **Deduplicate.** Search before creating. Reinforcing evidence is valuable but not as a duplicate.
 - **Route, don't dump.** Every entity should belong to a program if at all possible. Unrouted entities are a last resort.
 - **Conservative on auto-linking.** If routing is ambiguous, ask the user. If extraction is uncertain, skip it.
+- **Use batch tools.** When creating multiple relations, use `clotho_batch_create_relations` instead of individual calls.
