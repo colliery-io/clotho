@@ -57,9 +57,17 @@ pub fn render(frame: &mut Frame, app: &mut App) {
 
 fn panel_border_style(app: &App, panel: FocusedPanel) -> Style {
     if app.focused == panel {
-        Style::default().fg(Color::Cyan).add_modifier(Modifier::BOLD)
+        Style::default().fg(Color::White).add_modifier(Modifier::BOLD)
     } else {
-        Style::default().fg(Color::DarkGray)
+        Style::default().fg(Color::Rgb(80, 80, 90))
+    }
+}
+
+fn panel_border_type(app: &App, panel: FocusedPanel) -> ratatui::widgets::BorderType {
+    if app.focused == panel {
+        ratatui::widgets::BorderType::Thick
+    } else {
+        ratatui::widgets::BorderType::Plain
     }
 }
 
@@ -67,6 +75,7 @@ fn render_navigator(frame: &mut Frame, app: &mut App, area: Rect) {
     let block = Block::default()
         .title(" Entities ")
         .borders(Borders::ALL)
+        .border_type(panel_border_type(app, FocusedPanel::Navigator))
         .border_style(panel_border_style(app, FocusedPanel::Navigator));
 
     let inner = block.inner(area);
@@ -104,6 +113,7 @@ fn render_content(frame: &mut Frame, app: &mut App, area: Rect) {
     let block = Block::default()
         .title(mode_label)
         .borders(Borders::ALL)
+        .border_type(panel_border_type(app, FocusedPanel::Content))
         .border_style(panel_border_style(app, FocusedPanel::Content));
 
     if app.tabs.is_empty() {
@@ -281,6 +291,7 @@ fn render_chat(frame: &mut Frame, app: &App, area: Rect) {
     let block = Block::default()
         .title(" Chat ")
         .borders(Borders::ALL)
+        .border_type(panel_border_type(app, FocusedPanel::Chat))
         .border_style(panel_border_style(app, FocusedPanel::Chat));
 
     if let Some(ref pty) = app.pty {

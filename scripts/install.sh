@@ -154,19 +154,22 @@ install_claude_plugin() {
 
     info "Installing Clotho Claude Code plugin..."
 
-    # Nuke existing
+    # Nuke existing (both scopes)
+    (cd "$HOME/.clotho" 2>/dev/null && claude plugin uninstall clotho@colliery-io-clotho 2>/dev/null) || true
     claude plugin uninstall clotho@colliery-io-clotho 2>/dev/null || true
 
     # Register/update marketplace
     claude plugin marketplace add colliery-io/clotho 2>/dev/null || true
     claude plugin marketplace update colliery-io-clotho 2>/dev/null || true
 
-    # Install fresh
-    if claude plugin install clotho@colliery-io-clotho; then
+    # Install fresh as project-level plugin in ~/.clotho
+    WORKSPACE="$HOME/.clotho"
+    mkdir -p "$WORKSPACE"
+    if (cd "$WORKSPACE" && claude plugin install -s project clotho@colliery-io-clotho); then
         info "Clotho Claude Code plugin installed"
     else
         warn "Failed to install Claude Code plugin"
-        warn "  You can install manually: claude plugin install clotho@colliery-io-clotho"
+        warn "  You can install manually: cd ~/.clotho && claude plugin install -s project clotho@colliery-io-clotho"
     fi
 }
 

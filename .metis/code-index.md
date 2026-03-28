@@ -1,6 +1,6 @@
 # Code Index
 
-> Generated: 2026-03-28T01:17:22Z | 102 files | Rust
+> Generated: 2026-03-28T01:34:01Z | 102 files | Rust
 
 ## Project Structure
 
@@ -1621,9 +1621,10 @@
 
 - pub `render` function L14-56 — `(frame: &mut Frame, app: &mut App)` — Render the full TUI layout.
 -  `panel_border_style` function L58-64 — `(app: &App, panel: FocusedPanel) -> Style`
--  `render_navigator` function L66-96 — `(frame: &mut Frame, app: &mut App, area: Rect)`
--  `render_content` function L98-277 — `(frame: &mut Frame, app: &mut App, area: Rect)`
--  `render_chat` function L280-300 — `(frame: &mut Frame, app: &App, area: Rect)`
--  `render_status_bar` function L302-329 — `(frame: &mut Frame, app: &App, area: Rect)`
--  `render_help_overlay` function L331-383 — `(frame: &mut Frame, area: Rect)`
+-  `panel_border_type` function L66-72 — `(app: &App, panel: FocusedPanel) -> ratatui::widgets::BorderType`
+-  `render_navigator` function L74-105 — `(frame: &mut Frame, app: &mut App, area: Rect)`
+-  `render_content` function L107-287 — `(frame: &mut Frame, app: &mut App, area: Rect)`
+-  `render_chat` function L290-311 — `(frame: &mut Frame, app: &App, area: Rect)`
+-  `render_status_bar` function L313-340 — `(frame: &mut Frame, app: &App, area: Rect)`
+-  `render_help_overlay` function L342-394 — `(frame: &mut Frame, area: Rect)`
 

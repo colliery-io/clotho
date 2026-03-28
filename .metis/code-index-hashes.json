@@ -101,6 +101,6 @@
     "clotho-tui/src/navigator.rs": "5bb91da7cf50162fc732b950a372c528e01385b24dd841fd409643ea2188e9d5",
     "clotho-tui/src/pty.rs": "a8e4f75da3924a0fba0542fbabbe475554652a625b00b383b5b3a2b49bd7571d",
     "clotho-tui/src/state.rs": "1c658c8ab369961e0abaac1bd86db46ab280fdf96e3b7b2cae92b66f8191c2e1",
-    "clotho-tui/src/ui.rs": "e7f357028947e67d9934efbf780240af8ccc0b0123c6a732bf04e4020b64e46a"
+    "clotho-tui/src/ui.rs": "d1176f1d818fa2d7633d0c72d8e36f74ac086ee9d8e21cbfa1501af06ef2115f"
   }
 }
