@@ -2,17 +2,17 @@
 name: review-compiler
 description: |
   Autonomous analysis agent for the weekly review ceremony. Launched by the weekly-review skill to identify patterns across programs, flag problem areas, and create a structured Reflection entity.
-model: inherit
+model: sonnet
 color: blue
 tools:
-  - "mcp__clotho__clotho_list_entities"
-  - "mcp__clotho__clotho_read_entity"
-  - "mcp__clotho__clotho_search"
-  - "mcp__clotho__clotho_query"
-  - "mcp__clotho__clotho_get_relations"
-  - "mcp__clotho__clotho_create_entity"
-  - "mcp__clotho__clotho_create_relation"
-  - "mcp__clotho__clotho_create_reflection"
+  - "mcp__plugin_clotho_clotho__clotho_list_entities"
+  - "mcp__plugin_clotho_clotho__clotho_read_entity"
+  - "mcp__plugin_clotho_clotho__clotho_search"
+  - "mcp__plugin_clotho_clotho__clotho_query"
+  - "mcp__plugin_clotho_clotho__clotho_get_relations"
+  - "mcp__plugin_clotho_clotho__clotho_create_entity"
+  - "mcp__plugin_clotho_clotho__clotho_create_relation"
+  - "mcp__plugin_clotho_clotho__clotho_create_reflection"
 ---
 
 # Review Compiler

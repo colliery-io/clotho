@@ -4,21 +4,21 @@ description: |
   Autonomous extraction agent for the daily debrief ceremony. Launched by the daily-debrief skill to process today's unextracted transcripts and notes. Uses program/responsibility context as the extraction lens — signals are routed to the programs they belong to.
 
   Use this agent when the daily-debrief skill reaches Phase 4 and needs to process unextracted content.
-model: inherit
+model: sonnet
 color: green
 tools:
-  - "mcp__clotho__clotho_read_entity"
-  - "mcp__clotho__clotho_create_entity"
-  - "mcp__clotho__clotho_create_relation"
-  - "mcp__clotho__clotho_batch_create_relations"
-  - "mcp__clotho__clotho_search"
-  - "mcp__clotho__clotho_list_entities"
-  - "mcp__clotho__clotho_list_unprocessed"
-  - "mcp__clotho__clotho_get_relations"
-  - "mcp__clotho__clotho_get_ontology"
-  - "mcp__clotho__clotho_update_ontology"
-  - "mcp__clotho__clotho_mark_processed"
-  - "mcp__clotho__clotho_query"
+  - "mcp__plugin_clotho_clotho__clotho_read_entity"
+  - "mcp__plugin_clotho_clotho__clotho_create_entity"
+  - "mcp__plugin_clotho_clotho__clotho_create_relation"
+  - "mcp__plugin_clotho_clotho__clotho_batch_create_relations"
+  - "mcp__plugin_clotho_clotho__clotho_search"
+  - "mcp__plugin_clotho_clotho__clotho_list_entities"
+  - "mcp__plugin_clotho_clotho__clotho_list_unprocessed"
+  - "mcp__plugin_clotho_clotho__clotho_get_relations"
+  - "mcp__plugin_clotho_clotho__clotho_get_ontology"
+  - "mcp__plugin_clotho_clotho__clotho_update_ontology"
+  - "mcp__plugin_clotho_clotho__clotho_mark_processed"
+  - "mcp__plugin_clotho_clotho__clotho_query"
 ---
 
 # Debrief Processor

@@ -2,16 +2,16 @@
 name: report-builder
 description: |
   Autonomous report generation agent. Launched by the report skill to aggregate program data and format an audience-appropriate status report as an Artifact entity.
-model: inherit
+model: sonnet
 color: yellow
 tools:
-  - "mcp__clotho__clotho_list_entities"
-  - "mcp__clotho__clotho_read_entity"
-  - "mcp__clotho__clotho_query"
-  - "mcp__clotho__clotho_get_relations"
-  - "mcp__clotho__clotho_search"
-  - "mcp__clotho__clotho_create_entity"
-  - "mcp__clotho__clotho_create_relation"
+  - "mcp__plugin_clotho_clotho__clotho_list_entities"
+  - "mcp__plugin_clotho_clotho__clotho_read_entity"
+  - "mcp__plugin_clotho_clotho__clotho_query"
+  - "mcp__plugin_clotho_clotho__clotho_get_relations"
+  - "mcp__plugin_clotho_clotho__clotho_search"
+  - "mcp__plugin_clotho_clotho__clotho_create_entity"
+  - "mcp__plugin_clotho_clotho__clotho_create_relation"
 ---
 
 # Report Builder
