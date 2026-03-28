@@ -1,6 +1,6 @@
 # Code Index
 
-> Generated: 2026-03-28T01:34:01Z | 102 files | Rust
+> Generated: 2026-03-28T02:13:29Z | 102 files | Rust
 
 ## Project Structure
 
@@ -1601,11 +1601,11 @@
 
 #### clotho-tui/src/pty.rs
 
-- pub `PtyHandle` struct L8-13 — `{ parser: Arc<RwLock<vt100::Parser>>, input_tx: mpsc::UnboundedSender<Vec<u8>> }` — Manages the embedded PTY running the claude CLI.
-- pub `spawn` function L17-75 — `( cmd: &str, args: &[String], working_dir: &std::path::Path, rows: u16, cols: u1...` — Spawn a PTY running the given command with the given size.
-- pub `send_input` function L78-80 — `(&self, bytes: Vec<u8>)` — Send raw bytes to the PTY (keyboard input).
-- pub `resize` function L83-87 — `(&self, rows: u16, cols: u16)` — Resize the PTY.
--  `PtyHandle` type L15-88 — `= PtyHandle`
+- pub `PtyHandle` struct L8-18 — `{ parser: Arc<RwLock<vt100::Parser>>, input_tx: mpsc::UnboundedSender<Vec<u8>>, ...` — Manages the embedded PTY running the claude CLI.
+- pub `spawn` function L22-88 — `( cmd: &str, args: &[String], working_dir: &std::path::Path, rows: u16, cols: u1...` — Spawn a PTY running the given command with the given size.
+- pub `send_input` function L91-93 — `(&self, bytes: Vec<u8>)` — Send raw bytes to the PTY (keyboard input).
+- pub `resize` function L96-117 — `(&mut self, rows: u16, cols: u16)` — Resize the PTY if the size has changed.
+-  `PtyHandle` type L20-118 — `= PtyHandle`
 
 #### clotho-tui/src/state.rs
 
@@ -1624,7 +1624,7 @@
 -  `panel_border_type` function L66-72 — `(app: &App, panel: FocusedPanel) -> ratatui::widgets::BorderType`
 -  `render_navigator` function L74-105 — `(frame: &mut Frame, app: &mut App, area: Rect)`
 -  `render_content` function L107-287 — `(frame: &mut Frame, app: &mut App, area: Rect)`
--  `render_chat` function L290-311 — `(frame: &mut Frame, app: &App, area: Rect)`
--  `render_status_bar` function L313-340 — `(frame: &mut Frame, app: &App, area: Rect)`
--  `render_help_overlay` function L342-394 — `(frame: &mut Frame, area: Rect)`
+-  `render_chat` function L290-317 — `(frame: &mut Frame, app: &mut App, area: Rect)`
+-  `render_status_bar` function L319-346 — `(frame: &mut Frame, app: &App, area: Rect)`
+-  `render_help_overlay` function L348-400 — `(frame: &mut Frame, area: Rect)`
 

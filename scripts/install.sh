@@ -1,7 +1,7 @@
 #!/usr/bin/env sh
 # Clotho installer
-# Usage (remote):  curl -fsSL https://raw.githubusercontent.com/colliery-io/clotho/main/scripts/install.sh | sh
-# Usage (local):   scripts/install.sh --local
+# Usage: curl -fsSL https://raw.githubusercontent.com/colliery-io/clotho/main/scripts/install.sh | sh
+# Local: scripts/install.sh --local
 set -e
 
 REPO="colliery-io/clotho"
@@ -14,14 +14,14 @@ done
 
 # Colors (only if terminal)
 if [ -t 1 ]; then
-    RED='\033[0;31m'
     GREEN='\033[0;32m'
     YELLOW='\033[0;33m'
+    RED='\033[0;31m'
     NC='\033[0m'
 else
-    RED=''
     GREEN=''
     YELLOW=''
+    RED=''
     NC=''
 fi
 
@@ -29,118 +29,38 @@ info() { printf "${GREEN}[clotho]${NC} %s\n" "$1"; }
 warn() { printf "${YELLOW}[clotho]${NC} %s\n" "$1"; }
 error() { printf "${RED}[clotho]${NC} %s\n" "$1" >&2; exit 1; }
 
-# Detect platform
-detect_platform() {
-    OS=$(uname -s)
-    ARCH=$(uname -m)
-
-    case "$OS" in
-        Darwin)
-            case "$ARCH" in
-                arm64|aarch64) TARGET="aarch64-apple-darwin" ;;
-                x86_64)        TARGET="x86_64-apple-darwin" ;;
-                *)             error "Unsupported macOS architecture: $ARCH" ;;
-            esac
-            ;;
-        Linux)
-            case "$ARCH" in
-                x86_64|amd64) TARGET="x86_64-unknown-linux-gnu" ;;
-                *)            error "Unsupported Linux architecture: $ARCH" ;;
-            esac
-            ;;
-        *)
-            error "Unsupported operating system: $OS"
-            ;;
-    esac
+# Check dependencies
+check_deps() {
+    command -v cargo >/dev/null 2>&1 || error "Rust toolchain required. Install from https://rustup.rs"
 }
 
-# Get latest version from GitHub API
-get_version() {
-    if [ -n "${CLOTHO_VERSION:-}" ]; then
-        VERSION="$CLOTHO_VERSION"
-    else
-        VERSION=$(curl -fsSL "https://api.github.com/repos/$REPO/releases/latest" | \
-            grep '"tag_name"' | sed 's/.*"v\(.*\)".*/\1/')
-        if [ -z "$VERSION" ]; then
-            error "Failed to determine latest version. Set CLOTHO_VERSION manually."
-        fi
-    fi
-    info "Installing Clotho v$VERSION"
-}
-
-# Install from local build
+# Install from local source
 install_local() {
     SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
     REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 
-    for binary in clotho clotho-mcp; do
-        src="$REPO_ROOT/target/release/$binary"
-        [ -f "$src" ] || error "$src not found. Run 'cargo build --release' first."
-    done
+    info "Installing clotho from local source..."
+    cargo install --path "$REPO_ROOT/clotho-cli" --root "$HOME/.local" --force || error "Failed to install clotho"
 
-    INSTALL_DIR="${CLOTHO_INSTALL_DIR:-$HOME/.local/bin}"
-    mkdir -p "$INSTALL_DIR"
-
-    for binary in clotho clotho-mcp; do
-        cp "$REPO_ROOT/target/release/$binary" "$INSTALL_DIR/$binary"
-        chmod +x "$INSTALL_DIR/$binary"
-    done
-
-    info "Installed to $INSTALL_DIR/"
-    check_path
+    info "Installing clotho-mcp from local source..."
+    cargo install --path "$REPO_ROOT/clotho-mcp" --root "$HOME/.local" --force || error "Failed to install clotho-mcp"
 }
 
-# Download and install from GitHub releases
+# Install from GitHub
 install_remote() {
-    TMPDIR=$(mktemp -d)
-    trap 'rm -rf "$TMPDIR"' EXIT
+    info "Installing clotho from source..."
+    cargo install --git "https://github.com/$REPO" clotho-cli --root "$HOME/.local" --force || error "Failed to install clotho"
 
-    CLI_NAME="clotho-${TARGET}"
-    MCP_NAME="clotho-mcp-${TARGET}"
-
-    BASE_URL="https://github.com/$REPO/releases/download/v${VERSION}"
-
-    info "Downloading clotho..."
-    curl -fsSL "$BASE_URL/$CLI_NAME" -o "$TMPDIR/clotho" || error "Failed to download clotho"
-
-    info "Downloading clotho-mcp..."
-    curl -fsSL "$BASE_URL/$MCP_NAME" -o "$TMPDIR/clotho-mcp" || error "Failed to download clotho-mcp"
-
-    [ -s "$TMPDIR/clotho" ] || error "Downloaded clotho is empty"
-    [ -s "$TMPDIR/clotho-mcp" ] || error "Downloaded clotho-mcp is empty"
-
-    INSTALL_DIR="${CLOTHO_INSTALL_DIR:-$HOME/.local/bin}"
-    mkdir -p "$INSTALL_DIR"
-
-    chmod +x "$TMPDIR/clotho" "$TMPDIR/clotho-mcp"
-    cp "$TMPDIR/clotho" "$INSTALL_DIR/clotho"
-    cp "$TMPDIR/clotho-mcp" "$INSTALL_DIR/clotho-mcp"
-
-    info "Installed to $INSTALL_DIR/"
-    check_path
-}
-
-check_path() {
-    INSTALL_DIR="${CLOTHO_INSTALL_DIR:-$HOME/.local/bin}"
-    case ":$PATH:" in
-        *":$INSTALL_DIR:"*) ;;
-        *)
-            warn "$INSTALL_DIR is not in your PATH."
-            warn "Add this to your shell profile:"
-            warn "  export PATH=\"$INSTALL_DIR:\$PATH\""
-            ;;
-    esac
+    info "Installing clotho-mcp from source..."
+    cargo install --git "https://github.com/$REPO" clotho-mcp --root "$HOME/.local" --force || error "Failed to install clotho-mcp"
 }
 
 # Initialize workspace
 setup_workspace() {
-    INSTALL_DIR="${CLOTHO_INSTALL_DIR:-$HOME/.local/bin}"
-    CLOTHO="$INSTALL_DIR/clotho"
     WORKSPACE="$HOME/.clotho"
-
     if [ ! -d "$WORKSPACE" ]; then
         info "Initializing workspace at $WORKSPACE..."
-        "$CLOTHO" init --path "$HOME" 2>/dev/null || true
+        clotho init --path "$HOME" 2>/dev/null || true
     fi
 }
 
@@ -148,7 +68,8 @@ setup_workspace() {
 install_claude_plugin() {
     if ! command -v claude >/dev/null 2>&1; then
         warn "Claude Code not found — skipping plugin install"
-        warn "  Install Claude Code, then run: claude plugin install clotho@colliery-io-clotho"
+        warn "  Install Claude Code, then run:"
+        warn "  cd ~/.clotho && claude plugin install -s project clotho@colliery-io-clotho"
         return
     fi
 
@@ -163,23 +84,24 @@ install_claude_plugin() {
     claude plugin marketplace update colliery-io-clotho 2>/dev/null || true
 
     # Install fresh as project-level plugin in ~/.clotho
-    WORKSPACE="$HOME/.clotho"
-    mkdir -p "$WORKSPACE"
-    if (cd "$WORKSPACE" && claude plugin install -s project clotho@colliery-io-clotho); then
+    mkdir -p "$HOME/.clotho"
+    if (cd "$HOME/.clotho" && claude plugin install -s project clotho@colliery-io-clotho); then
         info "Clotho Claude Code plugin installed"
     else
         warn "Failed to install Claude Code plugin"
-        warn "  You can install manually: cd ~/.clotho && claude plugin install -s project clotho@colliery-io-clotho"
+        warn "  You can install manually:"
+        warn "  cd ~/.clotho && claude plugin install -s project clotho@colliery-io-clotho"
     fi
 }
+
+check_deps
 
 if [ "$LOCAL_MODE" = true ]; then
     install_local
 else
-    detect_platform
-    get_version
     install_remote
 fi
+
 setup_workspace
 install_claude_plugin
 

@@ -1,7 +1,7 @@
 use std::io::{Read, Write};
-use std::sync::{Arc, RwLock};
+use std::sync::{Arc, Mutex, RwLock};
 
-use portable_pty::{native_pty_system, CommandBuilder, PtySize};
+use portable_pty::{native_pty_system, CommandBuilder, MasterPty, PtySize};
 use tokio::sync::mpsc;
 
 /// Manages the embedded PTY running the claude CLI.
@@ -10,6 +10,11 @@ pub struct PtyHandle {
     pub parser: Arc<RwLock<vt100::Parser>>,
     /// Send bytes to the PTY's stdin.
     pub input_tx: mpsc::UnboundedSender<Vec<u8>>,
+    /// PTY master — kept alive for resizing.
+    master: Arc<Mutex<Box<dyn MasterPty + Send>>>,
+    /// Last known size.
+    last_rows: u16,
+    last_cols: u16,
 }
 
 impl PtyHandle {
@@ -71,7 +76,15 @@ impl PtyHandle {
             }
         });
 
-        Ok(Self { parser, input_tx })
+        let master = Arc::new(Mutex::new(pair.master));
+
+        Ok(Self {
+            parser,
+            input_tx,
+            master,
+            last_rows: rows,
+            last_cols: cols,
+        })
     }
 
     /// Send raw bytes to the PTY (keyboard input).
@@ -79,8 +92,25 @@ impl PtyHandle {
         let _ = self.input_tx.send(bytes);
     }
 
-    /// Resize the PTY.
-    pub fn resize(&self, rows: u16, cols: u16) {
+    /// Resize the PTY if the size has changed.
+    pub fn resize(&mut self, rows: u16, cols: u16) {
+        if rows == self.last_rows && cols == self.last_cols {
+            return;
+        }
+        self.last_rows = rows;
+        self.last_cols = cols;
+
+        // Resize the actual PTY
+        if let Ok(master) = self.master.lock() {
+            let _ = master.resize(PtySize {
+                rows,
+                cols,
+                pixel_width: 0,
+                pixel_height: 0,
+            });
+        }
+
+        // Resize the vt100 parser
         if let Ok(mut p) = self.parser.write() {
             p.set_size(rows, cols);
         }

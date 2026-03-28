@@ -71,7 +71,7 @@
     "clotho-mcp/src/tools/update_entity.rs": "8a299594b8f7fb3219e314c2c1917d586e84d95f7fa59980126b557f1a3a0138",
     "clotho-mcp/src/tools/workspace_summary.rs": "f2206dd3aa21f10ffdc7ad049caea3f7b1a56e7994921f3b33843396b3f4b41c",
     "clotho-mcp/src/workspace_resolver.rs": "d5356ba19ebe304d01090239badd87eb933609bd1f13fcecc2e05b8ae71160c7",
-    "clotho-mcp/tests/entity_mgmt_tests.rs": "60fe4f1926fdd0a0b141f6dcad280332e5c13498916193d84896311a3ef61814",
+    "clotho-mcp/tests/entity_mgmt_tests.rs": "5e658ee00088652cdeec24667adbd18e306a946509528a83ca117525ca18914a",
     "clotho-mcp/tests/mcp_tests.rs": "7b56febccb29e5301d8a78d18b117251725f241e0ef8468b9e4a2b105c530960",
     "clotho-store/src/content.rs": "27f0ced7da0882688fb57da913509e7df9fca0e008022d37dc746766ccb5db09",
     "clotho-store/src/data/entities.rs": "34961b8d8d06c7cd39225ffce4bed3b84d11bceb1adde2af3d5689906f39fd2c",
@@ -99,8 +99,8 @@
     "clotho-tui/src/event.rs": "80c3479eded7f22fd47d67ea1fd1264685db41ccb5295df63d5102986e7a2aaa",
     "clotho-tui/src/lib.rs": "576b23484131846e579fa8248b231fea412ff86ec3d5d732794213a8f29e2873",
     "clotho-tui/src/navigator.rs": "5bb91da7cf50162fc732b950a372c528e01385b24dd841fd409643ea2188e9d5",
-    "clotho-tui/src/pty.rs": "a8e4f75da3924a0fba0542fbabbe475554652a625b00b383b5b3a2b49bd7571d",
+    "clotho-tui/src/pty.rs": "641348cf4fd73ea2a794d5b3c5704ca2dfefd6d6109dfb8876c190bdb37de9ee",
     "clotho-tui/src/state.rs": "1c658c8ab369961e0abaac1bd86db46ab280fdf96e3b7b2cae92b66f8191c2e1",
-    "clotho-tui/src/ui.rs": "d1176f1d818fa2d7633d0c72d8e36f74ac086ee9d8e21cbfa1501af06ef2115f"
+    "clotho-tui/src/ui.rs": "a47b67a288ea1f82813ce640ae09a11a53f737dd7afd89d9f55bf84e028363ca"
   }
 }

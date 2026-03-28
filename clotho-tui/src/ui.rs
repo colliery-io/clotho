@@ -287,12 +287,18 @@ fn render_content(frame: &mut Frame, app: &mut App, area: Rect) {
 }
 
 
-fn render_chat(frame: &mut Frame, app: &App, area: Rect) {
+fn render_chat(frame: &mut Frame, app: &mut App, area: Rect) {
     let block = Block::default()
         .title(" Chat ")
         .borders(Borders::ALL)
         .border_type(panel_border_type(app, FocusedPanel::Chat))
         .border_style(panel_border_style(app, FocusedPanel::Chat));
+
+    // Resize PTY to match the inner area of the chat panel
+    let inner = block.inner(area);
+    if let Some(ref mut pty) = app.pty {
+        pty.resize(inner.height, inner.width);
+    }
 
     if let Some(ref pty) = app.pty {
         if let Ok(parser) = pty.parser.read() {
