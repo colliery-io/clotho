@@ -1,9 +1,16 @@
 #!/usr/bin/env sh
 # Clotho installer
-# Usage: curl -fsSL https://raw.githubusercontent.com/colliery-io/clotho/main/scripts/install.sh | sh
+# Usage (remote):  curl -fsSL https://raw.githubusercontent.com/colliery-io/clotho/main/scripts/install.sh | sh
+# Usage (local):   scripts/install.sh --local
 set -e
 
 REPO="colliery-io/clotho"
+LOCAL_MODE=false
+for arg in "$@"; do
+    case "$arg" in
+        --local) LOCAL_MODE=true ;;
+    esac
+done
 
 # Colors (only if terminal)
 if [ -t 1 ]; then
@@ -61,8 +68,30 @@ get_version() {
     info "Installing Clotho v$VERSION"
 }
 
-# Download and install
-install() {
+# Install from local build
+install_local() {
+    SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+    REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+
+    for binary in clotho clotho-mcp; do
+        src="$REPO_ROOT/target/release/$binary"
+        [ -f "$src" ] || error "$src not found. Run 'cargo build --release' first."
+    done
+
+    INSTALL_DIR="${CLOTHO_INSTALL_DIR:-$HOME/.local/bin}"
+    mkdir -p "$INSTALL_DIR"
+
+    for binary in clotho clotho-mcp; do
+        cp "$REPO_ROOT/target/release/$binary" "$INSTALL_DIR/$binary"
+        chmod +x "$INSTALL_DIR/$binary"
+    done
+
+    info "Installed to $INSTALL_DIR/"
+    check_path
+}
+
+# Download and install from GitHub releases
+install_remote() {
     TMPDIR=$(mktemp -d)
     trap 'rm -rf "$TMPDIR"' EXIT
 
@@ -71,15 +100,12 @@ install() {
 
     BASE_URL="https://github.com/$REPO/releases/download/v${VERSION}"
 
-    # Download CLI
     info "Downloading clotho..."
     curl -fsSL "$BASE_URL/$CLI_NAME" -o "$TMPDIR/clotho" || error "Failed to download clotho"
 
-    # Download MCP server
     info "Downloading clotho-mcp..."
     curl -fsSL "$BASE_URL/$MCP_NAME" -o "$TMPDIR/clotho-mcp" || error "Failed to download clotho-mcp"
 
-    # Verify downloads are non-empty
     [ -s "$TMPDIR/clotho" ] || error "Downloaded clotho is empty"
     [ -s "$TMPDIR/clotho-mcp" ] || error "Downloaded clotho-mcp is empty"
 
@@ -91,8 +117,11 @@ install() {
     cp "$TMPDIR/clotho-mcp" "$INSTALL_DIR/clotho-mcp"
 
     info "Installed to $INSTALL_DIR/"
+    check_path
+}
 
-    # Check if in PATH
+check_path() {
+    INSTALL_DIR="${CLOTHO_INSTALL_DIR:-$HOME/.local/bin}"
     case ":$PATH:" in
         *":$INSTALL_DIR:"*) ;;
         *)
@@ -101,10 +130,54 @@ install() {
             warn "  export PATH=\"$INSTALL_DIR:\$PATH\""
             ;;
     esac
-
-    info "Done! Run 'clotho --version' to verify."
 }
 
-detect_platform
-get_version
-install
+# Initialize workspace
+setup_workspace() {
+    INSTALL_DIR="${CLOTHO_INSTALL_DIR:-$HOME/.local/bin}"
+    CLOTHO="$INSTALL_DIR/clotho"
+    WORKSPACE="$HOME/.clotho"
+
+    if [ ! -d "$WORKSPACE" ]; then
+        info "Initializing workspace at $WORKSPACE..."
+        "$CLOTHO" init --path "$HOME" 2>/dev/null || true
+    fi
+}
+
+# Install Claude Code plugin (nuke and reinstall)
+install_claude_plugin() {
+    if ! command -v claude >/dev/null 2>&1; then
+        warn "Claude Code not found — skipping plugin install"
+        warn "  Install Claude Code, then run: claude plugin install clotho@colliery-io-clotho"
+        return
+    fi
+
+    info "Installing Clotho Claude Code plugin..."
+
+    # Nuke existing
+    claude plugin uninstall clotho@colliery-io-clotho 2>/dev/null || true
+
+    # Register/update marketplace
+    claude plugin marketplace add colliery-io/clotho 2>/dev/null || true
+    claude plugin marketplace update colliery-io-clotho 2>/dev/null || true
+
+    # Install fresh
+    if claude plugin install clotho@colliery-io-clotho; then
+        info "Clotho Claude Code plugin installed"
+    else
+        warn "Failed to install Claude Code plugin"
+        warn "  You can install manually: claude plugin install clotho@colliery-io-clotho"
+    fi
+}
+
+if [ "$LOCAL_MODE" = true ]; then
+    install_local
+else
+    detect_platform
+    get_version
+    install_remote
+fi
+setup_workspace
+install_claude_plugin
+
+info "Done! Run 'clotho' to launch."

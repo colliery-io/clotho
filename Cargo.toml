@@ -5,6 +5,7 @@ members = [
     "clotho-cli",
     "clotho-mcp",
     "clotho-sync",
+    "clotho-tui",
     "clotho-tests",
 ]
 resolver = "2"

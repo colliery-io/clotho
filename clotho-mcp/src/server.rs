@@ -2,9 +2,9 @@ use crate::tools::{
     BatchCreateRelationsTool, CaptureDirectoryTool, CaptureTool, CheckProcessedTool, ClothoTools,
     CreateEntityTool, CreateNoteTool, CreateReflectionTool, CreateRelationTool, DeleteEntityTool,
     DeleteRelationTool, GetOntologyTool, GetRelationsTool, InitTool, ListEntitiesTool,
-    ListUnprocessedTool, MarkProcessedTool, QueryTool, ReadEntityTool, SearchOntologyTool,
-    SearchTool, SetWorkspaceTool, SyncTool, UpdateEntityTool, UpdateOntologyTool,
-    WorkspaceSummaryTool,
+    ListSurfacesTool, ListUnprocessedTool, MarkProcessedTool, PushSurfaceTool, QueryTool,
+    ReadEntityTool, ReadSurfaceTool, SearchOntologyTool, SearchTool, SetWorkspaceTool, SyncTool,
+    UpdateEntityTool, UpdateOntologyTool, WorkspaceSummaryTool,
 };
 use async_trait::async_trait;
 use rust_mcp_sdk::{
@@ -176,6 +176,21 @@ impl ServerHandler for ClothoServerHandler {
             }
             "clotho_mark_processed" => {
                 let tool: MarkProcessedTool = serde_json::from_value(args)
+                    .map_err(rust_mcp_sdk::schema::schema_utils::CallToolError::new)?;
+                tool.call_tool().await
+            }
+            "clotho_push_surface" => {
+                let tool: PushSurfaceTool = serde_json::from_value(args)
+                    .map_err(rust_mcp_sdk::schema::schema_utils::CallToolError::new)?;
+                tool.call_tool().await
+            }
+            "clotho_read_surface" => {
+                let tool: ReadSurfaceTool = serde_json::from_value(args)
+                    .map_err(rust_mcp_sdk::schema::schema_utils::CallToolError::new)?;
+                tool.call_tool().await
+            }
+            "clotho_list_surfaces" => {
+                let tool: ListSurfacesTool = serde_json::from_value(args)
                     .map_err(rust_mcp_sdk::schema::schema_utils::CallToolError::new)?;
                 tool.call_tool().await
             }

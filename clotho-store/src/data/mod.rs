@@ -3,3 +3,4 @@ pub mod extractions;
 pub mod jsonl;
 pub mod ontology;
 pub mod processing;
+pub mod surfaces;

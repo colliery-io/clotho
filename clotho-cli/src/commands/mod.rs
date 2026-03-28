@@ -12,4 +12,5 @@ pub mod relate;
 pub mod search;
 pub mod status;
 pub mod sync;
+pub mod tui;
 pub mod update;

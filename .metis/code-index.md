@@ -1,6 +1,6 @@
 # Code Index
 
-> Generated: 2026-03-22T13:03:47Z | 89 files | Rust
+> Generated: 2026-03-28T01:17:22Z | 102 files | Rust
 
 ## Project Structure
 
@@ -23,6 +23,7 @@
 │   │   │   ├── search.rs
 │   │   │   ├── status.rs
 │   │   │   ├── sync.rs
+│   │   │   ├── tui.rs
 │   │   │   └── update.rs
 │   │   ├── main.rs
 │   │   └── resolve.rs
@@ -73,12 +74,15 @@
 │   │   │   ├── get_relations.rs
 │   │   │   ├── init.rs
 │   │   │   ├── list_entities.rs
+│   │   │   ├── list_surfaces.rs
 │   │   │   ├── list_unprocessed.rs
 │   │   │   ├── mod.rs
 │   │   │   ├── ontology.rs
 │   │   │   ├── processing.rs
+│   │   │   ├── push_surface.rs
 │   │   │   ├── query.rs
 │   │   │   ├── read_entity.rs
+│   │   │   ├── read_surface.rs
 │   │   │   ├── search.rs
 │   │   │   ├── set_workspace.rs
 │   │   │   ├── sync.rs
@@ -97,7 +101,8 @@
 │   │   │   ├── jsonl.rs
 │   │   │   ├── mod.rs
 │   │   │   ├── ontology.rs
-│   │   │   └── processing.rs
+│   │   │   ├── processing.rs
+│   │   │   └── surfaces.rs
 │   │   ├── error.rs
 │   │   ├── federation.rs
 │   │   ├── index.rs
@@ -113,11 +118,21 @@
 │   │   └── lib.rs
 │   └── tests/
 │       └── sync_tests.rs
-└── clotho-tests/
-    ├── src/
-    │   └── lib.rs
-    └── tests/
-        └── e2e_workflows.rs
+├── clotho-tests/
+│   ├── src/
+│   │   └── lib.rs
+│   └── tests/
+│       └── e2e_workflows.rs
+└── clotho-tui/
+    └── src/
+        ├── app.rs
+        ├── editor.rs
+        ├── event.rs
+        ├── lib.rs
+        ├── navigator.rs
+        ├── pty.rs
+        ├── state.rs
+        └── ui.rs
 ```
 
 ## Modules
@@ -177,7 +192,8 @@
 - pub `search` module L12 — `-`
 - pub `status` module L13 — `-`
 - pub `sync` module L14 — `-`
-- pub `update` module L15 — `-`
+- pub `tui` module L15 — `-`
+- pub `update` module L16 — `-`
 
 #### clotho-cli/src/commands/ontology.rs
 
@@ -232,6 +248,13 @@
 - pub `SyncArgs` struct L7-15 — `{ prune: bool, keep: usize }`
 - pub `run` function L17-55 — `(args: SyncArgs, json: bool) -> Result<(), Box<dyn std::error::Error>>`
 
+#### clotho-cli/src/commands/tui.rs
+
+- pub `TuiArgs` struct L7-17 — `{ workspace: Option<PathBuf>, claude_args: Vec<String> }` — Launch the interactive TUI.
+- pub `run` function L42-49 — `(args: TuiArgs) -> Result<(), Box<dyn std::error::Error>>`
+-  `default_workspace` function L19-23 — `() -> PathBuf`
+-  `ensure_workspace` function L25-40 — `(workspace: &PathBuf) -> Result<(), Box<dyn std::error::Error>>`
+
 #### clotho-cli/src/commands/update.rs
 
 - pub `UpdateArgs` struct L11-26 — `{ id: String, title: Option<String>, status: Option<String>, state: Option<Strin...`
@@ -246,9 +269,9 @@
 
 - pub `resolve` module L2 — `-`
 -  `commands` module L1 — `-`
--  `Cli` struct L10-17 — `{ json: bool, command: Commands }` — Clotho — Personal work and time management through reflection,
--  `Commands` enum L20-80 — `Init | Create | Get | Update | Delete | Capture | List | Search | Query | Reflec...`
--  `main` function L82-117 — `()`
+-  `Cli` struct L10-17 — `{ json: bool, command: Option<Commands> }` — Clotho — Personal work and time management through reflection,
+-  `Commands` enum L20-83 — `Init | Create | Get | Update | Delete | Capture | List | Search | Query | Reflec...`
+-  `main` function L85-126 — `()`
 
 #### clotho-cli/src/resolve.rs
 
@@ -897,9 +920,9 @@
 -  `ClothoServerHandler` type L22-26 — `impl Default for ClothoServerHandler`
 -  `default` function L23-25 — `() -> Self`
 -  `ClothoServerHandler` type L28-33 — `= ClothoServerHandler`
--  `ClothoServerHandler` type L36-185 — `impl ServerHandler for ClothoServerHandler`
+-  `ClothoServerHandler` type L36-200 — `impl ServerHandler for ClothoServerHandler`
 -  `handle_list_tools_request` function L37-47 — `( &self, _params: Option<PaginatedRequestParams>, _runtime: Arc<dyn McpServer>, ...`
--  `handle_call_tool_request` function L49-184 — `( &self, params: CallToolRequestParams, _runtime: Arc<dyn McpServer>, ) -> Resul...`
+-  `handle_call_tool_request` function L49-199 — `( &self, params: CallToolRequestParams, _runtime: Arc<dyn McpServer>, ) -> Resul...`
 
 #### clotho-mcp/src/workspace_resolver.rs
 
@@ -916,8 +939,8 @@
 #### clotho-mcp/src/tools/all_tools.rs
 
 - pub `ClothoTools` struct L13 — `-` — Registry of all Clotho MCP tools.
-- pub `tools` function L16-52 — `() -> Vec<Tool>`
--  `ClothoTools` type L15-53 — `= ClothoTools`
+- pub `tools` function L16-56 — `() -> Vec<Tool>`
+-  `ClothoTools` type L15-57 — `= ClothoTools`
 
 #### clotho-mcp/src/tools/batch_relations.rs
 
@@ -1003,6 +1026,12 @@
 - pub `call_tool` function L31-78 — `(&self) -> Result<CallToolResult, CallToolError>`
 -  `ListEntitiesTool` type L30-79 — `= ListEntitiesTool`
 
+#### clotho-mcp/src/tools/list_surfaces.rs
+
+- pub `ListSurfacesTool` struct L21-28 — `{ status: Option<String>, surface_type: Option<String>, search: Option<String> }`
+- pub `call_tool` function L31-68 — `(&self) -> Result<CallToolResult, CallToolError>`
+-  `ListSurfacesTool` type L30-69 — `= ListSurfacesTool`
+
 #### clotho-mcp/src/tools/list_unprocessed.rs
 
 - pub `ListUnprocessedTool` struct L22-25 — `{ entity_type: Option<String> }`
@@ -1024,16 +1053,19 @@
 - pub `get_relations` module L11 — `-`
 - pub `init` module L12 — `-`
 - pub `list_entities` module L13 — `-`
-- pub `list_unprocessed` module L14 — `-`
-- pub `ontology` module L15 — `-`
-- pub `processing` module L16 — `-`
-- pub `query` module L17 — `-`
-- pub `read_entity` module L18 — `-`
-- pub `search` module L19 — `-`
-- pub `set_workspace` module L20 — `-`
-- pub `sync` module L21 — `-`
-- pub `update_entity` module L22 — `-`
-- pub `workspace_summary` module L23 — `-`
+- pub `list_surfaces` module L14 — `-`
+- pub `list_unprocessed` module L15 — `-`
+- pub `ontology` module L16 — `-`
+- pub `processing` module L17 — `-`
+- pub `push_surface` module L18 — `-`
+- pub `query` module L19 — `-`
+- pub `read_entity` module L20 — `-`
+- pub `read_surface` module L21 — `-`
+- pub `search` module L22 — `-`
+- pub `set_workspace` module L23 — `-`
+- pub `sync` module L24 — `-`
+- pub `update_entity` module L25 — `-`
+- pub `workspace_summary` module L26 — `-`
 
 #### clotho-mcp/src/tools/ontology.rs
 
@@ -1056,6 +1088,12 @@
 -  `CheckProcessedTool` type L30-80 — `= CheckProcessedTool`
 -  `MarkProcessedTool` type L106-149 — `= MarkProcessedTool`
 
+#### clotho-mcp/src/tools/push_surface.rs
+
+- pub `PushSurfaceTool` struct L21-31 — `{ title: String, content: String, surface_type: Option<String>, replace: bool }`
+- pub `call_tool` function L34-62 — `(&self) -> Result<CallToolResult, CallToolError>`
+-  `PushSurfaceTool` type L33-63 — `= PushSurfaceTool`
+
 #### clotho-mcp/src/tools/query.rs
 
 - pub `QueryTool` struct L21-24 — `{ cypher: String }`
@@ -1067,6 +1105,12 @@
 - pub `ReadEntityTool` struct L24-29 — `{ entity_id: String, include_relations: Option<bool> }`
 - pub `call_tool` function L32-124 — `(&self) -> Result<CallToolResult, CallToolError>`
 -  `ReadEntityTool` type L31-125 — `= ReadEntityTool`
+
+#### clotho-mcp/src/tools/read_surface.rs
+
+- pub `ReadSurfaceTool` struct L21-24 — `{ id_or_title: String }`
+- pub `call_tool` function L27-62 — `(&self) -> Result<CallToolResult, CallToolError>`
+-  `ReadSurfaceTool` type L26-63 — `= ReadSurfaceTool`
 
 #### clotho-mcp/src/tools/search.rs
 
@@ -1295,6 +1339,7 @@
 - pub `jsonl` module L3 — `-`
 - pub `ontology` module L4 — `-`
 - pub `processing` module L5 — `-`
+- pub `surfaces` module L6 — `-`
 
 #### clotho-store/src/data/ontology.rs
 
@@ -1328,6 +1373,23 @@
 - pub `get_unprocessed` function L133-145 — `( &self, process_name: &str, entity_ids: &[&str], ) -> Result<Vec<String>, Store...` — Get all unprocessed entities of a given type (entities with no processing record for a given process).
 -  `SCHEMA` variable L9-24 — `: &str`
 -  `ProcessingLog` type L49-146 — `= ProcessingLog`
+
+#### clotho-store/src/data/surfaces.rs
+
+- pub `SurfaceRow` struct L12-20 — `{ id: String, title: String, content: String, surface_type: Option<String>, stat...` — A surface row in SQLite.
+- pub `SurfaceStore` struct L23-25 — `{ conn: Connection }` — SQLite-backed surface storage (data/entities.db — same DB as entities).
+- pub `open` function L29-32 — `(path: &Path) -> Result<Self, StoreError>` — Open the surface store at the given path (same entities.db).
+- pub `create` function L35-59 — `( &self, title: &str, content: &str, surface_type: Option<&str>, ) -> Result<Sur...` — Create a new surface.
+- pub `push` function L63-79 — `( &self, title: &str, content: &str, surface_type: Option<&str>, replace: bool, ...` — Create or replace a surface by title.
+- pub `get` function L82-91 — `(&self, id: &str) -> Result<Option<SurfaceRow>, StoreError>` — Get a surface by ID.
+- pub `find_active_by_title` function L94-103 — `(&self, title: &str) -> Result<Option<SurfaceRow>, StoreError>` — Find an active surface by exact title.
+- pub `update_content` function L106-113 — `(&self, id: &str, content: &str) -> Result<(), StoreError>` — Update surface content.
+- pub `close` function L116-123 — `(&self, id: &str) -> Result<(), StoreError>` — Close a surface (soft delete).
+- pub `list` function L126-153 — `( &self, status: Option<&str>, surface_type: Option<&str>, ) -> Result<Vec<Surfa...` — List surfaces, optionally filtered by status and/or type.
+- pub `list_active` function L156-158 — `(&self) -> Result<Vec<SurfaceRow>, StoreError>` — List only active surfaces.
+- pub `search` function L161-172 — `(&self, query: &str) -> Result<Vec<SurfaceRow>, StoreError>` — Search surfaces by keyword in title or content.
+-  `SurfaceStore` type L27-173 — `= SurfaceStore`
+-  `row_to_surface` function L175-185 — `(row: &rusqlite::Row) -> rusqlite::Result<SurfaceRow>`
 
 ### clotho-store/tests
 
@@ -1448,4 +1510,120 @@
 -  `scenario_git_sync_lifecycle` function L541-596 — `()` — ingest content, build the graph, search, query, reflect, sync.
 -  `scenario_graph_traversal` function L605-681 — `()` — ingest content, build the graph, search, query, reflect, sync.
 -  `scenario_event_log_integrity` function L690-745 — `()` — ingest content, build the graph, search, query, reflect, sync.
+
+### clotho-tui/src
+
+> *Semantic summary to be generated by AI agent.*
+
+#### clotho-tui/src/app.rs
+
+- pub `FocusedPanel` enum L21-25 — `Navigator | Content | Chat` — Which panel currently has focus.
+- pub `ContentMode` enum L29-34 — `Command | Edit` — Content panel mode.
+- pub `TabKindLocal` enum L38-41 — `Entity | Surface` — What kind of item a tab represents.
+- pub `Tab` struct L44-49 — `{ title: String, id: String, kind: TabKindLocal, editor: Editor }` — A tab open in the content panel.
+- pub `App` struct L52-79 — `{ workspace: PathBuf, focused: FocusedPanel, should_quit: bool, pty: Option<PtyH...` — Top-level application state.
+- pub `new` function L82-179 — `(workspace: PathBuf, claude_args: Vec<String>) -> Result<Self, Box<dyn std::erro...`
+- pub `run` function L181-239 — `(&mut self) -> Result<(), Box<dyn std::error::Error>>`
+-  `App` type L81-691 — `= App`
+-  `handle_key` function L241-284 — `(&mut self, key: KeyEvent)`
+-  `handle_navigator_key` function L286-319 — `(&mut self, key: KeyEvent)`
+-  `handle_content_key` function L321-326 — `(&mut self, key: KeyEvent)`
+-  `handle_content_command_key` function L328-413 — `(&mut self, key: KeyEvent)`
+-  `handle_content_edit_key` function L415-500 — `(&mut self, key: KeyEvent)`
+-  `save_active_tab` function L502-533 — `(&mut self)`
+-  `open_entity_tab` function L535-560 — `(&mut self, entity: clotho_store::data::entities::EntityRow)`
+-  `forward_key_to_pty` function L562-594 — `(&mut self, key: KeyEvent)`
+-  `cycle_focus_forward` function L596-602 — `(&mut self)`
+-  `cycle_focus_backward` function L604-610 — `(&mut self)`
+-  `on_tick` function L612-661 — `(&mut self)`
+-  `save_state` function L663-690 — `(&self)`
+-  `format_entity_details_static` function L693-713 — `(entity: &clotho_store::data::entities::EntityRow) -> String`
+
+#### clotho-tui/src/editor.rs
+
+- pub `Editor` struct L3-14 — `{ lines: Vec<String>, cursor_row: usize, cursor_col: usize, scroll_offset: usize...`
+- pub `new` function L17-34 — `(content: &str) -> Self`
+- pub `content` function L37-39 — `(&self) -> String` — Get the full content as a single string.
+- pub `insert_char` function L42-50 — `(&mut self, c: char)` — Insert a character at the cursor position.
+- pub `insert_newline` function L53-62 — `(&mut self)` — Insert a newline at cursor (split the current line).
+- pub `backspace` function L65-82 — `(&mut self)` — Delete the character before the cursor (backspace).
+- pub `delete` function L85-100 — `(&mut self)` — Delete the character at the cursor (delete key).
+- pub `move_up` function L103-108 — `(&mut self)` — Move cursor up.
+- pub `move_down` function L111-116 — `(&mut self)` — Move cursor down.
+- pub `move_left` function L119-126 — `(&mut self)` — Move cursor left.
+- pub `move_right` function L129-137 — `(&mut self)` — Move cursor right.
+- pub `move_home` function L140-142 — `(&mut self)` — Move cursor to start of line.
+- pub `move_end` function L145-147 — `(&mut self)` — Move cursor to end of line.
+- pub `page_up` function L150-153 — `(&mut self, viewport_height: usize)` — Move cursor up by a page (viewport_height lines).
+- pub `page_down` function L156-159 — `(&mut self, viewport_height: usize)` — Move cursor down by a page (viewport_height lines).
+- pub `move_to_start` function L162-165 — `(&mut self)` — Move cursor to the start of the document.
+- pub `move_to_end` function L168-171 — `(&mut self)` — Move cursor to the end of the document.
+- pub `toggle_checkbox` function L175-196 — `(&mut self)` — Toggle checkbox on the current line.
+- pub `adjust_scroll` function L199-206 — `(&mut self, viewport_height: usize)` — Adjust scroll to keep cursor visible.
+-  `Editor` type L16-224 — `= Editor`
+-  `ensure_cursor_valid` function L208-216 — `(&mut self)`
+-  `clamp_cursor_col` function L218-223 — `(&mut self)`
+-  `char_len` function L227-229 — `(s: &str) -> usize` — Count characters (not bytes) in a string.
+-  `char_col_to_byte` function L232-237 — `(s: &str, col: usize) -> usize` — Convert a character column index to a byte offset.
+
+#### clotho-tui/src/event.rs
+
+- pub `AppEvent` enum L8-15 — `Key | Resize | Tick` — Terminal events the app loop handles.
+- pub `spawn_event_reader` function L19-57 — `(tick_rate: Duration) -> mpsc::UnboundedReceiver<AppEvent>` — Spawns a background task that reads terminal events via async EventStream
+
+#### clotho-tui/src/lib.rs
+
+- pub `run` function L17-20 — `(workspace: PathBuf, claude_args: Vec<String>) -> Result<(), Box<dyn std::error:...` — Launch the Clotho TUI.
+-  `app` module L1 — `-`
+-  `editor` module L2 — `-`
+-  `event` module L3 — `-`
+-  `navigator` module L4 — `-`
+-  `pty` module L5 — `-`
+-  `state` module L6 — `-`
+-  `ui` module L7 — `-`
+
+#### clotho-tui/src/navigator.rs
+
+- pub `EntityGroup` struct L7-11 — `{ entity_type: String, entities: Vec<EntityRow>, expanded: bool }` — A group of entities in the navigator tree.
+- pub `Navigator` struct L14-25 — `{ groups: Vec<EntityGroup>, cursor: usize, visible_count: usize, scroll_offset: ...` — Navigator state — holds the entity list grouped by type.
+- pub `new` function L28-36 — `() -> Self`
+- pub `set_expanded` function L39-49 — `(&mut self, entity_type: &str, expanded: bool)` — Pre-set expansion state for a group (used when restoring from saved state).
+- pub `refresh` function L52-102 — `(&mut self, db_path: &Path)` — Reload entities from the store.
+- pub `cursor_up` function L116-120 — `(&mut self)` — Move cursor up.
+- pub `cursor_down` function L123-127 — `(&mut self)` — Move cursor down.
+- pub `toggle_expand` function L130-138 — `(&mut self)` — Toggle expand/collapse on the current line if it's a group header.
+- pub `resolve_cursor` function L141-158 — `(&self) -> Option<(usize, Option<usize>)>` — Resolve cursor position to (group_index, Some(entity_index)) or (group_index, None) for header.
+- pub `selected_entity` function L161-167 — `(&self) -> Option<&EntityRow>` — Get the entity at the current cursor, if it's an entity line.
+- pub `visible_lines` function L170-219 — `(&self, height: usize) -> Vec<(String, bool, bool)>` — Build a list of (line_text, is_header, is_cursor) for rendering.
+- pub `adjust_scroll` function L222-229 — `(&mut self, height: usize)` — Update scroll offset to keep cursor visible for a given viewport height.
+-  `Navigator` type L27-230 — `= Navigator`
+-  `recompute_visible_count` function L104-113 — `(&mut self)`
+
+#### clotho-tui/src/pty.rs
+
+- pub `PtyHandle` struct L8-13 — `{ parser: Arc<RwLock<vt100::Parser>>, input_tx: mpsc::UnboundedSender<Vec<u8>> }` — Manages the embedded PTY running the claude CLI.
+- pub `spawn` function L17-75 — `( cmd: &str, args: &[String], working_dir: &std::path::Path, rows: u16, cols: u1...` — Spawn a PTY running the given command with the given size.
+- pub `send_input` function L78-80 — `(&self, bytes: Vec<u8>)` — Send raw bytes to the PTY (keyboard input).
+- pub `resize` function L83-87 — `(&self, rows: u16, cols: u16)` — Resize the PTY.
+-  `PtyHandle` type L15-88 — `= PtyHandle`
+
+#### clotho-tui/src/state.rs
+
+- pub `TuiState` struct L8-15 — `{ tabs: Vec<TabState>, active_tab: usize, navigator_expanded: HashMap<String, bo...` — Persisted TUI display state — survives across restarts.
+- pub `TabState` struct L18-21 — `{ kind: TabKind, id: String }`
+- pub `TabKind` enum L25-28 — `Entity | Surface`
+- pub `state_path` function L32-34 — `(workspace: &Path) -> PathBuf` — Path to the state file within a workspace.
+- pub `load` function L37-43 — `(workspace: &Path) -> Self` — Load state from disk, or return default if not found / corrupt.
+- pub `save` function L46-51 — `(&self, workspace: &Path)` — Save state to disk.
+-  `TuiState` type L30-52 — `= TuiState`
+
+#### clotho-tui/src/ui.rs
+
+- pub `render` function L14-56 — `(frame: &mut Frame, app: &mut App)` — Render the full TUI layout.
+-  `panel_border_style` function L58-64 — `(app: &App, panel: FocusedPanel) -> Style`
+-  `render_navigator` function L66-96 — `(frame: &mut Frame, app: &mut App, area: Rect)`
+-  `render_content` function L98-277 — `(frame: &mut Frame, app: &mut App, area: Rect)`
+-  `render_chat` function L280-300 — `(frame: &mut Frame, app: &App, area: Rect)`
+-  `render_status_bar` function L302-329 — `(frame: &mut Frame, app: &App, area: Rect)`
+-  `render_help_overlay` function L331-383 — `(frame: &mut Frame, area: Rect)`
 

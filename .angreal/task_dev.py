@@ -57,20 +57,3 @@ def clean():
     subprocess.run(["cargo", "clean"], check=True)
 
 
-@angreal.command(name="install-local", about="Install clotho and clotho-mcp to ~/.local/bin")
-def install_local():
-    """Build release and copy binaries to ~/.local/bin."""
-    import os
-    import shutil
-
-    build_release()
-
-    install_dir = os.path.expanduser("~/.local/bin")
-    os.makedirs(install_dir, exist_ok=True)
-
-    for binary in ["clotho", "clotho-mcp"]:
-        src = f"target/release/{binary}"
-        dst = os.path.join(install_dir, binary)
-        shutil.copy2(src, dst)
-        os.chmod(dst, 0o755)
-        print(f"Installed {dst}")

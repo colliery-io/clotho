@@ -4,9 +4,9 @@ use super::{
     BatchCreateRelationsTool, CaptureDirectoryTool, CaptureTool, CheckProcessedTool,
     CreateEntityTool, CreateNoteTool, CreateReflectionTool, CreateRelationTool, DeleteEntityTool,
     DeleteRelationTool, GetOntologyTool, GetRelationsTool, InitTool, ListEntitiesTool,
-    ListUnprocessedTool, MarkProcessedTool, QueryTool, ReadEntityTool, SearchOntologyTool,
-    SearchTool, SetWorkspaceTool, SyncTool, UpdateEntityTool, UpdateOntologyTool,
-    WorkspaceSummaryTool,
+    ListSurfacesTool, ListUnprocessedTool, MarkProcessedTool, PushSurfaceTool, QueryTool,
+    ReadEntityTool, ReadSurfaceTool, SearchOntologyTool, SearchTool, SetWorkspaceTool, SyncTool,
+    UpdateEntityTool, UpdateOntologyTool, WorkspaceSummaryTool,
 };
 
 /// Registry of all Clotho MCP tools.
@@ -48,6 +48,10 @@ impl ClothoTools {
             // Processing log
             CheckProcessedTool::tool(),
             MarkProcessedTool::tool(),
+            // Surfaces (TUI)
+            PushSurfaceTool::tool(),
+            ReadSurfaceTool::tool(),
+            ListSurfacesTool::tool(),
         ]
     }
 }
