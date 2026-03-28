@@ -1,4 +1,4 @@
-use crossterm::event::{Event, EventStream, KeyEvent};
+use crossterm::event::{Event, EventStream, KeyEvent, MouseEvent};
 use futures::StreamExt;
 use std::time::Duration;
 use tokio::sync::mpsc;
@@ -8,6 +8,8 @@ use tokio::sync::mpsc;
 pub enum AppEvent {
     /// A key was pressed.
     Key(KeyEvent),
+    /// Mouse event.
+    Mouse(MouseEvent),
     /// Terminal was resized.
     Resize(u16, u16),
     /// Periodic tick for polling store updates.
@@ -25,29 +27,24 @@ pub fn spawn_event_reader(tick_rate: Duration) -> mpsc::UnboundedReceiver<AppEve
 
         loop {
             tokio::select! {
-                // Next terminal event (non-blocking async)
                 maybe_event = event_stream.next() => {
                     match maybe_event {
                         Some(Ok(Event::Key(key))) => {
-                            if tx.send(AppEvent::Key(key)).is_err() {
-                                return;
-                            }
+                            if tx.send(AppEvent::Key(key)).is_err() { return; }
+                        }
+                        Some(Ok(Event::Mouse(mouse))) => {
+                            if tx.send(AppEvent::Mouse(mouse)).is_err() { return; }
                         }
                         Some(Ok(Event::Resize(w, h))) => {
-                            if tx.send(AppEvent::Resize(w, h)).is_err() {
-                                return;
-                            }
+                            if tx.send(AppEvent::Resize(w, h)).is_err() { return; }
                         }
-                        Some(Ok(_)) => {} // ignore other events
+                        Some(Ok(_)) => {}
                         Some(Err(_)) => return,
-                        None => return, // stream ended
+                        None => return,
                     }
                 }
-                // Tick for store polling
                 _ = tick_interval.tick() => {
-                    if tx.send(AppEvent::Tick).is_err() {
-                        return;
-                    }
+                    if tx.send(AppEvent::Tick).is_err() { return; }
                 }
             }
         }

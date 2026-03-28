@@ -5,28 +5,24 @@ use ratatui::{
     widgets::{Block, Borders, Paragraph, Tabs},
     Frame,
 };
-use tui_term::widget::PseudoTerminal;
 use unicode_width::UnicodeWidthChar;
 
 use crate::app::{App, ContentMode, FocusedPanel};
 
-/// Render the full TUI layout.
 pub fn render(frame: &mut Frame, app: &mut App) {
     let size = frame.area();
 
-    // Main area + status bar
     let outer = Layout::default()
         .direction(Direction::Vertical)
         .constraints([
-            Constraint::Min(0),      // main area
-            Constraint::Length(1),   // status bar
+            Constraint::Min(0),
+            Constraint::Length(1),
         ])
         .split(size);
 
     let main_area = outer[0];
     let status_area = outer[1];
 
-    // Top-level horizontal split: navigator (left) | main area (right)
     let horizontal = Layout::default()
         .direction(Direction::Horizontal)
         .constraints([
@@ -35,21 +31,10 @@ pub fn render(frame: &mut Frame, app: &mut App) {
         ])
         .split(main_area);
 
-    // Right side vertical split: content (top) | chat (bottom)
-    let vertical = Layout::default()
-        .direction(Direction::Vertical)
-        .constraints([
-            Constraint::Percentage(50), // content area
-            Constraint::Percentage(50), // chat terminal
-        ])
-        .split(horizontal[1]);
-
     render_navigator(frame, app, horizontal[0]);
-    render_content(frame, app, vertical[0]);
-    render_chat(frame, app, vertical[1]);
+    render_content(frame, app, horizontal[1]);
     render_status_bar(frame, app, status_area);
 
-    // Help overlay on top of everything
     if app.show_help {
         render_help_overlay(frame, size);
     }
@@ -81,7 +66,6 @@ fn render_navigator(frame: &mut Frame, app: &mut App, area: Rect) {
     let inner = block.inner(area);
     frame.render_widget(block, area);
 
-    // Compute available height for the navigator list
     let height = inner.height as usize;
     app.navigator.adjust_scroll(height);
     let lines = app.navigator.visible_lines(height);
@@ -127,34 +111,24 @@ fn render_content(frame: &mut Frame, app: &mut App, area: Rect) {
     let inner = block.inner(area);
     frame.render_widget(block, area);
 
-    // Split inner into tab bar + content
     let content_layout = Layout::default()
         .direction(Direction::Vertical)
         .constraints([
-            Constraint::Length(1), // tab bar
-            Constraint::Min(0),   // content
+            Constraint::Length(1),
+            Constraint::Min(0),
         ])
         .split(inner);
 
     // Tab bar
-    let tab_titles: Vec<Line> = app
-        .tabs
-        .iter()
-        .enumerate()
-        .map(|(i, t)| {
-            let dirty = if t.editor.dirty { "● " } else { "" };
-            let title = if t.title.len() > 18 {
-                format!("{}{}…", dirty, &t.title[..17])
-            } else {
-                format!("{}{}", dirty, t.title)
-            };
-            if i == app.active_tab {
-                Line::from(title)
-            } else {
-                Line::from(title)
-            }
-        })
-        .collect();
+    let tab_titles: Vec<Line> = app.tabs.iter().map(|t| {
+        let dirty = if t.editor.dirty { "● " } else { "" };
+        let title = if t.title.len() > 18 {
+            format!("{}{}…", dirty, &t.title[..17])
+        } else {
+            format!("{}{}", dirty, t.title)
+        };
+        Line::from(title)
+    }).collect();
 
     let tabs = Tabs::new(tab_titles)
         .select(app.active_tab)
@@ -164,26 +138,22 @@ fn render_content(frame: &mut Frame, app: &mut App, area: Rect) {
 
     frame.render_widget(tabs, content_layout[0]);
 
-    // Tab content with editor
+    // Tab content
     if let Some(tab) = app.tabs.get_mut(app.active_tab) {
         let content_area = content_layout[1];
         let width = content_area.width as usize;
         let viewport_height = content_area.height as usize;
 
-        if width == 0 || viewport_height == 0 {
-            return;
-        }
+        if width == 0 || viewport_height == 0 { return; }
 
-        // Store viewport height for page up/down
         app.content_viewport_height = viewport_height;
 
-        // Manually wrap lines to fit the content area width using display width
-        let mut visual_lines: Vec<(usize, String)> = Vec::new(); // (editor_row, text)
+        // Manual word wrap
+        let mut visual_lines: Vec<(usize, String)> = Vec::new();
         for (row_idx, line) in tab.editor.lines.iter().enumerate() {
             if line.is_empty() {
                 visual_lines.push((row_idx, String::new()));
             } else {
-                // Wrap by display width, not character count
                 let mut current = String::new();
                 let mut current_width: usize = 0;
                 for ch in line.chars() {
@@ -200,7 +170,7 @@ fn render_content(frame: &mut Frame, app: &mut App, area: Rect) {
             }
         }
 
-        // Find which visual line the cursor is on
+        // Cursor position in visual lines
         let mut cursor_visual_row = 0;
         let mut cursor_visual_col = tab.editor.cursor_col;
         {
@@ -215,16 +185,14 @@ fn render_content(frame: &mut Frame, app: &mut App, area: Rect) {
                 }
                 vrow += 1;
             }
-            // If we exhausted visual lines for the cursor row
             if cursor_visual_col >= width {
                 cursor_visual_col = cursor_visual_col % width;
             }
         }
 
-        // Adjust scroll based on visual cursor position
+        // Scroll
         tab.editor.adjust_scroll(viewport_height);
-        let mut scroll = tab.editor.scroll_offset;
-        // Convert scroll from editor rows to visual rows
+        let scroll = tab.editor.scroll_offset;
         let mut visual_scroll = 0;
         {
             let mut editor_rows_seen = 0;
@@ -239,7 +207,6 @@ fn render_content(frame: &mut Frame, app: &mut App, area: Rect) {
             }
         }
 
-        // Keep cursor visible
         if cursor_visual_row < visual_scroll {
             visual_scroll = cursor_visual_row;
         }
@@ -249,9 +216,7 @@ fn render_content(frame: &mut Frame, app: &mut App, area: Rect) {
 
         let is_focused = app.focused == FocusedPanel::Content;
 
-        // Render visible visual lines
-        let visible: Vec<Line> = visual_lines
-            .iter()
+        let visible: Vec<Line> = visual_lines.iter()
             .skip(visual_scroll)
             .take(viewport_height)
             .map(|(_, text)| {
@@ -262,7 +227,7 @@ fn render_content(frame: &mut Frame, app: &mut App, area: Rect) {
         let paragraph = Paragraph::new(visible);
         frame.render_widget(paragraph, content_area);
 
-        // Overlay cursor
+        // Cursor overlay
         if is_focused {
             let cursor_screen_row = cursor_visual_row.saturating_sub(visual_scroll);
             let cursor_x = content_area.x + cursor_visual_col as u16;
@@ -286,36 +251,6 @@ fn render_content(frame: &mut Frame, app: &mut App, area: Rect) {
     }
 }
 
-
-fn render_chat(frame: &mut Frame, app: &mut App, area: Rect) {
-    let block = Block::default()
-        .title(" Chat ")
-        .borders(Borders::ALL)
-        .border_type(panel_border_type(app, FocusedPanel::Chat))
-        .border_style(panel_border_style(app, FocusedPanel::Chat));
-
-    // Resize PTY to match the inner area of the chat panel
-    let inner = block.inner(area);
-    if let Some(ref mut pty) = app.pty {
-        pty.resize(inner.height, inner.width);
-    }
-
-    if let Some(ref pty) = app.pty {
-        if let Ok(parser) = pty.parser.read() {
-            let pseudo_term = PseudoTerminal::new(parser.screen()).block(block);
-            frame.render_widget(pseudo_term, area);
-        } else {
-            let content = Paragraph::new("PTY lock contention — retrying...")
-                .block(block);
-            frame.render_widget(content, area);
-        }
-    } else {
-        let content = Paragraph::new("claude not available. Install claude CLI to use chat.")
-            .block(block);
-        frame.render_widget(content, area);
-    }
-}
-
 fn render_status_bar(frame: &mut Frame, app: &App, area: Rect) {
     let panel_name = match app.focused {
         FocusedPanel::Navigator => "NAV",
@@ -323,7 +258,6 @@ fn render_status_bar(frame: &mut Frame, app: &App, area: Rect) {
             ContentMode::Command => "CONTENT:CMD",
             ContentMode::Edit => "CONTENT:EDIT",
         },
-        FocusedPanel::Chat => "CHAT",
     };
 
     let dirty = app.tabs.get(app.active_tab).map_or(false, |t| t.editor.dirty);
@@ -334,7 +268,7 @@ fn render_status_bar(frame: &mut Frame, app: &App, area: Rect) {
         dirty_indicator,
     );
 
-    let right = format!("Ctrl+Tab: switch panel | ?: help ");
+    let right = "Tab: switch panel | ?: help ".to_string();
 
     let width = area.width as usize;
     let padding = width.saturating_sub(left.len() + right.len());
@@ -346,14 +280,12 @@ fn render_status_bar(frame: &mut Frame, app: &App, area: Rect) {
 }
 
 fn render_help_overlay(frame: &mut Frame, area: Rect) {
-    // Center a box in the middle of the screen
-    let width = 60u16.min(area.width.saturating_sub(4));
-    let height = 28u16.min(area.height.saturating_sub(4));
+    let width = 55u16.min(area.width.saturating_sub(4));
+    let height = 24u16.min(area.height.saturating_sub(4));
     let x = area.x + (area.width.saturating_sub(width)) / 2;
     let y = area.y + (area.height.saturating_sub(height)) / 2;
     let overlay_area = Rect::new(x, y, width, height);
 
-    // Clear the area
     let block = Block::default()
         .title(" Keybindings ")
         .borders(Borders::ALL)
@@ -361,34 +293,27 @@ fn render_help_overlay(frame: &mut Frame, area: Rect) {
 
     let help_text = vec![
         Line::from(Span::styled("GLOBAL", Style::default().fg(Color::Yellow).add_modifier(Modifier::BOLD))),
-        Line::from("  Ctrl+Tab     Switch panel focus"),
-        Line::from("  Ctrl+Q       Quit"),
-        Line::from("  ?            Show this help"),
+        Line::from("  Tab            Switch panel focus"),
+        Line::from("  Ctrl+C/Q       Quit"),
+        Line::from("  ?              Show this help"),
         Line::from(""),
         Line::from(Span::styled("ENTITIES PANEL", Style::default().fg(Color::Yellow).add_modifier(Modifier::BOLD))),
-        Line::from("  j/k or Up/Dn  Move cursor"),
-        Line::from("  Enter/Right   Open entity / expand group"),
-        Line::from("  Left          Collapse group"),
-        Line::from("  < / >         Resize panel"),
+        Line::from("  j/k or Up/Dn   Move cursor"),
+        Line::from("  Enter/Right    Open entity / expand"),
+        Line::from("  Left           Collapse group"),
+        Line::from("  < / >          Resize panel"),
         Line::from(""),
         Line::from(Span::styled("CONTENT - COMMAND MODE", Style::default().fg(Color::Yellow).add_modifier(Modifier::BOLD))),
-        Line::from("  h/l or L/R    Previous / next tab"),
-        Line::from("  j/k or Up/Dn  Scroll content"),
-        Line::from("  PgUp/PgDn     Page scroll"),
-        Line::from("  Home/g        Top of document"),
-        Line::from("  End/G         Bottom of document"),
-        Line::from("  i or Enter    Enter edit mode"),
-        Line::from("  w             Close tab"),
-        Line::from("  x             Toggle checkbox"),
-        Line::from("  s             Save"),
+        Line::from("  h/l or L/R     Previous / next tab"),
+        Line::from("  j/k or Up/Dn   Scroll content"),
+        Line::from("  PgUp/PgDn      Page scroll"),
+        Line::from("  Home/g  End/G  Top / bottom"),
+        Line::from("  i or Enter     Enter edit mode"),
+        Line::from("  w  Close tab   s  Save   x  Checkbox"),
         Line::from(""),
         Line::from(Span::styled("CONTENT - EDIT MODE", Style::default().fg(Color::Yellow).add_modifier(Modifier::BOLD))),
-        Line::from("  Esc           Exit to command mode"),
-        Line::from("  Ctrl+S        Save"),
-        Line::from("  Arrows        Move cursor"),
-        Line::from("  Home/End      Start/end of line"),
-        Line::from("  PgUp/PgDn     Page scroll"),
-        Line::from("  Type          Insert text"),
+        Line::from("  Esc            Exit to command mode"),
+        Line::from("  Ctrl+S         Save"),
         Line::from(""),
         Line::from(Span::styled("Press any key to close", Style::default().fg(Color::DarkGray))),
     ];

@@ -90,6 +90,7 @@ fn main() {
         None => commands::tui::run(commands::tui::TuiArgs {
             workspace: None,
             claude_args: Vec::new(),
+            no_tmux: false,
         }),
         Some(Commands::Init(args)) => commands::init::run(args, cli.json),
         Some(Commands::Create(args)) => commands::create::run(args, cli.json),

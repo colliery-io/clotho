@@ -32,6 +32,38 @@ error() { printf "${RED}[clotho]${NC} %s\n" "$1" >&2; exit 1; }
 # Check dependencies
 check_deps() {
     command -v cargo >/dev/null 2>&1 || error "Rust toolchain required. Install from https://rustup.rs"
+    ensure_tmux
+}
+
+# Ensure tmux is installed
+ensure_tmux() {
+    if command -v tmux >/dev/null 2>&1; then
+        return
+    fi
+
+    info "tmux not found — attempting to install..."
+
+    if command -v brew >/dev/null 2>&1; then
+        brew install tmux && return
+    fi
+
+    if command -v port >/dev/null 2>&1; then
+        sudo port install tmux && return
+    fi
+
+    if command -v apt-get >/dev/null 2>&1; then
+        sudo apt-get update && sudo apt-get install -y tmux && return
+    fi
+
+    if command -v dnf >/dev/null 2>&1; then
+        sudo dnf install -y tmux && return
+    fi
+
+    if command -v pacman >/dev/null 2>&1; then
+        sudo pacman -S --noconfirm tmux && return
+    fi
+
+    error "Could not install tmux. Install it manually and re-run."
 }
 
 # Install from local source

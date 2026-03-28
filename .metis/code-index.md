@@ -1,6 +1,6 @@
 # Code Index
 
-> Generated: 2026-03-28T02:33:57Z | 102 files | Rust
+> Generated: 2026-03-28T03:54:05Z | 102 files | Rust
 
 ## Project Structure
 
@@ -250,10 +250,11 @@
 
 #### clotho-cli/src/commands/tui.rs
 
-- pub `TuiArgs` struct L7-17 — `{ workspace: Option<PathBuf>, claude_args: Vec<String> }` — Launch the interactive TUI.
-- pub `run` function L42-49 — `(args: TuiArgs) -> Result<(), Box<dyn std::error::Error>>`
--  `default_workspace` function L19-23 — `() -> PathBuf`
--  `ensure_workspace` function L25-40 — `(workspace: &PathBuf) -> Result<(), Box<dyn std::error::Error>>`
+- pub `TuiArgs` struct L8-22 — `{ workspace: Option<PathBuf>, claude_args: Vec<String>, no_tmux: bool }` — Launch the interactive TUI.
+- pub `run` function L47-59 — `(args: TuiArgs) -> Result<(), Box<dyn std::error::Error>>`
+-  `default_workspace` function L24-28 — `() -> PathBuf`
+-  `ensure_workspace` function L30-45 — `(workspace: &PathBuf) -> Result<(), Box<dyn std::error::Error>>`
+-  `launch_tmux` function L61-133 — `(workspace: &PathBuf, claude_args: &[String]) -> Result<(), Box<dyn std::error::...`
 
 #### clotho-cli/src/commands/update.rs
 
@@ -271,7 +272,7 @@
 -  `commands` module L1 — `-`
 -  `Cli` struct L10-17 — `{ json: bool, command: Option<Commands> }` — Clotho — Personal work and time management through reflection,
 -  `Commands` enum L20-83 — `Init | Create | Get | Update | Delete | Capture | List | Search | Query | Reflec...`
--  `main` function L85-126 — `()`
+-  `main` function L85-127 — `()`
 
 #### clotho-cli/src/resolve.rs
 
@@ -1518,27 +1519,26 @@
 
 #### clotho-tui/src/app.rs
 
-- pub `FocusedPanel` enum L21-25 — `Navigator | Content | Chat` — Which panel currently has focus.
-- pub `ContentMode` enum L29-34 — `Command | Edit` — Content panel mode.
-- pub `TabKindLocal` enum L38-41 — `Entity | Surface` — What kind of item a tab represents.
-- pub `Tab` struct L44-49 — `{ title: String, id: String, kind: TabKindLocal, editor: Editor }` — A tab open in the content panel.
-- pub `App` struct L52-79 — `{ workspace: PathBuf, focused: FocusedPanel, should_quit: bool, pty: Option<PtyH...` — Top-level application state.
-- pub `new` function L82-179 — `(workspace: PathBuf, claude_args: Vec<String>) -> Result<Self, Box<dyn std::erro...`
-- pub `run` function L181-239 — `(&mut self) -> Result<(), Box<dyn std::error::Error>>`
--  `App` type L81-691 — `= App`
--  `handle_key` function L241-284 — `(&mut self, key: KeyEvent)`
--  `handle_navigator_key` function L286-319 — `(&mut self, key: KeyEvent)`
--  `handle_content_key` function L321-326 — `(&mut self, key: KeyEvent)`
--  `handle_content_command_key` function L328-413 — `(&mut self, key: KeyEvent)`
--  `handle_content_edit_key` function L415-500 — `(&mut self, key: KeyEvent)`
--  `save_active_tab` function L502-533 — `(&mut self)`
--  `open_entity_tab` function L535-560 — `(&mut self, entity: clotho_store::data::entities::EntityRow)`
--  `forward_key_to_pty` function L562-594 — `(&mut self, key: KeyEvent)`
--  `cycle_focus_forward` function L596-602 — `(&mut self)`
--  `cycle_focus_backward` function L604-610 — `(&mut self)`
--  `on_tick` function L612-661 — `(&mut self)`
--  `save_state` function L663-690 — `(&self)`
--  `format_entity_details_static` function L693-713 — `(entity: &clotho_store::data::entities::EntityRow) -> String`
+- pub `FocusedPanel` enum L20-23 — `Navigator | Content` — Which panel currently has focus.
+- pub `ContentMode` enum L27-30 — `Command | Edit` — Content panel mode.
+- pub `TabKindLocal` enum L34-37 — `Entity | Surface` — What kind of item a tab represents.
+- pub `Tab` struct L40-45 — `{ title: String, id: String, kind: TabKindLocal, editor: Editor }` — A tab open in the content panel.
+- pub `App` struct L48-61 — `{ workspace: PathBuf, focused: FocusedPanel, should_quit: bool, navigator: Navig...` — Top-level application state.
+- pub `new` function L64-139 — `(workspace: PathBuf) -> Result<Self, Box<dyn std::error::Error>>`
+- pub `run` function L141-188 — `(&mut self) -> Result<(), Box<dyn std::error::Error>>`
+-  `App` type L63-503 — `= App`
+-  `handle_mouse` function L190-218 — `(&mut self, mouse: MouseEvent)`
+-  `handle_key` function L220-256 — `(&mut self, key: KeyEvent)`
+-  `handle_navigator_key` function L258-283 — `(&mut self, key: KeyEvent)`
+-  `handle_content_key` function L285-290 — `(&mut self, key: KeyEvent)`
+-  `handle_content_command_key` function L292-344 — `(&mut self, key: KeyEvent)`
+-  `handle_content_edit_key` function L346-383 — `(&mut self, key: KeyEvent)`
+-  `save_active_tab` function L385-413 — `(&mut self)`
+-  `open_entity_tab` function L415-436 — `(&mut self, entity: clotho_store::data::entities::EntityRow)`
+-  `cycle_focus` function L438-443 — `(&mut self)`
+-  `on_tick` function L445-485 — `(&mut self)`
+-  `save_state` function L487-502 — `(&self)`
+-  `format_entity_details_static` function L505-521 — `(entity: &clotho_store::data::entities::EntityRow) -> String`
 
 #### clotho-tui/src/editor.rs
 
@@ -1569,19 +1569,18 @@
 
 #### clotho-tui/src/event.rs
 
-- pub `AppEvent` enum L8-15 — `Key | Resize | Tick` — Terminal events the app loop handles.
-- pub `spawn_event_reader` function L19-57 — `(tick_rate: Duration) -> mpsc::UnboundedReceiver<AppEvent>` — Spawns a background task that reads terminal events via async EventStream
+- pub `AppEvent` enum L8-17 — `Key | Mouse | Resize | Tick` — Terminal events the app loop handles.
+- pub `spawn_event_reader` function L21-54 — `(tick_rate: Duration) -> mpsc::UnboundedReceiver<AppEvent>` — Spawns a background task that reads terminal events via async EventStream
 
 #### clotho-tui/src/lib.rs
 
-- pub `run` function L17-20 — `(workspace: PathBuf, claude_args: Vec<String>) -> Result<(), Box<dyn std::error:...` — Launch the Clotho TUI.
+- pub `run` function L15-18 — `(workspace: PathBuf) -> Result<(), Box<dyn std::error::Error>>` — Launch the Clotho TUI (dashboard only — no embedded chat).
 -  `app` module L1 — `-`
 -  `editor` module L2 — `-`
 -  `event` module L3 — `-`
 -  `navigator` module L4 — `-`
--  `pty` module L5 — `-`
--  `state` module L6 — `-`
--  `ui` module L7 — `-`
+-  `state` module L5 — `-`
+-  `ui` module L6 — `-`
 
 #### clotho-tui/src/navigator.rs
 
@@ -1620,12 +1619,11 @@
 
 #### clotho-tui/src/ui.rs
 
-- pub `render` function L14-56 — `(frame: &mut Frame, app: &mut App)` — Render the full TUI layout.
--  `panel_border_style` function L58-64 — `(app: &App, panel: FocusedPanel) -> Style`
--  `panel_border_type` function L66-72 — `(app: &App, panel: FocusedPanel) -> ratatui::widgets::BorderType`
--  `render_navigator` function L74-105 — `(frame: &mut Frame, app: &mut App, area: Rect)`
--  `render_content` function L107-287 — `(frame: &mut Frame, app: &mut App, area: Rect)`
--  `render_chat` function L290-317 — `(frame: &mut Frame, app: &mut App, area: Rect)`
--  `render_status_bar` function L319-346 — `(frame: &mut Frame, app: &App, area: Rect)`
--  `render_help_overlay` function L348-400 — `(frame: &mut Frame, area: Rect)`
+- pub `render` function L12-41 — `(frame: &mut Frame, app: &mut App)`
+-  `panel_border_style` function L43-49 — `(app: &App, panel: FocusedPanel) -> Style`
+-  `panel_border_type` function L51-57 — `(app: &App, panel: FocusedPanel) -> ratatui::widgets::BorderType`
+-  `render_navigator` function L59-89 — `(frame: &mut Frame, app: &mut App, area: Rect)`
+-  `render_content` function L91-252 — `(frame: &mut Frame, app: &mut App, area: Rect)`
+-  `render_status_bar` function L254-280 — `(frame: &mut Frame, app: &App, area: Rect)`
+-  `render_help_overlay` function L282-325 — `(frame: &mut Frame, area: Rect)`
 
