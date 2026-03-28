@@ -55,8 +55,8 @@ impl Default for OntologyConfig {
     }
 }
 
-/// Visible content directories created at project root.
-const VISIBLE_DIRS: &[&str] = &[
+/// Content directories created inside .clotho/content/.
+const CONTENT_DIRS: &[&str] = &[
     "programs",
     "responsibilities",
     "objectives",
@@ -72,12 +72,13 @@ const VISIBLE_DIRS: &[&str] = &[
 ];
 
 /// Machine-managed directories created inside .clotho/.
-const HIDDEN_DIRS: &[&str] = &["data", "graph", "index", "inbox", "config"];
+const MACHINE_DIRS: &[&str] = &["data", "graph", "index", "inbox", "config"];
 
 /// A Clotho workspace.
 ///
-/// Content lives at the project root (visible, browsable).
-/// Machine data lives in `.clotho/` (hidden).
+/// Everything lives inside `.clotho/`:
+/// - Content in `.clotho/content/` (notes, tasks, etc.)
+/// - Machine data in `.clotho/data/`, `.clotho/graph/`, etc.
 pub struct Workspace {
     /// Path to the `.clotho/` directory.
     pub path: PathBuf,
@@ -86,8 +87,7 @@ pub struct Workspace {
 impl Workspace {
     /// Initialize a new workspace at the given path.
     ///
-    /// Creates visible content directories at the project root and
-    /// machine-managed directories inside `.clotho/`.
+    /// Creates all directories inside `.clotho/`.
     pub fn init(base_path: &Path) -> Result<Self, StoreError> {
         let clotho_path = base_path.join(".clotho");
 
@@ -97,13 +97,13 @@ impl Workspace {
             ));
         }
 
-        // Create visible content directories at project root
-        for dir in VISIBLE_DIRS {
-            fs::create_dir_all(base_path.join(dir))?;
+        // Create content directories inside .clotho/content/
+        for dir in CONTENT_DIRS {
+            fs::create_dir_all(clotho_path.join("content").join(dir))?;
         }
 
-        // Create hidden machine directories in .clotho/
-        for dir in HIDDEN_DIRS {
+        // Create machine-managed directories in .clotho/
+        for dir in MACHINE_DIRS {
             fs::create_dir_all(clotho_path.join(dir))?;
         }
 
@@ -130,6 +130,7 @@ impl Workspace {
     /// Open an existing workspace.
     ///
     /// Validates that the .clotho/ directory and essential subdirs exist.
+    /// Creates content/ directory if missing (upgrade from old layout).
     pub fn open(base_path: &Path) -> Result<Self, StoreError> {
         let clotho_path = base_path.join(".clotho");
 
@@ -158,20 +159,29 @@ impl Workspace {
             ));
         }
 
+        // Ensure content directories exist (upgrade from old layout)
+        for dir in CONTENT_DIRS {
+            let _ = fs::create_dir_all(clotho_path.join("content").join(dir));
+        }
+
         // Run pending migrations (handles upgrades)
         crate::migrations::run_migrations(&clotho_path.join("data/entities.db"))?;
 
         Ok(Self { path: clotho_path })
     }
 
+    /// Path to the content root (.clotho/content/).
+    ///
+    /// This is where content directories live (notes, tasks, etc.).
+    pub fn content_root(&self) -> PathBuf {
+        self.path.join("content")
+    }
+
     /// Path to the project root (parent of .clotho/).
     ///
-    /// This is where visible content directories live.
+    /// Kept for backward compatibility — prefer content_root() for content paths.
     pub fn project_root(&self) -> PathBuf {
-        self.path
-            .parent()
-            .expect("workspace .clotho/ must have a parent")
-            .to_path_buf()
+        self.content_root()
     }
 
     /// Path to the data directory (.clotho/data/).

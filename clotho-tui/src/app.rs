@@ -120,7 +120,7 @@ impl App {
                     if let Some(ref store) = entity_store {
                         if let Ok(Some(entity)) = store.get(&tab_state.id) {
                             let content = if let Some(ref content_path) = entity.content_path {
-                                let full_path = workspace.parent().unwrap_or(&workspace).join(content_path);
+                                let full_path = workspace.join("content").join(content_path);
                                 std::fs::read_to_string(&full_path).unwrap_or_else(|_| "(no content)".to_string())
                             } else {
                                 format_entity_details_static(&entity)
@@ -521,7 +521,7 @@ impl App {
                 if let Ok(store) = clotho_store::data::entities::EntityStore::open(&db_path) {
                     if let Ok(Some(entity)) = store.get(&tab.id) {
                         if let Some(ref content_path) = entity.content_path {
-                            let full_path = self.workspace.parent().unwrap_or(&self.workspace).join(content_path);
+                            let full_path = self.workspace.join("content").join(content_path);
                             if std::fs::write(&full_path, &content).is_ok() {
                                 tab.editor.dirty = false;
                             }
@@ -541,7 +541,7 @@ impl App {
 
         // Load content if available
         let content = if let Some(ref content_path) = entity.content_path {
-            let full_path = self.workspace.parent().unwrap_or(&self.workspace).join(content_path);
+            let full_path = self.workspace.join("content").join(content_path);
             std::fs::read_to_string(&full_path).unwrap_or_else(|_| "(no content)".to_string())
         } else {
             format_entity_details_static(&entity)

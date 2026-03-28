@@ -1,6 +1,6 @@
 # Code Index
 
-> Generated: 2026-03-28T02:13:29Z | 102 files | Rust
+> Generated: 2026-03-28T02:33:57Z | 102 files | Rust
 
 ## Project Structure
 
@@ -1249,24 +1249,25 @@
 - pub `SyncConfig` struct L16-20 — `{ auto_commit: bool, debounce_seconds: u64, shallow_history_limit: u32 }`
 - pub `OntologyConfig` struct L37-40 — `{ known_entities: Vec<String>, extraction: ExtractionConfig }` — Default ontology configuration.
 - pub `ExtractionConfig` struct L43-45 — `{ default_confidence_threshold: f32 }`
-- pub `Workspace` struct L81-84 — `{ path: PathBuf }` — A Clotho workspace.
+- pub `Workspace` struct L82-85 — `{ path: PathBuf }` — A Clotho workspace.
 - pub `init` function L91-128 — `(base_path: &Path) -> Result<Self, StoreError>` — Initialize a new workspace at the given path.
-- pub `open` function L133-165 — `(base_path: &Path) -> Result<Self, StoreError>` — Open an existing workspace.
-- pub `project_root` function L170-175 — `(&self) -> PathBuf` — Path to the project root (parent of .clotho/).
-- pub `data_path` function L178-180 — `(&self) -> PathBuf` — Path to the data directory (.clotho/data/).
-- pub `graph_path` function L183-185 — `(&self) -> PathBuf` — Path to the graph directory (.clotho/graph/).
-- pub `index_path` function L188-190 — `(&self) -> PathBuf` — Path to the index directory (.clotho/index/).
-- pub `inbox_path` function L193-195 — `(&self) -> PathBuf` — Path to the inbox directory (.clotho/inbox/).
-- pub `config_path` function L198-200 — `(&self) -> PathBuf` — Path to the config directory (.clotho/config/).
-- pub `read_config` function L203-207 — `(&self) -> Result<WorkspaceConfig, StoreError>` — Read the workspace configuration.
-- pub `read_ontology` function L210-214 — `(&self) -> Result<OntologyConfig, StoreError>` — Read the ontology configuration.
+- pub `open` function L134-171 — `(base_path: &Path) -> Result<Self, StoreError>` — Open an existing workspace.
+- pub `content_root` function L176-178 — `(&self) -> PathBuf` — Path to the content root (.clotho/content/).
+- pub `project_root` function L183-185 — `(&self) -> PathBuf` — Path to the project root (parent of .clotho/).
+- pub `data_path` function L188-190 — `(&self) -> PathBuf` — Path to the data directory (.clotho/data/).
+- pub `graph_path` function L193-195 — `(&self) -> PathBuf` — Path to the graph directory (.clotho/graph/).
+- pub `index_path` function L198-200 — `(&self) -> PathBuf` — Path to the index directory (.clotho/index/).
+- pub `inbox_path` function L203-205 — `(&self) -> PathBuf` — Path to the inbox directory (.clotho/inbox/).
+- pub `config_path` function L208-210 — `(&self) -> PathBuf` — Path to the config directory (.clotho/config/).
+- pub `read_config` function L213-217 — `(&self) -> Result<WorkspaceConfig, StoreError>` — Read the workspace configuration.
+- pub `read_ontology` function L220-224 — `(&self) -> Result<OntologyConfig, StoreError>` — Read the ontology configuration.
 -  `WorkspaceConfig` type L22-33 — `impl Default for WorkspaceConfig`
 -  `default` function L23-32 — `() -> Self`
 -  `OntologyConfig` type L47-56 — `impl Default for OntologyConfig`
 -  `default` function L48-55 — `() -> Self`
--  `VISIBLE_DIRS` variable L59-72 — `: &[&str]` — Visible content directories created at project root.
--  `HIDDEN_DIRS` variable L75 — `: &[&str]` — Machine-managed directories created inside .clotho/.
--  `Workspace` type L86-215 — `= Workspace`
+-  `CONTENT_DIRS` variable L59-72 — `: &[&str]` — Content directories created inside .clotho/content/.
+-  `MACHINE_DIRS` variable L75 — `: &[&str]` — Machine-managed directories created inside .clotho/.
+-  `Workspace` type L87-225 — `= Workspace`
 
 ### clotho-store/src/data
 
