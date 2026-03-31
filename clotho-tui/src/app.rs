@@ -287,8 +287,21 @@ impl App {
     }
 
     fn handle_navigator_key(&mut self, key: KeyEvent) {
+        if self.navigator.searching {
+            self.handle_navigator_search_key(key);
+            return;
+        }
+
         match key.code {
             KeyCode::Char('?') => self.show_help = true,
+            KeyCode::Char('/') => self.navigator.start_search(),
+            KeyCode::Char('a') => {
+                self.navigator.show_archived = !self.navigator.show_archived;
+                self.status_message = Some(
+                    if self.navigator.show_archived { "Showing all".to_string() }
+                    else { "Active only".to_string() }
+                );
+            }
             KeyCode::Char('<') | KeyCode::Char(',') => {
                 if self.nav_width_pct > 10 { self.nav_width_pct -= 5; }
             }
@@ -309,6 +322,25 @@ impl App {
                     self.navigator.toggle_expand();
                 }
             }
+            _ => {}
+        }
+    }
+
+    fn handle_navigator_search_key(&mut self, key: KeyEvent) {
+        match key.code {
+            KeyCode::Esc => self.navigator.stop_search(),
+            KeyCode::Enter => {
+                // Open selected search result
+                if let Some(entity) = self.navigator.selected_search_entity() {
+                    let entity = entity.clone();
+                    self.navigator.stop_search();
+                    self.open_entity_tab(entity);
+                }
+            }
+            KeyCode::Up => self.navigator.cursor_up(),
+            KeyCode::Down => self.navigator.cursor_down(),
+            KeyCode::Backspace => self.navigator.search_pop(),
+            KeyCode::Char(c) => self.navigator.search_push(c),
             _ => {}
         }
     }

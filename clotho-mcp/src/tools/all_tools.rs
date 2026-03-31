@@ -1,12 +1,12 @@
 use rust_mcp_sdk::schema::Tool;
 
 use super::{
-    BatchCreateRelationsTool, CaptureDirectoryTool, CaptureTool, CheckProcessedTool,
-    CreateEntityTool, CreateNoteTool, CreateReflectionTool, CreateRelationTool, DeleteEntityTool,
-    DeleteRelationTool, GetOntologyTool, GetRelationsTool, InitTool, ListEntitiesTool,
-    ListSurfacesTool, ListUnprocessedTool, MarkProcessedTool, PushSurfaceTool, QueryTool,
-    ReadEntityTool, ReadSurfaceTool, SearchOntologyTool, SearchTool, SetWorkspaceTool, SyncTool,
-    UpdateEntityTool, UpdateOntologyTool, WorkspaceSummaryTool,
+    ArchiveEntityTool, BatchCreateRelationsTool, CaptureDirectoryTool, CaptureTool,
+    CheckProcessedTool, CreateEntityTool, CreateNoteTool, CreateReflectionTool,
+    CreateRelationTool, DeleteEntityTool, DeleteRelationTool, GetOntologyTool, GetRelationsTool,
+    InitTool, ListEntitiesTool, ListSurfacesTool, ListUnprocessedTool, MarkProcessedTool,
+    PushSurfaceTool, QueryTool, ReadEntityTool, ReadSurfaceTool, SearchOntologyTool, SearchTool,
+    SetWorkspaceTool, SyncTool, UpdateEntityTool, UpdateOntologyTool, WorkspaceSummaryTool,
 };
 
 /// Registry of all Clotho MCP tools.
@@ -35,6 +35,7 @@ impl ClothoTools {
             CreateEntityTool::tool(),
             UpdateEntityTool::tool(),
             DeleteEntityTool::tool(),
+            ArchiveEntityTool::tool(),
             // Write - relations
             CreateRelationTool::tool(),
             BatchCreateRelationsTool::tool(),

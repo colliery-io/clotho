@@ -1,4 +1,5 @@
 pub mod all_tools;
+pub mod archive_entity;
 pub mod batch_relations;
 pub mod capture;
 pub mod capture_directory;
@@ -47,6 +48,7 @@ pub use search::*;
 pub use set_workspace::*;
 pub use sync::*;
 pub use update_entity::*;
+pub use archive_entity::*;
 pub use list_surfaces::*;
 pub use push_surface::*;
 pub use read_surface::*;

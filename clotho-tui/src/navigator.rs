@@ -22,6 +22,14 @@ pub struct Navigator {
     pub scroll_offset: usize,
     /// Pending expansion state from saved state (applied on next refresh).
     pending_expanded: HashMap<String, bool>,
+    /// Show archived/inactive entities.
+    pub show_archived: bool,
+    /// Search mode active.
+    pub searching: bool,
+    /// Current search query.
+    pub search_query: String,
+    /// Cached search results (flat list of matching entities).
+    search_results: Vec<(usize, usize)>, // (group_idx, entity_idx)
 }
 
 impl Navigator {
@@ -32,6 +40,10 @@ impl Navigator {
             visible_count: 0,
             scroll_offset: 0,
             pending_expanded: HashMap::new(),
+            show_archived: false,
+            searching: false,
+            search_query: String::new(),
+            search_results: Vec::new(),
         }
     }
 
@@ -60,35 +72,35 @@ impl Navigator {
             Err(_) => return,
         };
 
-        // Filter to active entities only:
-        // - Exclude status=inactive
-        // - Exclude task_state=done
-        // - Exclude extraction_status=discarded
-        let active: Vec<EntityRow> = all
-            .into_iter()
-            .filter(|row| {
-                if let Some(ref status) = row.status {
-                    if status.to_lowercase() == "inactive" {
-                        return false;
+        // Filter entities unless show_archived is on
+        let filtered: Vec<EntityRow> = if self.show_archived {
+            all
+        } else {
+            all.into_iter()
+                .filter(|row| {
+                    if let Some(ref status) = row.status {
+                        if status.to_lowercase() == "inactive" {
+                            return false;
+                        }
                     }
-                }
-                if let Some(ref state) = row.task_state {
-                    if state.to_lowercase() == "done" {
-                        return false;
+                    if let Some(ref state) = row.task_state {
+                        if state.to_lowercase() == "done" {
+                            return false;
+                        }
                     }
-                }
-                if let Some(ref es) = row.extraction_status {
-                    if es.to_lowercase() == "discarded" {
-                        return false;
+                    if let Some(ref es) = row.extraction_status {
+                        if es.to_lowercase() == "discarded" {
+                            return false;
+                        }
                     }
-                }
-                true
-            })
-            .collect();
+                    true
+                })
+                .collect()
+        };
 
         // Group by entity_type, preserving a stable order
         let mut grouped: BTreeMap<String, Vec<EntityRow>> = BTreeMap::new();
-        for row in active {
+        for row in filtered {
             grouped
                 .entry(row.entity_type.clone())
                 .or_default()
@@ -147,7 +159,12 @@ impl Navigator {
 
     /// Move cursor down.
     pub fn cursor_down(&mut self) {
-        if self.visible_count > 0 && self.cursor < self.visible_count - 1 {
+        let max = if self.searching {
+            self.search_results.len()
+        } else {
+            self.visible_count
+        };
+        if max > 0 && self.cursor < max - 1 {
             self.cursor += 1;
         }
     }
@@ -246,11 +263,97 @@ impl Navigator {
 
     /// Update scroll offset to keep cursor visible for a given viewport height.
     pub fn adjust_scroll(&mut self, height: usize) {
-        if self.cursor < self.scroll_offset {
-            self.scroll_offset = self.cursor;
+        if self.searching {
+            let count = self.search_results.len();
+            if self.cursor < self.scroll_offset {
+                self.scroll_offset = self.cursor;
+            }
+            if count > 0 && self.cursor >= self.scroll_offset + height {
+                self.scroll_offset = self.cursor - height + 1;
+            }
+        } else {
+            if self.cursor < self.scroll_offset {
+                self.scroll_offset = self.cursor;
+            }
+            if self.cursor >= self.scroll_offset + height {
+                self.scroll_offset = self.cursor - height + 1;
+            }
         }
-        if self.cursor >= self.scroll_offset + height {
-            self.scroll_offset = self.cursor - height + 1;
+    }
+
+    /// Enter search mode.
+    pub fn start_search(&mut self) {
+        self.searching = true;
+        self.search_query.clear();
+        self.cursor = 0;
+        self.scroll_offset = 0;
+        self.update_search_results();
+    }
+
+    /// Exit search mode.
+    pub fn stop_search(&mut self) {
+        self.searching = false;
+        self.search_query.clear();
+        self.search_results.clear();
+        self.cursor = 0;
+        self.scroll_offset = 0;
+        self.recompute_visible_count();
+    }
+
+    /// Update search query and refresh results.
+    pub fn search_push(&mut self, c: char) {
+        self.search_query.push(c);
+        self.cursor = 0;
+        self.scroll_offset = 0;
+        self.update_search_results();
+    }
+
+    /// Remove last character from search query.
+    pub fn search_pop(&mut self) {
+        self.search_query.pop();
+        self.cursor = 0;
+        self.scroll_offset = 0;
+        self.update_search_results();
+    }
+
+    /// Rebuild search results based on current query.
+    fn update_search_results(&mut self) {
+        self.search_results.clear();
+        let query = self.search_query.to_lowercase();
+
+        for (gi, group) in self.groups.iter().enumerate() {
+            for (ei, entity) in group.entities.iter().enumerate() {
+                if query.is_empty() || entity.title.to_lowercase().contains(&query) ||
+                   group.entity_type.to_lowercase().contains(&query) {
+                    self.search_results.push((gi, ei));
+                }
+            }
         }
+    }
+
+    /// Get the entity at the cursor when in search mode.
+    pub fn selected_search_entity(&self) -> Option<&EntityRow> {
+        let idx = self.search_results.get(self.cursor)?;
+        Some(&self.groups[idx.0].entities[idx.1])
+    }
+
+    /// Build search result lines for rendering.
+    pub fn search_lines(&self, height: usize) -> Vec<(String, bool, bool)> {
+        let scroll = self.scroll_offset;
+        let mut lines = Vec::new();
+
+        for (pos, (gi, ei)) in self.search_results.iter().enumerate() {
+            if pos >= scroll + height {
+                break;
+            }
+            if pos >= scroll {
+                let group = &self.groups[*gi];
+                let entity = &group.entities[*ei];
+                let text = format!("  {} | {}", group.entity_type, entity.title);
+                lines.push((text, false, pos == self.cursor));
+            }
+        }
+
+        lines
     }
 }

@@ -56,8 +56,13 @@ fn panel_border_type(app: &App, panel: FocusedPanel) -> ratatui::widgets::Border
 }
 
 fn render_navigator(frame: &mut Frame, app: &mut App, area: Rect) {
+    let title = if app.navigator.searching {
+        " Entities [SEARCH] "
+    } else {
+        " Entities "
+    };
     let block = Block::default()
-        .title(" Entities ")
+        .title(title)
         .borders(Borders::ALL)
         .border_type(panel_border_type(app, FocusedPanel::Navigator))
         .border_style(panel_border_style(app, FocusedPanel::Navigator));
@@ -65,26 +70,63 @@ fn render_navigator(frame: &mut Frame, app: &mut App, area: Rect) {
     let inner = block.inner(area);
     frame.render_widget(block, area);
 
-    let height = inner.height as usize;
-    app.navigator.adjust_scroll(height);
-    let lines = app.navigator.visible_lines(height);
+    if app.navigator.searching {
+        // Split inner: search bar (top) + results (below)
+        let nav_layout = Layout::default()
+            .direction(Direction::Vertical)
+            .constraints([
+                Constraint::Length(1),
+                Constraint::Min(0),
+            ])
+            .split(inner);
 
-    let text_lines: Vec<Line> = lines
-        .iter()
-        .map(|(text, is_header, is_cursor)| {
-            let style = if *is_cursor {
-                Style::default().bg(Color::DarkGray).fg(Color::White)
-            } else if *is_header {
-                Style::default().fg(Color::Yellow).add_modifier(Modifier::BOLD)
-            } else {
-                Style::default().fg(Color::White)
-            };
-            Line::from(Span::styled(text.clone(), style))
-        })
-        .collect();
+        // Search bar
+        let search_text = format!("/{}", app.navigator.search_query);
+        let search_bar = Paragraph::new(search_text)
+            .style(Style::default().fg(Color::Cyan));
+        frame.render_widget(search_bar, nav_layout[0]);
 
-    let paragraph = Paragraph::new(text_lines);
-    frame.render_widget(paragraph, inner);
+        // Search results
+        let height = nav_layout[1].height as usize;
+        app.navigator.adjust_scroll(height);
+        let lines = app.navigator.search_lines(height);
+
+        let text_lines: Vec<Line> = lines
+            .iter()
+            .map(|(text, _is_header, is_cursor)| {
+                let style = if *is_cursor {
+                    Style::default().bg(Color::DarkGray).fg(Color::White)
+                } else {
+                    Style::default().fg(Color::White)
+                };
+                Line::from(Span::styled(text.clone(), style))
+            })
+            .collect();
+
+        let paragraph = Paragraph::new(text_lines);
+        frame.render_widget(paragraph, nav_layout[1]);
+    } else {
+        let height = inner.height as usize;
+        app.navigator.adjust_scroll(height);
+        let lines = app.navigator.visible_lines(height);
+
+        let text_lines: Vec<Line> = lines
+            .iter()
+            .map(|(text, is_header, is_cursor)| {
+                let style = if *is_cursor {
+                    Style::default().bg(Color::DarkGray).fg(Color::White)
+                } else if *is_header {
+                    Style::default().fg(Color::Yellow).add_modifier(Modifier::BOLD)
+                } else {
+                    Style::default().fg(Color::White)
+                };
+                Line::from(Span::styled(text.clone(), style))
+            })
+            .collect();
+
+        let paragraph = Paragraph::new(text_lines);
+        frame.render_widget(paragraph, inner);
+    }
 }
 
 fn render_content(frame: &mut Frame, app: &mut App, area: Rect) {
@@ -205,6 +247,8 @@ fn render_help_overlay(frame: &mut Frame, area: Rect) {
         Line::from("  j/k or Up/Dn   Move cursor"),
         Line::from("  Enter/Right    Open entity / expand"),
         Line::from("  Left           Collapse group"),
+        Line::from("  /              Search entities"),
+        Line::from("  a              Toggle show archived"),
         Line::from("  < / >          Resize panel"),
         Line::from(""),
         Line::from(Span::styled("CONTENT - COMMAND MODE", Style::default().fg(Color::Yellow).add_modifier(Modifier::BOLD))),

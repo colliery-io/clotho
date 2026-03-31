@@ -94,13 +94,13 @@
     "clotho-sync/tests/sync_tests.rs": "9ef1dfa85323ba6dde696c0c4bece6e3fd12a55754e0a834fecd1e41275b9e21",
     "clotho-tests/src/lib.rs": "0201fb0c6acc0f331163524b213b91ea06361b64dae3aa486f34c76fe422d12d",
     "clotho-tests/tests/e2e_workflows.rs": "f0b72e977fdcf73184bab0c2f4305828170ddf44a9708ef461f3b2c424e03687",
-    "clotho-tui/src/app.rs": "eeb8bae2384e3375d765413d25062ee4522e0c7af4c89723ad1edd309c2c9dad",
+    "clotho-tui/src/app.rs": "c252868978195286b41093080cba3e1efd6387e5fbccf85b4b83de8721f87ea1",
     "clotho-tui/src/editor.rs": "e9c5380f9ac6db555720a3156e49a284f246d7eb55f16590fe95ea1a58946331",
     "clotho-tui/src/event.rs": "b874d5600c55289362d60ee3b97ab6cd85434ad5306a9dcc253a70cc0f7abb36",
     "clotho-tui/src/lib.rs": "141ad37e82b3681f5c45d7b77d39a8fa26e93a5df05ff1453c313a45add1fa66",
-    "clotho-tui/src/navigator.rs": "5bb91da7cf50162fc732b950a372c528e01385b24dd841fd409643ea2188e9d5",
+    "clotho-tui/src/navigator.rs": "80d30a99116e048e653cad99ed8744adb5740e85c09dd70082f395335dae0203",
     "clotho-tui/src/pty.rs": "641348cf4fd73ea2a794d5b3c5704ca2dfefd6d6109dfb8876c190bdb37de9ee",
     "clotho-tui/src/state.rs": "1c658c8ab369961e0abaac1bd86db46ab280fdf96e3b7b2cae92b66f8191c2e1",
-    "clotho-tui/src/ui.rs": "a2e17fe724ddb4d61c09316900f568e1e7b354d2c0a3096b32e91e7462e8ceef"
+    "clotho-tui/src/ui.rs": "742c687bbf5dc9d0ca46f17919ed072957656d18615877480a9289776ef1acf5"
   }
 }

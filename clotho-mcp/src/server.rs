@@ -1,10 +1,10 @@
 use crate::tools::{
-    BatchCreateRelationsTool, CaptureDirectoryTool, CaptureTool, CheckProcessedTool, ClothoTools,
-    CreateEntityTool, CreateNoteTool, CreateReflectionTool, CreateRelationTool, DeleteEntityTool,
-    DeleteRelationTool, GetOntologyTool, GetRelationsTool, InitTool, ListEntitiesTool,
-    ListSurfacesTool, ListUnprocessedTool, MarkProcessedTool, PushSurfaceTool, QueryTool,
-    ReadEntityTool, ReadSurfaceTool, SearchOntologyTool, SearchTool, SetWorkspaceTool, SyncTool,
-    UpdateEntityTool, UpdateOntologyTool, WorkspaceSummaryTool,
+    ArchiveEntityTool, BatchCreateRelationsTool, CaptureDirectoryTool, CaptureTool,
+    CheckProcessedTool, ClothoTools, CreateEntityTool, CreateNoteTool, CreateReflectionTool,
+    CreateRelationTool, DeleteEntityTool, DeleteRelationTool, GetOntologyTool, GetRelationsTool,
+    InitTool, ListEntitiesTool, ListSurfacesTool, ListUnprocessedTool, MarkProcessedTool,
+    PushSurfaceTool, QueryTool, ReadEntityTool, ReadSurfaceTool, SearchOntologyTool, SearchTool,
+    SetWorkspaceTool, SyncTool, UpdateEntityTool, UpdateOntologyTool, WorkspaceSummaryTool,
 };
 use async_trait::async_trait;
 use rust_mcp_sdk::{
@@ -126,6 +126,11 @@ impl ServerHandler for ClothoServerHandler {
             }
             "clotho_delete_entity" => {
                 let tool: DeleteEntityTool = serde_json::from_value(args)
+                    .map_err(rust_mcp_sdk::schema::schema_utils::CallToolError::new)?;
+                tool.call_tool().await
+            }
+            "clotho_archive_entity" => {
+                let tool: ArchiveEntityTool = serde_json::from_value(args)
                     .map_err(rust_mcp_sdk::schema::schema_utils::CallToolError::new)?;
                 tool.call_tool().await
             }
