@@ -97,6 +97,10 @@ pub struct App {
     pub active_tab: usize,
     pub content_mode: ContentMode,
     pub nav_width_pct: u16,
+    /// Transient preview of the currently highlighted entity (not a tab).
+    pub preview: Option<Tab>,
+    /// ID of the entity currently being previewed.
+    preview_id: Option<String>,
     pub show_help: bool,
     pub status_message: Option<String>,
     known_surface_ids: std::collections::HashSet<String>,
@@ -163,6 +167,8 @@ impl App {
             active_tab,
             content_mode: ContentMode::Command,
             nav_width_pct: 20,
+            preview: None,
+            preview_id: None,
             show_help: false,
             status_message: None,
             known_surface_ids,
@@ -309,8 +315,14 @@ impl App {
             KeyCode::Char('>') | KeyCode::Char('.') => {
                 if self.nav_width_pct < 50 { self.nav_width_pct += 5; }
             }
-            KeyCode::Up | KeyCode::Char('k') => self.navigator.cursor_up(),
-            KeyCode::Down | KeyCode::Char('j') => self.navigator.cursor_down(),
+            KeyCode::Up | KeyCode::Char('k') => {
+                self.navigator.cursor_up();
+                self.update_preview();
+            }
+            KeyCode::Down | KeyCode::Char('j') => {
+                self.navigator.cursor_down();
+                self.update_preview();
+            }
             KeyCode::Enter | KeyCode::Right => {
                 if let Some((_, None)) = self.navigator.resolve_cursor() {
                     self.navigator.toggle_expand();
@@ -329,19 +341,21 @@ impl App {
 
     fn handle_navigator_search_key(&mut self, key: KeyEvent) {
         match key.code {
-            KeyCode::Esc => self.navigator.stop_search(),
+            KeyCode::Esc => {
+                self.navigator.stop_search();
+                self.update_preview();
+            }
             KeyCode::Enter => {
-                // Open selected search result
                 if let Some(entity) = self.navigator.selected_search_entity() {
                     let entity = entity.clone();
                     self.navigator.stop_search();
                     self.open_entity_tab(entity);
                 }
             }
-            KeyCode::Up => self.navigator.cursor_up(),
-            KeyCode::Down => self.navigator.cursor_down(),
-            KeyCode::Backspace => self.navigator.search_pop(),
-            KeyCode::Char(c) => self.navigator.search_push(c),
+            KeyCode::Up => { self.navigator.cursor_up(); self.update_preview(); }
+            KeyCode::Down => { self.navigator.cursor_down(); self.update_preview(); }
+            KeyCode::Backspace => { self.navigator.search_pop(); self.update_preview(); }
+            KeyCode::Char(c) => { self.navigator.search_push(c); self.update_preview(); }
             _ => {}
         }
     }
@@ -494,6 +508,39 @@ impl App {
                 }
             }
         }
+    }
+
+    fn update_preview(&mut self) {
+        // Get the currently highlighted entity from navigator
+        let entity = if self.navigator.searching {
+            self.navigator.selected_search_entity().cloned()
+        } else {
+            self.navigator.selected_entity().cloned()
+        };
+
+        let Some(entity) = entity else {
+            self.preview = None;
+            self.preview_id = None;
+            return;
+        };
+
+        // Don't rebuild if already previewing this entity
+        if self.preview_id.as_deref() == Some(&entity.id) {
+            return;
+        }
+
+        let body = if let Some(ref content_path) = entity.content_path {
+            let full_path = self.workspace.join("content").join(content_path);
+            std::fs::read_to_string(&full_path).unwrap_or_else(|_| "(no content)".to_string())
+        } else {
+            format_entity_details(&entity)
+        };
+
+        let relations = self.load_relations_header(&entity);
+        let content = if relations.is_empty() { body } else { format!("{}\n---\n\n{}", relations, body) };
+
+        self.preview_id = Some(entity.id.clone());
+        self.preview = Some(Tab::new(entity.title.clone(), entity.id.clone(), TabKindLocal::Entity, &content));
     }
 
     fn open_entity_tab(&mut self, entity: clotho_store::data::entities::EntityRow) {

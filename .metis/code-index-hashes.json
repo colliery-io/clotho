@@ -95,7 +95,7 @@
     "clotho-sync/tests/sync_tests.rs": "9ef1dfa85323ba6dde696c0c4bece6e3fd12a55754e0a834fecd1e41275b9e21",
     "clotho-tests/src/lib.rs": "0201fb0c6acc0f331163524b213b91ea06361b64dae3aa486f34c76fe422d12d",
     "clotho-tests/tests/e2e_workflows.rs": "f0b72e977fdcf73184bab0c2f4305828170ddf44a9708ef461f3b2c424e03687",
-    "clotho-tui/src/app.rs": "27ac86fdab2e78ea0c51187fd50638bd9da34d3d7d7bb9de4fb57212a6b7532b",
+    "clotho-tui/src/app.rs": "32eaf3ba4bbfaa7b35e24be7e7ebd33ef8dc09edb8bba4a07d237f95ec0044c7",
     "clotho-tui/src/editor.rs": "e9c5380f9ac6db555720a3156e49a284f246d7eb55f16590fe95ea1a58946331",
     "clotho-tui/src/event.rs": "b874d5600c55289362d60ee3b97ab6cd85434ad5306a9dcc253a70cc0f7abb36",
     "clotho-tui/src/lib.rs": "141ad37e82b3681f5c45d7b77d39a8fa26e93a5df05ff1453c313a45add1fa66",

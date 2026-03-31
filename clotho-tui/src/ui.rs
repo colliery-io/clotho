@@ -130,16 +130,32 @@ fn render_navigator(frame: &mut Frame, app: &mut App, area: Rect) {
 }
 
 fn render_content(frame: &mut Frame, app: &mut App, area: Rect) {
-    let mode_label = match (app.focused, app.content_mode) {
-        (FocusedPanel::Content, ContentMode::Edit) => " Content [EDIT] ",
-        (FocusedPanel::Content, ContentMode::Command) => " Content [CMD] ",
-        _ => " Content ",
+    let showing_preview = app.focused == FocusedPanel::Navigator && app.preview.is_some();
+
+    let mode_label = if showing_preview {
+        " Preview "
+    } else {
+        match (app.focused, app.content_mode) {
+            (FocusedPanel::Content, ContentMode::Edit) => " Content [EDIT] ",
+            (FocusedPanel::Content, ContentMode::Command) => " Content [CMD] ",
+            _ => " Content ",
+        }
     };
     let block = Block::default()
         .title(mode_label)
         .borders(Borders::ALL)
         .border_type(panel_border_type(app, FocusedPanel::Content))
         .border_style(panel_border_style(app, FocusedPanel::Content));
+
+    // Show preview when navigator is focused
+    if showing_preview {
+        let inner = block.inner(area);
+        frame.render_widget(block, area);
+        if let Some(ref preview) = app.preview {
+            frame.render_widget(&preview.textarea, inner);
+        }
+        return;
+    }
 
     if app.tabs.is_empty() {
         let content = Paragraph::new("No tabs open. Select an entity from the navigator.")

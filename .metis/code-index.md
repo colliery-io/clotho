@@ -1,6 +1,6 @@
 # Code Index
 
-> Generated: 2026-03-31T23:33:05Z | 103 files | Rust
+> Generated: 2026-03-31T23:51:25Z | 103 files | Rust
 
 ## Project Structure
 
@@ -1540,7 +1540,7 @@
 -  `content` function L76-78 — `(&self) -> String`
 -  `check_dirty` function L80-82 — `(&mut self)`
 -  `mark_saved` function L84-87 — `(&mut self)`
--  `App` type L105-589 — `= App`
+-  `App` type L105-664 — `= App`
 -  `handle_mouse` function L221-253 — `(&mut self, mouse: MouseEvent)`
 -  `handle_key` function L255-288 — `(&mut self, key: KeyEvent)`
 -  `handle_navigator_key` function L290-328 — `(&mut self, key: KeyEvent)`
@@ -1550,11 +1550,12 @@
 -  `handle_content_edit_key` function L420-433 — `(&mut self, key: KeyEvent)`
 -  `toggle_checkbox` function L435-467 — `(&mut self)`
 -  `save_active_tab` function L469-497 — `(&mut self)`
--  `open_entity_tab` function L499-515 — `(&mut self, entity: clotho_store::data::entities::EntityRow)`
--  `cycle_focus` function L517-522 — `(&mut self)`
--  `on_tick` function L524-565 — `(&mut self)`
--  `save_state` function L567-588 — `(&self)`
--  `format_entity_details` function L591-607 — `(entity: &clotho_store::data::entities::EntityRow) -> String`
+-  `open_entity_tab` function L499-523 — `(&mut self, entity: clotho_store::data::entities::EntityRow)`
+-  `load_relations_header` function L525-590 — `(&self, entity: &clotho_store::data::entities::EntityRow) -> String`
+-  `cycle_focus` function L592-597 — `(&mut self)`
+-  `on_tick` function L599-640 — `(&mut self)`
+-  `save_state` function L642-663 — `(&self)`
+-  `format_entity_details` function L666-682 — `(entity: &clotho_store::data::entities::EntityRow) -> String`
 
 #### clotho-tui/src/editor.rs
 
