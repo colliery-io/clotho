@@ -119,20 +119,78 @@ Beyond generic speech acts, look for signals that matter to the specific program
 - **Meeting wrap-ups** — the last section of a meeting often contains explicit action items, next steps, and follow-up scheduling. These are high-signal.
 - **Follow-up actions** — "let's schedule a meeting", "set up time for", "circle back on" are real action items, not admin noise. Capture them as Tasks.
 
-## Step 2: Create entities
+## Step 2: Search-before-create (MANDATORY for ALL entity types)
 
-For each extracted signal:
+**NEVER create an entity without searching first.** This is the single most important rule.
+
+For every signal you extract — Risk, Blocker, Decision, Question, Insight, Task, or any other type — you MUST follow steps 2a-2e.
+
+### 2a. Abstract the signal to its theme
+
+Before searching, identify the **abstract theme**, not the tactical instance:
+
+| Tactical instance (from transcript) | Abstract theme (for the entity) |
+|--------------------------------------|--------------------------------|
+| "Spark costs are 40% over budget" | Infrastructure cost overrun |
+| "S3 storage bills doubled" | Infrastructure cost overrun |
+| "Ali can't merge because tests are flaky" | CI reliability blocking velocity |
+| "Tests failed again on the PR" | CI reliability blocking velocity |
+| "Nobody owns data quality" | Unclear ownership of data quality |
+| "Who's responsible for the data pipeline?" | Unclear ownership of data quality |
+
+The **abstract theme** becomes the entity title. The **tactical instance** is evidence.
+
+### 2b. Search for existing entities at that abstraction level
+
 ```
-clotho_create_entity(entity_type: "<type>", title: "<clear, specific title>")
+clotho_search(query: "<abstract theme keywords>")
+clotho_list_entities(entity_type: "<type>")
 ```
 
-**Title quality matters.** Be specific and attributed:
-- Good: "Database-as-interface coupling prevents team autonomy (per Ali K)"
-- Bad: "Architecture problem"
+Does an existing entity cover the same theme? Consider:
+- Same or synonymous topic (even with different wording)
+- Same program context
+- Same underlying concern expressed differently
+
+### 2c. If a match exists — link, don't duplicate
+
+Add a new `extracted_from` relation to the existing entity:
+```
+clotho_create_relation(source_id: "<existing_entity_id>", relation_type: "extracted_from", target_id: "<transcript_id>")
+```
+
+The count of `extracted_from` relations is a frequency signal — how often this theme comes up. This is valuable data, not noise.
+
+Note the match in the summary as **reinforcing evidence**.
+
+### 2d. If no match — create at the abstract level
+
+```
+clotho_create_entity(entity_type: "<type>", title: "<abstract theme title>")
+```
+
+**Title quality:**
+- Good: "Infrastructure cost overrun" (thematic, won't duplicate)
+- Bad: "Spark costs are high" (tactical, will duplicate next week)
+- Good: "CI reliability blocking development velocity"
+- Bad: "Tests failed on PR #42"
+
+For Tasks, be more specific since tasks are inherently tactical — but still search first.
+
+### 2e. People — always search first
+
+```
+clotho_search(query: "<person name>")
+```
+Only create if no match. Then link:
+```
+clotho_create_relation(source_id: "<transcript_id>", relation_type: "mentions", target_id: "<person_id>")
+```
 
 ## Step 3: Create relations
 
 ### EXTRACTED_FROM — provenance
+Every entity (new or existing) gets linked to the source:
 ```
 clotho_create_relation(source_id: "<entity_id>", relation_type: "extracted_from", target_id: "<transcript_id>")
 ```
@@ -143,32 +201,10 @@ For entities where you're confident about the program:
 clotho_create_relation(source_id: "<entity_id>", relation_type: "belongs_to", target_id: "<program_id>")
 ```
 
-For entities where routing is ambiguous, present options to the user instead of auto-linking.
+For ambiguous routing, present options to the user instead of auto-linking.
 
-### MENTIONS — people
-Look for names. Search before creating:
-```
-clotho_search(query: "<person name>")
-```
-If not found:
-```
-clotho_create_entity(entity_type: "person", title: "<name>")
-```
-Then:
-```
-clotho_create_relation(source_id: "<transcript_id>", relation_type: "mentions", target_id: "<person_id>")
-```
-
-## Step 4: Dedup check
-
-Before creating an entity, check if something similar already exists:
-```
-clotho_search(query: "<key terms from the signal>")
-```
-
-If you find an existing entity that covers the same ground:
-- **Don't create a duplicate.**
-- Instead, note it as reinforcing evidence. If the existing entity's content could be enriched, mention that to the user.
+### Use batch tools
+When creating multiple relations, use `clotho_batch_create_relations` instead of individual calls.
 
 ## Step 5: Present summary
 
@@ -205,10 +241,12 @@ Do this automatically — don't wait for the user to ask. This keeps the extract
 
 ## Rules
 
-- **Context-first extraction.** Read the program descriptions before extracting. The programs tell you what matters.
-- **Be specific and attributed.** Who said it matters. Vague signals are useless.
-- **One signal per entity.** Don't combine multiple observations into one entity.
-- **Deduplicate.** Search before creating. Reinforcing evidence is valuable but not as a duplicate.
-- **Route, don't dump.** Every entity should belong to a program if at all possible. Unrouted entities are a last resort.
-- **Conservative on auto-linking.** If routing is ambiguous, ask the user. If extraction is uncertain, skip it.
-- **Use batch tools.** When creating multiple relations, use `clotho_batch_create_relations` instead of individual calls.
+1. **SEARCH BEFORE CREATE. ALWAYS.** No exceptions. Every entity type. If you skip this, you create duplicates that the user has to manually clean up.
+2. **Abstract over tactical.** Entity titles should be thematic, not instance-specific. "Infrastructure cost overrun" not "Spark is expensive". Tactical details are evidence, not titles.
+3. **Context-first extraction.** Read the program descriptions before extracting. The programs tell you what matters.
+4. **Be specific and attributed.** Who said it matters. Vague signals are useless.
+5. **One signal per entity.** Don't combine multiple observations into one entity.
+6. **Frequency is signal.** When you find an existing match, linking it (not duplicating it) preserves how often the theme recurs. This is the most valuable metadata.
+7. **Route, don't dump.** Every entity should belong to a program if at all possible. Unrouted entities are a last resort.
+8. **Conservative on auto-linking.** If routing is ambiguous, ask the user. If extraction is uncertain, skip it.
+9. **Use batch tools.** When creating multiple relations, use `clotho_batch_create_relations` instead of individual calls.
