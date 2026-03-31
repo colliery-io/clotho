@@ -8,8 +8,8 @@ use crossterm::{
     terminal::{disable_raw_mode, enable_raw_mode, EnterAlternateScreen, LeaveAlternateScreen},
 };
 use ratatui::{backend::CrosstermBackend, Terminal};
+use ratatui_textarea::TextArea;
 
-use crate::editor::Editor;
 use crate::event::{spawn_event_reader, AppEvent};
 use crate::navigator::Navigator;
 use crate::state::{TabKind, TabState, TuiState};
@@ -41,7 +41,49 @@ pub struct Tab {
     pub title: String,
     pub id: String,
     pub kind: TabKindLocal,
-    pub editor: Editor,
+    pub textarea: TextArea<'static>,
+    pub dirty: bool,
+    /// Content at last save — for dirty detection.
+    saved_content: String,
+}
+
+impl Tab {
+    fn new(title: String, id: String, kind: TabKindLocal, content: &str) -> Self {
+        // Normalize escaped \n to real newlines
+        let normalized = content.replace("\\n", "\n").replace("\r\n", "\n");
+        let lines: Vec<String> = normalized.split('\n').map(|l| l.to_string()).collect();
+        let saved = lines.join("\n");
+        let mut textarea = TextArea::new(lines);
+        textarea.set_cursor_style(
+            ratatui::style::Style::default()
+                .add_modifier(ratatui::style::Modifier::REVERSED),
+        );
+        textarea.set_cursor_line_style(
+            ratatui::style::Style::default()
+                .add_modifier(ratatui::style::Modifier::UNDERLINED),
+        );
+        Self {
+            title,
+            id,
+            kind,
+            textarea,
+            dirty: false,
+            saved_content: saved,
+        }
+    }
+
+    fn content(&self) -> String {
+        self.textarea.lines().join("\n")
+    }
+
+    fn check_dirty(&mut self) {
+        self.dirty = self.content() != self.saved_content;
+    }
+
+    fn mark_saved(&mut self) {
+        self.saved_content = self.content();
+        self.dirty = false;
+    }
 }
 
 /// Top-level application state.
@@ -54,7 +96,6 @@ pub struct App {
     pub active_tab: usize,
     pub content_mode: ContentMode,
     pub nav_width_pct: u16,
-    pub content_viewport_height: usize,
     pub show_help: bool,
     pub status_message: Option<String>,
     known_surface_ids: std::collections::HashSet<String>,
@@ -85,26 +126,16 @@ impl App {
                                 let full_path = workspace.join("content").join(content_path);
                                 std::fs::read_to_string(&full_path).unwrap_or_else(|_| "(no content)".to_string())
                             } else {
-                                format_entity_details_static(&entity)
+                                format_entity_details(&entity)
                             };
-                            tabs.push(Tab {
-                                title: entity.title.clone(),
-                                id: entity.id.clone(),
-                                kind: TabKindLocal::Entity,
-                                editor: Editor::new(&content),
-                            });
+                            tabs.push(Tab::new(entity.title.clone(), entity.id.clone(), TabKindLocal::Entity, &content));
                         }
                     }
                 }
                 TabKind::Surface => {
                     if let Some(ref store) = surface_store {
                         if let Ok(Some(surface)) = store.get(&tab_state.id) {
-                            tabs.push(Tab {
-                                title: surface.title.clone(),
-                                id: surface.id.clone(),
-                                kind: TabKindLocal::Surface,
-                                editor: Editor::new(&surface.content),
-                            });
+                            tabs.push(Tab::new(surface.title.clone(), surface.id.clone(), TabKindLocal::Surface, &surface.content));
                         }
                     }
                 }
@@ -131,7 +162,6 @@ impl App {
             active_tab,
             content_mode: ContentMode::Command,
             nav_width_pct: 20,
-            content_viewport_height: 20,
             show_help: false,
             status_message: None,
             known_surface_ids,
@@ -193,7 +223,9 @@ impl App {
                 match self.focused {
                     FocusedPanel::Content => {
                         if let Some(tab) = self.tabs.get_mut(self.active_tab) {
-                            for _ in 0..3 { tab.editor.move_up(); }
+                            for _ in 0..3 {
+                                tab.textarea.move_cursor(ratatui_textarea::CursorMove::Up);
+                            }
                         }
                     }
                     FocusedPanel::Navigator => {
@@ -205,7 +237,9 @@ impl App {
                 match self.focused {
                     FocusedPanel::Content => {
                         if let Some(tab) = self.tabs.get_mut(self.active_tab) {
-                            for _ in 0..3 { tab.editor.move_down(); }
+                            for _ in 0..3 {
+                                tab.textarea.move_cursor(ratatui_textarea::CursorMove::Down);
+                            }
                         }
                     }
                     FocusedPanel::Navigator => {
@@ -223,23 +257,20 @@ impl App {
             return;
         }
 
+        // Global keybindings
         match (key.code, key.modifiers) {
             (KeyCode::Char('q'), KeyModifiers::CONTROL) | (KeyCode::Char('c'), KeyModifiers::CONTROL) => {
                 self.should_quit = true;
                 return;
             }
-            (KeyCode::Tab, KeyModifiers::CONTROL) | (KeyCode::Tab, KeyModifiers::NONE) if self.focused == FocusedPanel::Navigator => {
-                self.cycle_focus();
+            // Esc: exit edit mode only
+            (KeyCode::Esc, _) if self.focused == FocusedPanel::Content && self.content_mode == ContentMode::Edit => {
+                self.content_mode = ContentMode::Command;
+                self.status_message = None;
                 return;
             }
-            (KeyCode::Tab, KeyModifiers::CONTROL) => {
-                self.cycle_focus();
-                if self.focused == FocusedPanel::Content {
-                    self.content_mode = ContentMode::Command;
-                }
-                return;
-            }
-            (KeyCode::BackTab, _) => {
+            // Tab: switch panels (except in edit mode where it inserts)
+            (KeyCode::Tab, _) if !(self.focused == FocusedPanel::Content && self.content_mode == ContentMode::Edit) => {
                 self.cycle_focus();
                 if self.focused == FocusedPanel::Content {
                     self.content_mode = ContentMode::Command;
@@ -313,27 +344,37 @@ impl App {
                 }
             }
             KeyCode::Char('j') | KeyCode::Down => {
-                if let Some(tab) = self.tabs.get_mut(self.active_tab) { tab.editor.move_down(); }
+                if let Some(tab) = self.tabs.get_mut(self.active_tab) {
+                    tab.textarea.move_cursor(ratatui_textarea::CursorMove::Down);
+                }
             }
             KeyCode::Char('k') | KeyCode::Up => {
-                if let Some(tab) = self.tabs.get_mut(self.active_tab) { tab.editor.move_up(); }
+                if let Some(tab) = self.tabs.get_mut(self.active_tab) {
+                    tab.textarea.move_cursor(ratatui_textarea::CursorMove::Up);
+                }
             }
             KeyCode::PageUp => {
-                let h = self.content_viewport_height;
-                if let Some(tab) = self.tabs.get_mut(self.active_tab) { tab.editor.page_up(h); }
+                if let Some(tab) = self.tabs.get_mut(self.active_tab) {
+                    for _ in 0..20 { tab.textarea.move_cursor(ratatui_textarea::CursorMove::Up); }
+                }
             }
             KeyCode::PageDown => {
-                let h = self.content_viewport_height;
-                if let Some(tab) = self.tabs.get_mut(self.active_tab) { tab.editor.page_down(h); }
+                if let Some(tab) = self.tabs.get_mut(self.active_tab) {
+                    for _ in 0..20 { tab.textarea.move_cursor(ratatui_textarea::CursorMove::Down); }
+                }
             }
             KeyCode::Home | KeyCode::Char('g') => {
-                if let Some(tab) = self.tabs.get_mut(self.active_tab) { tab.editor.move_to_start(); }
+                if let Some(tab) = self.tabs.get_mut(self.active_tab) {
+                    tab.textarea.move_cursor(ratatui_textarea::CursorMove::Top);
+                }
             }
             KeyCode::End | KeyCode::Char('G') => {
-                if let Some(tab) = self.tabs.get_mut(self.active_tab) { tab.editor.move_to_end(); }
+                if let Some(tab) = self.tabs.get_mut(self.active_tab) {
+                    tab.textarea.move_cursor(ratatui_textarea::CursorMove::Bottom);
+                }
             }
             KeyCode::Char('x') => {
-                if let Some(tab) = self.tabs.get_mut(self.active_tab) { tab.editor.toggle_checkbox(); }
+                self.toggle_checkbox();
             }
             KeyCode::Char('s') => {
                 self.save_active_tab();
@@ -344,56 +385,66 @@ impl App {
     }
 
     fn handle_content_edit_key(&mut self, key: KeyEvent) {
-        match (key.code, key.modifiers) {
-            (KeyCode::Esc, _) => {
-                self.content_mode = ContentMode::Command;
-                self.status_message = None;
+        // Ctrl+S to save
+        if key.code == KeyCode::Char('s') && key.modifiers.contains(KeyModifiers::CONTROL) {
+            self.save_active_tab();
+            self.status_message = Some("-- EDIT -- Saved".to_string());
+            return;
+        }
+
+        // Pass everything else to the textarea
+        if let Some(tab) = self.tabs.get_mut(self.active_tab) {
+            tab.textarea.input(key);
+            tab.check_dirty();
+        }
+    }
+
+    fn toggle_checkbox(&mut self) {
+        let Some(tab) = self.tabs.get_mut(self.active_tab) else { return };
+        let (row, _) = tab.textarea.cursor();
+        let lines = tab.textarea.lines();
+        if row >= lines.len() { return; }
+
+        let line = &lines[row];
+        let new_line = if line.contains('☐') {
+            Some(line.replacen('☐', "☑", 1))
+        } else if line.contains('☑') {
+            Some(line.replacen('☑', "☐", 1))
+        } else if line.contains("[ ]") {
+            Some(line.replacen("[ ]", "[x]", 1))
+        } else if line.contains("[x]") || line.contains("[X]") {
+            Some(line.replacen("[x]", "[ ]", 1).replacen("[X]", "[ ]", 1))
+        } else {
+            None
+        };
+
+        if let Some(new) = new_line {
+            // Replace the line by selecting it and inserting the replacement
+            let col = tab.textarea.cursor().1;
+            tab.textarea.move_cursor(ratatui_textarea::CursorMove::Head);
+            tab.textarea.delete_line_by_end();
+            tab.textarea.insert_str(&new);
+            // Try to restore column position
+            tab.textarea.move_cursor(ratatui_textarea::CursorMove::Head);
+            for _ in 0..col {
+                tab.textarea.move_cursor(ratatui_textarea::CursorMove::Forward);
             }
-            (KeyCode::Char('s'), KeyModifiers::CONTROL) => {
-                self.save_active_tab();
-                self.status_message = Some("-- EDIT -- Saved".to_string());
-            }
-            (KeyCode::Up, _) => { if let Some(tab) = self.tabs.get_mut(self.active_tab) { tab.editor.move_up(); } }
-            (KeyCode::Down, _) => { if let Some(tab) = self.tabs.get_mut(self.active_tab) { tab.editor.move_down(); } }
-            (KeyCode::Left, _) => { if let Some(tab) = self.tabs.get_mut(self.active_tab) { tab.editor.move_left(); } }
-            (KeyCode::Right, _) => { if let Some(tab) = self.tabs.get_mut(self.active_tab) { tab.editor.move_right(); } }
-            (KeyCode::Home, _) => { if let Some(tab) = self.tabs.get_mut(self.active_tab) { tab.editor.move_home(); } }
-            (KeyCode::End, _) => { if let Some(tab) = self.tabs.get_mut(self.active_tab) { tab.editor.move_end(); } }
-            (KeyCode::PageUp, _) => {
-                let h = self.content_viewport_height;
-                if let Some(tab) = self.tabs.get_mut(self.active_tab) { tab.editor.page_up(h); }
-            }
-            (KeyCode::PageDown, _) => {
-                let h = self.content_viewport_height;
-                if let Some(tab) = self.tabs.get_mut(self.active_tab) { tab.editor.page_down(h); }
-            }
-            (KeyCode::Char(c), KeyModifiers::NONE | KeyModifiers::SHIFT) => {
-                if let Some(tab) = self.tabs.get_mut(self.active_tab) { tab.editor.insert_char(c); }
-            }
-            (KeyCode::Enter, _) => { if let Some(tab) = self.tabs.get_mut(self.active_tab) { tab.editor.insert_newline(); } }
-            (KeyCode::Backspace, _) => { if let Some(tab) = self.tabs.get_mut(self.active_tab) { tab.editor.backspace(); } }
-            (KeyCode::Delete, _) => { if let Some(tab) = self.tabs.get_mut(self.active_tab) { tab.editor.delete(); } }
-            (KeyCode::Tab, KeyModifiers::NONE) => {
-                if let Some(tab) = self.tabs.get_mut(self.active_tab) {
-                    for _ in 0..4 { tab.editor.insert_char(' '); }
-                }
-            }
-            _ => {}
+            tab.check_dirty();
         }
     }
 
     fn save_active_tab(&mut self) {
         let Some(tab) = self.tabs.get_mut(self.active_tab) else { return };
-        if !tab.editor.dirty { return; }
+        if !tab.dirty { return; }
 
         let db_path = self.workspace.join("data/entities.db");
-        let content = tab.editor.content();
+        let content = tab.content();
 
         match tab.kind {
             TabKindLocal::Surface => {
                 if let Ok(store) = clotho_store::data::surfaces::SurfaceStore::open(&db_path) {
                     if store.update_content(&tab.id, &content).is_ok() {
-                        tab.editor.dirty = false;
+                        tab.mark_saved();
                     }
                 }
             }
@@ -403,7 +454,7 @@ impl App {
                         if let Some(ref content_path) = entity.content_path {
                             let full_path = self.workspace.join("content").join(content_path);
                             if std::fs::write(&full_path, &content).is_ok() {
-                                tab.editor.dirty = false;
+                                tab.mark_saved();
                             }
                         }
                     }
@@ -422,15 +473,10 @@ impl App {
             let full_path = self.workspace.join("content").join(content_path);
             std::fs::read_to_string(&full_path).unwrap_or_else(|_| "(no content)".to_string())
         } else {
-            format_entity_details_static(&entity)
+            format_entity_details(&entity)
         };
 
-        self.tabs.push(Tab {
-            title: entity.title.clone(),
-            id: entity.id.clone(),
-            kind: TabKindLocal::Entity,
-            editor: Editor::new(&content),
-        });
+        self.tabs.push(Tab::new(entity.title.clone(), entity.id.clone(), TabKindLocal::Entity, &content));
         self.active_tab = self.tabs.len() - 1;
         self.focused = FocusedPanel::Content;
     }
@@ -452,29 +498,30 @@ impl App {
                     if !self.known_surface_ids.contains(&surface.id) {
                         self.known_surface_ids.insert(surface.id.clone());
                         if !self.tabs.iter().any(|t| t.id == surface.id) {
-                            self.tabs.push(Tab {
-                                title: surface.title.clone(),
-                                id: surface.id.clone(),
-                                kind: TabKindLocal::Surface,
-                                editor: Editor::new(&surface.content),
-                            });
+                            self.tabs.push(Tab::new(
+                                surface.title.clone(),
+                                surface.id.clone(),
+                                TabKindLocal::Surface,
+                                &surface.content,
+                            ));
                             self.active_tab = self.tabs.len() - 1;
                         }
                     } else {
                         if let Some(tab) = self.tabs.iter_mut().find(|t| t.id == surface.id) {
-                            if !tab.editor.dirty {
-                                let new_content = surface.content.clone();
-                                if tab.editor.content() != new_content {
-                                    let row = tab.editor.cursor_row;
-                                    let col = tab.editor.cursor_col;
-                                    let scroll = tab.editor.scroll_offset;
-                                    tab.editor = Editor::new(&new_content);
-                                    tab.editor.cursor_row = row.min(tab.editor.lines.len().saturating_sub(1));
-                                    tab.editor.cursor_col = col;
-                                    tab.editor.scroll_offset = scroll;
+                            if !tab.dirty && tab.content() != surface.content {
+                                let (row, col) = tab.textarea.cursor();
+                                *tab = Tab::new(surface.title.clone(), surface.id.clone(), TabKindLocal::Surface, &surface.content);
+                                // Restore cursor
+                                tab.textarea.move_cursor(ratatui_textarea::CursorMove::Top);
+                                for _ in 0..row {
+                                    tab.textarea.move_cursor(ratatui_textarea::CursorMove::Down);
                                 }
+                                for _ in 0..col {
+                                    tab.textarea.move_cursor(ratatui_textarea::CursorMove::Forward);
+                                }
+                            } else {
+                                tab.title = surface.title.clone();
                             }
-                            tab.title = surface.title.clone();
                         }
                     }
                 }
@@ -502,7 +549,7 @@ impl App {
     }
 }
 
-fn format_entity_details_static(entity: &clotho_store::data::entities::EntityRow) -> String {
+fn format_entity_details(entity: &clotho_store::data::entities::EntityRow) -> String {
     let mut lines = Vec::new();
     lines.push(format!("# {}", entity.title));
     lines.push(String::new());

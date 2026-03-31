@@ -1,5 +1,4 @@
 mod app;
-mod editor;
 mod event;
 mod navigator;
 mod state;

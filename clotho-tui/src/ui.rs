@@ -5,7 +5,6 @@ use ratatui::{
     widgets::{Block, Borders, Paragraph, Tabs},
     Frame,
 };
-use unicode_width::UnicodeWidthChar;
 
 use crate::app::{App, ContentMode, FocusedPanel};
 
@@ -121,7 +120,7 @@ fn render_content(frame: &mut Frame, app: &mut App, area: Rect) {
 
     // Tab bar
     let tab_titles: Vec<Line> = app.tabs.iter().map(|t| {
-        let dirty = if t.editor.dirty { "● " } else { "" };
+        let dirty = if t.dirty { "● " } else { "" };
         let title = if t.title.len() > 18 {
             format!("{}{}…", dirty, &t.title[..17])
         } else {
@@ -138,116 +137,21 @@ fn render_content(frame: &mut Frame, app: &mut App, area: Rect) {
 
     frame.render_widget(tabs, content_layout[0]);
 
-    // Tab content
+    // Render the textarea widget
     if let Some(tab) = app.tabs.get_mut(app.active_tab) {
-        let content_area = content_layout[1];
-        let width = content_area.width as usize;
-        let viewport_height = content_area.height as usize;
-
-        if width == 0 || viewport_height == 0 { return; }
-
-        app.content_viewport_height = viewport_height;
-
-        // Manual word wrap
-        let mut visual_lines: Vec<(usize, String)> = Vec::new();
-        for (row_idx, line) in tab.editor.lines.iter().enumerate() {
-            if line.is_empty() {
-                visual_lines.push((row_idx, String::new()));
-            } else {
-                let mut current = String::new();
-                let mut current_width: usize = 0;
-                for ch in line.chars() {
-                    let ch_width = UnicodeWidthChar::width(ch).unwrap_or(1);
-                    if current_width + ch_width > width {
-                        visual_lines.push((row_idx, current));
-                        current = String::new();
-                        current_width = 0;
-                    }
-                    current.push(ch);
-                    current_width += ch_width;
-                }
-                visual_lines.push((row_idx, current));
-            }
-        }
-
-        // Cursor position in visual lines
-        let mut cursor_visual_row = 0;
-        let mut cursor_visual_col = tab.editor.cursor_col;
-        {
-            let mut vrow = 0;
-            for (row_idx, _) in &visual_lines {
-                if *row_idx == tab.editor.cursor_row {
-                    if cursor_visual_col < width {
-                        cursor_visual_row = vrow;
-                        break;
-                    }
-                    cursor_visual_col -= width;
-                }
-                vrow += 1;
-            }
-            if cursor_visual_col >= width {
-                cursor_visual_col = cursor_visual_col % width;
-            }
-        }
-
-        // Scroll
-        tab.editor.adjust_scroll(viewport_height);
-        let scroll = tab.editor.scroll_offset;
-        let mut visual_scroll = 0;
-        {
-            let mut editor_rows_seen = 0;
-            for (i, (row_idx, _)) in visual_lines.iter().enumerate() {
-                if i > 0 && *row_idx != visual_lines[i - 1].0 {
-                    editor_rows_seen = *row_idx;
-                }
-                if editor_rows_seen >= scroll {
-                    visual_scroll = i;
-                    break;
-                }
-            }
-        }
-
-        if cursor_visual_row < visual_scroll {
-            visual_scroll = cursor_visual_row;
-        }
-        if cursor_visual_row >= visual_scroll + viewport_height {
-            visual_scroll = cursor_visual_row - viewport_height + 1;
-        }
-
         let is_focused = app.focused == FocusedPanel::Content;
+        let is_editing = is_focused && app.content_mode == ContentMode::Edit;
 
-        let visible: Vec<Line> = visual_lines.iter()
-            .skip(visual_scroll)
-            .take(viewport_height)
-            .map(|(_, text)| {
-                Line::from(Span::styled(text.clone(), Style::default().fg(Color::White)))
-            })
-            .collect();
-
-        let paragraph = Paragraph::new(visible);
-        frame.render_widget(paragraph, content_area);
-
-        // Cursor overlay
-        if is_focused {
-            let cursor_screen_row = cursor_visual_row.saturating_sub(visual_scroll);
-            let cursor_x = content_area.x + cursor_visual_col as u16;
-            let cursor_y = content_area.y + cursor_screen_row as u16;
-
-            if cursor_x < content_area.x + content_area.width
-                && cursor_y < content_area.y + content_area.height
-            {
-                let ch = tab.editor.lines
-                    .get(tab.editor.cursor_row)
-                    .and_then(|line| line.chars().nth(tab.editor.cursor_col))
-                    .unwrap_or(' ');
-
-                let cursor_span = Span::styled(
-                    ch.to_string(),
-                    Style::default().bg(Color::White).fg(Color::Black),
-                );
-                frame.buffer_mut().set_span(cursor_x, cursor_y, &cursor_span, 1);
-            }
+        // Show cursor only when editing
+        if is_editing {
+            tab.textarea.set_cursor_style(
+                Style::default().add_modifier(Modifier::REVERSED),
+            );
+        } else {
+            tab.textarea.set_cursor_style(Style::default());
         }
+
+        frame.render_widget(&tab.textarea, content_layout[1]);
     }
 }
 
@@ -260,7 +164,7 @@ fn render_status_bar(frame: &mut Frame, app: &App, area: Rect) {
         },
     };
 
-    let dirty = app.tabs.get(app.active_tab).map_or(false, |t| t.editor.dirty);
+    let dirty = app.tabs.get(app.active_tab).map_or(false, |t| t.dirty);
     let dirty_indicator = if dirty { " [modified]" } else { "" };
 
     let left = format!(" {} {}{}", panel_name,
@@ -314,6 +218,7 @@ fn render_help_overlay(frame: &mut Frame, area: Rect) {
         Line::from(Span::styled("CONTENT - EDIT MODE", Style::default().fg(Color::Yellow).add_modifier(Modifier::BOLD))),
         Line::from("  Esc            Exit to command mode"),
         Line::from("  Ctrl+S         Save"),
+        Line::from("  Full editing: undo/redo, select, copy/paste"),
         Line::from(""),
         Line::from(Span::styled("Press any key to close", Style::default().fg(Color::DarkGray))),
     ];

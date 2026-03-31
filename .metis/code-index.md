@@ -1,6 +1,6 @@
 # Code Index
 
-> Generated: 2026-03-28T03:54:05Z | 102 files | Rust
+> Generated: 2026-03-31T18:38:38Z | 102 files | Rust
 
 ## Project Structure
 
@@ -1522,23 +1522,29 @@
 - pub `FocusedPanel` enum L20-23 — `Navigator | Content` — Which panel currently has focus.
 - pub `ContentMode` enum L27-30 — `Command | Edit` — Content panel mode.
 - pub `TabKindLocal` enum L34-37 — `Entity | Surface` — What kind of item a tab represents.
-- pub `Tab` struct L40-45 — `{ title: String, id: String, kind: TabKindLocal, editor: Editor }` — A tab open in the content panel.
-- pub `App` struct L48-61 — `{ workspace: PathBuf, focused: FocusedPanel, should_quit: bool, navigator: Navig...` — Top-level application state.
-- pub `new` function L64-139 — `(workspace: PathBuf) -> Result<Self, Box<dyn std::error::Error>>`
-- pub `run` function L141-188 — `(&mut self) -> Result<(), Box<dyn std::error::Error>>`
--  `App` type L63-503 — `= App`
--  `handle_mouse` function L190-218 — `(&mut self, mouse: MouseEvent)`
--  `handle_key` function L220-256 — `(&mut self, key: KeyEvent)`
--  `handle_navigator_key` function L258-283 — `(&mut self, key: KeyEvent)`
--  `handle_content_key` function L285-290 — `(&mut self, key: KeyEvent)`
--  `handle_content_command_key` function L292-344 — `(&mut self, key: KeyEvent)`
--  `handle_content_edit_key` function L346-383 — `(&mut self, key: KeyEvent)`
--  `save_active_tab` function L385-413 — `(&mut self)`
--  `open_entity_tab` function L415-436 — `(&mut self, entity: clotho_store::data::entities::EntityRow)`
--  `cycle_focus` function L438-443 — `(&mut self)`
--  `on_tick` function L445-485 — `(&mut self)`
--  `save_state` function L487-502 — `(&self)`
--  `format_entity_details_static` function L505-521 — `(entity: &clotho_store::data::entities::EntityRow) -> String`
+- pub `Tab` struct L40-48 — `{ title: String, id: String, kind: TabKindLocal, textarea: TextArea<'static>, di...` — A tab open in the content panel.
+- pub `App` struct L90-102 — `{ workspace: PathBuf, focused: FocusedPanel, should_quit: bool, navigator: Navig...` — Top-level application state.
+- pub `new` function L105-169 — `(workspace: PathBuf) -> Result<Self, Box<dyn std::error::Error>>`
+- pub `run` function L171-218 — `(&mut self) -> Result<(), Box<dyn std::error::Error>>`
+-  `Tab` type L50-87 — `= Tab`
+-  `new` function L51-73 — `(title: String, id: String, kind: TabKindLocal, content: &str) -> Self`
+-  `content` function L75-77 — `(&self) -> String`
+-  `check_dirty` function L79-81 — `(&mut self)`
+-  `mark_saved` function L83-86 — `(&mut self)`
+-  `App` type L104-550 — `= App`
+-  `handle_mouse` function L220-252 — `(&mut self, mouse: MouseEvent)`
+-  `handle_key` function L254-287 — `(&mut self, key: KeyEvent)`
+-  `handle_navigator_key` function L289-314 — `(&mut self, key: KeyEvent)`
+-  `handle_content_key` function L316-321 — `(&mut self, key: KeyEvent)`
+-  `handle_content_command_key` function L323-385 — `(&mut self, key: KeyEvent)`
+-  `handle_content_edit_key` function L387-400 — `(&mut self, key: KeyEvent)`
+-  `toggle_checkbox` function L402-434 — `(&mut self)`
+-  `save_active_tab` function L436-464 — `(&mut self)`
+-  `open_entity_tab` function L466-482 — `(&mut self, entity: clotho_store::data::entities::EntityRow)`
+-  `cycle_focus` function L484-489 — `(&mut self)`
+-  `on_tick` function L491-532 — `(&mut self)`
+-  `save_state` function L534-549 — `(&self)`
+-  `format_entity_details` function L552-568 — `(entity: &clotho_store::data::entities::EntityRow) -> String`
 
 #### clotho-tui/src/editor.rs
 
@@ -1574,13 +1580,12 @@
 
 #### clotho-tui/src/lib.rs
 
-- pub `run` function L15-18 — `(workspace: PathBuf) -> Result<(), Box<dyn std::error::Error>>` — Launch the Clotho TUI (dashboard only — no embedded chat).
+- pub `run` function L14-17 — `(workspace: PathBuf) -> Result<(), Box<dyn std::error::Error>>` — Launch the Clotho TUI (dashboard only — no embedded chat).
 -  `app` module L1 — `-`
--  `editor` module L2 — `-`
--  `event` module L3 — `-`
--  `navigator` module L4 — `-`
--  `state` module L5 — `-`
--  `ui` module L6 — `-`
+-  `event` module L2 — `-`
+-  `navigator` module L3 — `-`
+-  `state` module L4 — `-`
+-  `ui` module L5 — `-`
 
 #### clotho-tui/src/navigator.rs
 
@@ -1619,11 +1624,11 @@
 
 #### clotho-tui/src/ui.rs
 
-- pub `render` function L12-41 — `(frame: &mut Frame, app: &mut App)`
--  `panel_border_style` function L43-49 — `(app: &App, panel: FocusedPanel) -> Style`
--  `panel_border_type` function L51-57 — `(app: &App, panel: FocusedPanel) -> ratatui::widgets::BorderType`
--  `render_navigator` function L59-89 — `(frame: &mut Frame, app: &mut App, area: Rect)`
--  `render_content` function L91-252 — `(frame: &mut Frame, app: &mut App, area: Rect)`
--  `render_status_bar` function L254-280 — `(frame: &mut Frame, app: &App, area: Rect)`
--  `render_help_overlay` function L282-325 — `(frame: &mut Frame, area: Rect)`
+- pub `render` function L11-40 — `(frame: &mut Frame, app: &mut App)`
+-  `panel_border_style` function L42-48 — `(app: &App, panel: FocusedPanel) -> Style`
+-  `panel_border_type` function L50-56 — `(app: &App, panel: FocusedPanel) -> ratatui::widgets::BorderType`
+-  `render_navigator` function L58-88 — `(frame: &mut Frame, app: &mut App, area: Rect)`
+-  `render_content` function L90-156 — `(frame: &mut Frame, app: &mut App, area: Rect)`
+-  `render_status_bar` function L158-184 — `(frame: &mut Frame, app: &App, area: Rect)`
+-  `render_help_overlay` function L186-230 — `(frame: &mut Frame, area: Rect)`
 
