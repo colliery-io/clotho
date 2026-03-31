@@ -95,11 +95,11 @@
     "clotho-sync/tests/sync_tests.rs": "9ef1dfa85323ba6dde696c0c4bece6e3fd12a55754e0a834fecd1e41275b9e21",
     "clotho-tests/src/lib.rs": "0201fb0c6acc0f331163524b213b91ea06361b64dae3aa486f34c76fe422d12d",
     "clotho-tests/tests/e2e_workflows.rs": "f0b72e977fdcf73184bab0c2f4305828170ddf44a9708ef461f3b2c424e03687",
-    "clotho-tui/src/app.rs": "31f5890112f7a7d89a5b99444c0061915ad73cf5fb6a3c2125ba2484c2467f1e",
+    "clotho-tui/src/app.rs": "27ac86fdab2e78ea0c51187fd50638bd9da34d3d7d7bb9de4fb57212a6b7532b",
     "clotho-tui/src/editor.rs": "e9c5380f9ac6db555720a3156e49a284f246d7eb55f16590fe95ea1a58946331",
     "clotho-tui/src/event.rs": "b874d5600c55289362d60ee3b97ab6cd85434ad5306a9dcc253a70cc0f7abb36",
     "clotho-tui/src/lib.rs": "141ad37e82b3681f5c45d7b77d39a8fa26e93a5df05ff1453c313a45add1fa66",
-    "clotho-tui/src/navigator.rs": "c29000a43cbc21dbe136bf810f113b70a94662cda4497c02a656bf8a52529a59",
+    "clotho-tui/src/navigator.rs": "1e6fd4ef4ae321a25333c2d03945afe9e30e65f9fdf05ca1b1bf373776ac91c0",
     "clotho-tui/src/pty.rs": "641348cf4fd73ea2a794d5b3c5704ca2dfefd6d6109dfb8876c190bdb37de9ee",
     "clotho-tui/src/state.rs": "1c658c8ab369961e0abaac1bd86db46ab280fdf96e3b7b2cae92b66f8191c2e1",
     "clotho-tui/src/ui.rs": "01ea82d5fabdf5322e3f05022f3c65fb3ea066557dd0a6424daf8c81befa6e5d"

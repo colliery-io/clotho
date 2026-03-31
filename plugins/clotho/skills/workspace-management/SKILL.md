@@ -42,6 +42,48 @@ clotho_capture(file_path: "/path/to/transcript.md", entity_type: "transcript")
 clotho_create_entity(entity_type: "person", title: "Alice", email: "alice@example.com")
 ```
 
+## Modeling Responsibilities and Direct Reports
+
+Responsibilities represent ongoing obligations that never complete. They serve as organizational anchors in the navigator — entities linked to a responsibility via `belongs_to` appear nested under it.
+
+### Common responsibility patterns
+
+**Direct Reports** — Create a responsibility for managing direct reports. Link 1:1 meeting notes, performance notes, and related tasks to it:
+```
+clotho_create_entity(entity_type: "responsibility", title: "Direct Reports")
+clotho_create_note(title: "1:1 with Alice - 2026-03-28", content: "...", parent_id: "<direct_reports_id>")
+clotho_create_entity(entity_type: "task", title: "Write Alice's performance review", parent_id: "<direct_reports_id>")
+```
+
+This produces a navigator tree like:
+```
+▾ Responsibilities
+  ▾ Direct Reports
+    1:1 with Alice - 2026-03-28
+    1:1 with Bob - 2026-04-01
+    Write Alice's performance review
+```
+
+**Per-person responsibilities** — For heavy management load, create a responsibility per person:
+```
+clotho_create_entity(entity_type: "responsibility", title: "1:1s — Alice Chen")
+clotho_create_entity(entity_type: "responsibility", title: "1:1s — Bob Martinez")
+```
+
+**Other common responsibilities:**
+- "Hiring" — interview notes, pipeline tasks, hiring decisions
+- "Budget Management" — cost reports, approval tasks, financial decisions
+- "On-Call" — incident notes, runbook tasks, escalation decisions
+- "Team Ceremonies" — sprint retros, planning notes, team health tasks
+
+### Linking people to responsibilities
+People entities are separate from responsibilities. To connect them:
+```
+clotho_create_relation(source_id: "<person_id>", relation_type: "relates_to", target_id: "<responsibility_id>")
+```
+
+This doesn't nest them in the navigator (only `belongs_to` does that) but makes the relationship queryable in the graph.
+
 ### Derived Layer — "Sense-making" (from extraction)
 ```
 clotho_create_entity(entity_type: "decision", title: "Go with option B")
