@@ -502,16 +502,91 @@ impl App {
             return;
         }
 
-        let content = if let Some(ref content_path) = entity.content_path {
+        let body = if let Some(ref content_path) = entity.content_path {
             let full_path = self.workspace.join("content").join(content_path);
             std::fs::read_to_string(&full_path).unwrap_or_else(|_| "(no content)".to_string())
         } else {
             format_entity_details(&entity)
         };
 
+        // Build relations header
+        let relations = self.load_relations_header(&entity);
+        let content = if relations.is_empty() {
+            body
+        } else {
+            format!("{}\n---\n\n{}", relations, body)
+        };
+
         self.tabs.push(Tab::new(entity.title.clone(), entity.id.clone(), TabKindLocal::Entity, &content));
         self.active_tab = self.tabs.len() - 1;
         self.focused = FocusedPanel::Content;
+    }
+
+    fn load_relations_header(&self, entity: &clotho_store::data::entities::EntityRow) -> String {
+        let graph_path = self.workspace.join("graph/relations.db");
+        let db_path = self.workspace.join("data/entities.db");
+
+        let graph = match clotho_core::graph::GraphStore::open(&graph_path) {
+            Ok(g) => g,
+            Err(_) => return String::new(),
+        };
+        let store = match clotho_store::data::entities::EntityStore::open(&db_path) {
+            Ok(s) => s,
+            Err(_) => return String::new(),
+        };
+
+        let entity_id = match uuid::Uuid::parse_str(&entity.id) {
+            Ok(u) => clotho_core::domain::types::EntityId::from(u),
+            Err(_) => return String::new(),
+        };
+
+        // Get outgoing and incoming edges
+        let outgoing = graph.get_edges_from(&entity_id).unwrap_or_default();
+        let incoming = graph.get_edges_to(&entity_id).unwrap_or_default();
+
+        if outgoing.is_empty() && incoming.is_empty() {
+            return String::new();
+        }
+
+        let mut lines = Vec::new();
+        lines.push(format!("## {} ({})", entity.title, entity.entity_type));
+        lines.push(String::new());
+
+        // Group outgoing by relation type
+        let mut out_grouped: std::collections::BTreeMap<String, Vec<String>> = std::collections::BTreeMap::new();
+        for edge in &outgoing {
+            let target_title = store.get(&edge.target_id.to_string())
+                .ok().flatten()
+                .map(|r| format!("{} ({})", r.title, r.entity_type))
+                .unwrap_or_else(|| edge.target_id.to_string()[..8].to_string());
+            let rel = format!("{:?}", edge.relation_type);
+            out_grouped.entry(rel).or_default().push(target_title);
+        }
+
+        // Group incoming by relation type
+        let mut in_grouped: std::collections::BTreeMap<String, Vec<String>> = std::collections::BTreeMap::new();
+        for edge in &incoming {
+            let source_title = store.get(&edge.source_id.to_string())
+                .ok().flatten()
+                .map(|r| format!("{} ({})", r.title, r.entity_type))
+                .unwrap_or_else(|| edge.source_id.to_string()[..8].to_string());
+            let rel = format!("{:?}", edge.relation_type);
+            in_grouped.entry(rel).or_default().push(source_title);
+        }
+
+        if !out_grouped.is_empty() {
+            for (rel, targets) in &out_grouped {
+                lines.push(format!("{}: {}", rel, targets.join(", ")));
+            }
+        }
+
+        if !in_grouped.is_empty() {
+            for (rel, sources) in &in_grouped {
+                lines.push(format!("{} (from): {}", rel, sources.join(", ")));
+            }
+        }
+
+        lines.join("\n")
     }
 
     fn cycle_focus(&mut self) {
