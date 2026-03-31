@@ -1,6 +1,6 @@
 # Code Index
 
-> Generated: 2026-03-31T18:38:38Z | 102 files | Rust
+> Generated: 2026-03-31T22:50:16Z | 102 files | Rust
 
 ## Project Structure
 
@@ -1071,14 +1071,14 @@
 #### clotho-mcp/src/tools/ontology.rs
 
 - pub `GetOntologyTool` struct L26-29 — `{ entity_id: String }`
-- pub `call_tool` function L32-87 — `(&self) -> Result<CallToolResult, CallToolError>`
-- pub `UpdateOntologyTool` struct L99-116 — `{ entity_id: String, add_keywords: Option<String>, remove_keywords: Option<Strin...`
-- pub `call_tool` function L119-187 — `(&self) -> Result<CallToolResult, CallToolError>`
-- pub `SearchOntologyTool` struct L199-202 — `{ query: String }`
-- pub `call_tool` function L205-239 — `(&self) -> Result<CallToolResult, CallToolError>`
--  `GetOntologyTool` type L31-88 — `= GetOntologyTool`
--  `UpdateOntologyTool` type L118-188 — `= UpdateOntologyTool`
--  `SearchOntologyTool` type L204-240 — `= SearchOntologyTool`
+- pub `call_tool` function L32-94 — `(&self) -> Result<CallToolResult, CallToolError>`
+- pub `UpdateOntologyTool` struct L106-127 — `{ entity_id: String, add_keywords: Option<String>, remove_keywords: Option<Strin...`
+- pub `call_tool` function L130-211 — `(&self) -> Result<CallToolResult, CallToolError>`
+- pub `SearchOntologyTool` struct L223-226 — `{ query: String }`
+- pub `call_tool` function L229-263 — `(&self) -> Result<CallToolResult, CallToolError>`
+-  `GetOntologyTool` type L31-95 — `= GetOntologyTool`
+-  `UpdateOntologyTool` type L129-212 — `= UpdateOntologyTool`
+-  `SearchOntologyTool` type L228-264 — `= SearchOntologyTool`
 
 #### clotho-mcp/src/tools/processing.rs
 
@@ -1349,18 +1349,19 @@
 - pub `CATEGORY_SIGNAL_TECHNICAL` variable L27 — `: &str`
 - pub `CATEGORY_SIGNAL_SOCIAL` variable L28 — `: &str`
 - pub `CATEGORY_PERSON` variable L29 — `: &str`
-- pub `OntologyEntry` struct L33-40 — `{ id: i64, entity_id: String, category: String, value: String, added_at: String,...` — A single ontology entry.
-- pub `Ontology` struct L44-50 — `{ entity_id: String, keywords: Vec<String>, signal_technical: Vec<String>, signa...` — The full ontology for an entity, grouped by category.
-- pub `OntologyStore` struct L53-55 — `{ conn: Connection }` — Ontology store backed by a table in entities.db.
-- pub `open` function L60-64 — `(path: &Path) -> Result<Self, StoreError>` — Open the ontology store, creating the table if needed.
-- pub `in_memory` function L67-71 — `() -> Result<Self, StoreError>` — Open an in-memory store (for tests).
-- pub `get` function L74-106 — `(&self, entity_id: &str) -> Result<Ontology, StoreError>` — Get the full ontology for an entity, grouped by category.
-- pub `add` function L109-128 — `( &self, entity_id: &str, category: &str, values: &[&str], added_by: Option<&str...` — Add entries to an entity's ontology.
-- pub `remove` function L131-146 — `( &self, entity_id: &str, category: &str, values: &[&str], ) -> Result<usize, St...` — Remove entries from an entity's ontology.
-- pub `search` function L150-170 — `(&self, value: &str) -> Result<Vec<OntologyEntry>, StoreError>` — Find which entities have a specific value in their ontology.
-- pub `list` function L173-192 — `(&self, entity_id: &str) -> Result<Vec<OntologyEntry>, StoreError>` — Get all entries for an entity as a flat list.
+- pub `CATEGORY_IGNORE` variable L30 — `: &str`
+- pub `OntologyEntry` struct L34-41 — `{ id: i64, entity_id: String, category: String, value: String, added_at: String,...` — A single ontology entry.
+- pub `Ontology` struct L45-52 — `{ entity_id: String, keywords: Vec<String>, signal_technical: Vec<String>, signa...` — The full ontology for an entity, grouped by category.
+- pub `OntologyStore` struct L55-57 — `{ conn: Connection }` — Ontology store backed by a table in entities.db.
+- pub `open` function L62-66 — `(path: &Path) -> Result<Self, StoreError>` — Open the ontology store, creating the table if needed.
+- pub `in_memory` function L69-73 — `() -> Result<Self, StoreError>` — Open an in-memory store (for tests).
+- pub `get` function L76-111 — `(&self, entity_id: &str) -> Result<Ontology, StoreError>` — Get the full ontology for an entity, grouped by category.
+- pub `add` function L114-133 — `( &self, entity_id: &str, category: &str, values: &[&str], added_by: Option<&str...` — Add entries to an entity's ontology.
+- pub `remove` function L136-151 — `( &self, entity_id: &str, category: &str, values: &[&str], ) -> Result<usize, St...` — Remove entries from an entity's ontology.
+- pub `search` function L155-175 — `(&self, value: &str) -> Result<Vec<OntologyEntry>, StoreError>` — Find which entities have a specific value in their ontology.
+- pub `list` function L178-197 — `(&self, entity_id: &str) -> Result<Vec<OntologyEntry>, StoreError>` — Get all entries for an entity as a flat list.
 -  `SCHEMA` variable L9-23 — `: &str`
--  `OntologyStore` type L57-193 — `= OntologyStore`
+-  `OntologyStore` type L59-198 — `= OntologyStore`
 
 #### clotho-store/src/data/processing.rs
 

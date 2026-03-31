@@ -60,9 +60,35 @@ impl Navigator {
             Err(_) => return,
         };
 
+        // Filter to active entities only:
+        // - Exclude status=inactive
+        // - Exclude task_state=done
+        // - Exclude extraction_status=discarded
+        let active: Vec<EntityRow> = all
+            .into_iter()
+            .filter(|row| {
+                if let Some(ref status) = row.status {
+                    if status.to_lowercase() == "inactive" {
+                        return false;
+                    }
+                }
+                if let Some(ref state) = row.task_state {
+                    if state.to_lowercase() == "done" {
+                        return false;
+                    }
+                }
+                if let Some(ref es) = row.extraction_status {
+                    if es.to_lowercase() == "discarded" {
+                        return false;
+                    }
+                }
+                true
+            })
+            .collect();
+
         // Group by entity_type, preserving a stable order
         let mut grouped: BTreeMap<String, Vec<EntityRow>> = BTreeMap::new();
-        for row in all {
+        for row in active {
             grouped
                 .entry(row.entity_type.clone())
                 .or_default()
