@@ -1,6 +1,6 @@
 # Code Index
 
-> Generated: 2026-03-31T23:03:21Z | 102 files | Rust
+> Generated: 2026-03-31T23:10:24Z | 103 files | Rust
 
 ## Project Structure
 
@@ -62,6 +62,7 @@
 │   │   ├── server.rs
 │   │   ├── tools/
 │   │   │   ├── all_tools.rs
+│   │   │   ├── archive_entity.rs
 │   │   │   ├── batch_relations.rs
 │   │   │   ├── capture.rs
 │   │   │   ├── capture_directory.rs
@@ -921,9 +922,9 @@
 -  `ClothoServerHandler` type L22-26 — `impl Default for ClothoServerHandler`
 -  `default` function L23-25 — `() -> Self`
 -  `ClothoServerHandler` type L28-33 — `= ClothoServerHandler`
--  `ClothoServerHandler` type L36-200 — `impl ServerHandler for ClothoServerHandler`
+-  `ClothoServerHandler` type L36-205 — `impl ServerHandler for ClothoServerHandler`
 -  `handle_list_tools_request` function L37-47 — `( &self, _params: Option<PaginatedRequestParams>, _runtime: Arc<dyn McpServer>, ...`
--  `handle_call_tool_request` function L49-199 — `( &self, params: CallToolRequestParams, _runtime: Arc<dyn McpServer>, ) -> Resul...`
+-  `handle_call_tool_request` function L49-204 — `( &self, params: CallToolRequestParams, _runtime: Arc<dyn McpServer>, ) -> Resul...`
 
 #### clotho-mcp/src/workspace_resolver.rs
 
@@ -940,8 +941,14 @@
 #### clotho-mcp/src/tools/all_tools.rs
 
 - pub `ClothoTools` struct L13 — `-` — Registry of all Clotho MCP tools.
-- pub `tools` function L16-56 — `() -> Vec<Tool>`
--  `ClothoTools` type L15-57 — `= ClothoTools`
+- pub `tools` function L16-57 — `() -> Vec<Tool>`
+-  `ClothoTools` type L15-58 — `= ClothoTools`
+
+#### clotho-mcp/src/tools/archive_entity.rs
+
+- pub `ArchiveEntityTool` struct L23-26 — `{ entity_id: String }`
+- pub `call_tool` function L29-55 — `(&self) -> Result<CallToolResult, CallToolError>`
+-  `ArchiveEntityTool` type L28-56 — `= ArchiveEntityTool`
 
 #### clotho-mcp/src/tools/batch_relations.rs
 
@@ -1042,31 +1049,32 @@
 #### clotho-mcp/src/tools/mod.rs
 
 - pub `all_tools` module L1 — `-`
-- pub `batch_relations` module L2 — `-`
-- pub `capture` module L3 — `-`
-- pub `capture_directory` module L4 — `-`
-- pub `create_entity` module L5 — `-`
-- pub `create_note` module L6 — `-`
-- pub `create_reflection` module L7 — `-`
-- pub `create_relation` module L8 — `-`
-- pub `delete_entity` module L9 — `-`
-- pub `delete_relation` module L10 — `-`
-- pub `get_relations` module L11 — `-`
-- pub `init` module L12 — `-`
-- pub `list_entities` module L13 — `-`
-- pub `list_surfaces` module L14 — `-`
-- pub `list_unprocessed` module L15 — `-`
-- pub `ontology` module L16 — `-`
-- pub `processing` module L17 — `-`
-- pub `push_surface` module L18 — `-`
-- pub `query` module L19 — `-`
-- pub `read_entity` module L20 — `-`
-- pub `read_surface` module L21 — `-`
-- pub `search` module L22 — `-`
-- pub `set_workspace` module L23 — `-`
-- pub `sync` module L24 — `-`
-- pub `update_entity` module L25 — `-`
-- pub `workspace_summary` module L26 — `-`
+- pub `archive_entity` module L2 — `-`
+- pub `batch_relations` module L3 — `-`
+- pub `capture` module L4 — `-`
+- pub `capture_directory` module L5 — `-`
+- pub `create_entity` module L6 — `-`
+- pub `create_note` module L7 — `-`
+- pub `create_reflection` module L8 — `-`
+- pub `create_relation` module L9 — `-`
+- pub `delete_entity` module L10 — `-`
+- pub `delete_relation` module L11 — `-`
+- pub `get_relations` module L12 — `-`
+- pub `init` module L13 — `-`
+- pub `list_entities` module L14 — `-`
+- pub `list_surfaces` module L15 — `-`
+- pub `list_unprocessed` module L16 — `-`
+- pub `ontology` module L17 — `-`
+- pub `processing` module L18 — `-`
+- pub `push_surface` module L19 — `-`
+- pub `query` module L20 — `-`
+- pub `read_entity` module L21 — `-`
+- pub `read_surface` module L22 — `-`
+- pub `search` module L23 — `-`
+- pub `set_workspace` module L24 — `-`
+- pub `sync` module L25 — `-`
+- pub `update_entity` module L26 — `-`
+- pub `workspace_summary` module L27 — `-`
 
 #### clotho-mcp/src/tools/ontology.rs
 
@@ -1532,21 +1540,21 @@
 -  `content` function L75-77 — `(&self) -> String`
 -  `check_dirty` function L79-81 — `(&mut self)`
 -  `mark_saved` function L83-86 — `(&mut self)`
--  `App` type L104-575 — `= App`
+-  `App` type L104-582 — `= App`
 -  `handle_mouse` function L220-252 — `(&mut self, mouse: MouseEvent)`
 -  `handle_key` function L254-287 — `(&mut self, key: KeyEvent)`
--  `handle_navigator_key` function L289-320 — `(&mut self, key: KeyEvent)`
--  `handle_navigator_search_key` function L322-339 — `(&mut self, key: KeyEvent)`
--  `handle_content_key` function L341-346 — `(&mut self, key: KeyEvent)`
--  `handle_content_command_key` function L348-410 — `(&mut self, key: KeyEvent)`
--  `handle_content_edit_key` function L412-425 — `(&mut self, key: KeyEvent)`
--  `toggle_checkbox` function L427-459 — `(&mut self)`
--  `save_active_tab` function L461-489 — `(&mut self)`
--  `open_entity_tab` function L491-507 — `(&mut self, entity: clotho_store::data::entities::EntityRow)`
--  `cycle_focus` function L509-514 — `(&mut self)`
--  `on_tick` function L516-557 — `(&mut self)`
--  `save_state` function L559-574 — `(&self)`
--  `format_entity_details` function L577-593 — `(entity: &clotho_store::data::entities::EntityRow) -> String`
+-  `handle_navigator_key` function L289-327 — `(&mut self, key: KeyEvent)`
+-  `handle_navigator_search_key` function L329-346 — `(&mut self, key: KeyEvent)`
+-  `handle_content_key` function L348-353 — `(&mut self, key: KeyEvent)`
+-  `handle_content_command_key` function L355-417 — `(&mut self, key: KeyEvent)`
+-  `handle_content_edit_key` function L419-432 — `(&mut self, key: KeyEvent)`
+-  `toggle_checkbox` function L434-466 — `(&mut self)`
+-  `save_active_tab` function L468-496 — `(&mut self)`
+-  `open_entity_tab` function L498-514 — `(&mut self, entity: clotho_store::data::entities::EntityRow)`
+-  `cycle_focus` function L516-521 — `(&mut self)`
+-  `on_tick` function L523-564 — `(&mut self)`
+-  `save_state` function L566-581 — `(&self)`
+-  `format_entity_details` function L584-600 — `(entity: &clotho_store::data::entities::EntityRow) -> String`
 
 #### clotho-tui/src/editor.rs
 
@@ -1592,26 +1600,26 @@
 #### clotho-tui/src/navigator.rs
 
 - pub `EntityGroup` struct L7-11 — `{ entity_type: String, entities: Vec<EntityRow>, expanded: bool }` — A group of entities in the navigator tree.
-- pub `Navigator` struct L14-31 — `{ groups: Vec<EntityGroup>, cursor: usize, visible_count: usize, scroll_offset: ...` — Navigator state — holds the entity list grouped by type.
-- pub `new` function L34-45 — `() -> Self`
-- pub `set_expanded` function L48-58 — `(&mut self, entity_type: &str, expanded: bool)` — Pre-set expansion state for a group (used when restoring from saved state).
-- pub `refresh` function L61-137 — `(&mut self, db_path: &Path)` — Reload entities from the store.
-- pub `cursor_up` function L151-155 — `(&mut self)` — Move cursor up.
-- pub `cursor_down` function L158-167 — `(&mut self)` — Move cursor down.
-- pub `toggle_expand` function L170-178 — `(&mut self)` — Toggle expand/collapse on the current line if it's a group header.
-- pub `resolve_cursor` function L181-198 — `(&self) -> Option<(usize, Option<usize>)>` — Resolve cursor position to (group_index, Some(entity_index)) or (group_index, None) for header.
-- pub `selected_entity` function L201-207 — `(&self) -> Option<&EntityRow>` — Get the entity at the current cursor, if it's an entity line.
-- pub `visible_lines` function L210-259 — `(&self, height: usize) -> Vec<(String, bool, bool)>` — Build a list of (line_text, is_header, is_cursor) for rendering.
-- pub `adjust_scroll` function L262-279 — `(&mut self, height: usize)` — Update scroll offset to keep cursor visible for a given viewport height.
-- pub `start_search` function L282-288 — `(&mut self)` — Enter search mode.
-- pub `stop_search` function L291-298 — `(&mut self)` — Exit search mode.
-- pub `search_push` function L301-306 — `(&mut self, c: char)` — Update search query and refresh results.
-- pub `search_pop` function L309-314 — `(&mut self)` — Remove last character from search query.
-- pub `selected_search_entity` function L332-335 — `(&self) -> Option<&EntityRow>` — Get the entity at the cursor when in search mode.
-- pub `search_lines` function L338-355 — `(&self, height: usize) -> Vec<(String, bool, bool)>` — Build search result lines for rendering.
--  `Navigator` type L33-356 — `= Navigator`
--  `recompute_visible_count` function L139-148 — `(&mut self)`
--  `update_search_results` function L317-329 — `(&mut self)` — Rebuild search results based on current query.
+- pub `Navigator` struct L14-33 — `{ groups: Vec<EntityGroup>, cursor: usize, visible_count: usize, scroll_offset: ...` — Navigator state — holds the entity list grouped by type.
+- pub `new` function L36-48 — `() -> Self`
+- pub `set_expanded` function L51-61 — `(&mut self, entity_type: &str, expanded: bool)` — Pre-set expansion state for a group (used when restoring from saved state).
+- pub `refresh` function L64-140 — `(&mut self, db_path: &Path)` — Reload entities from the store.
+- pub `cursor_up` function L154-158 — `(&mut self)` — Move cursor up.
+- pub `cursor_down` function L161-170 — `(&mut self)` — Move cursor down.
+- pub `toggle_expand` function L173-181 — `(&mut self)` — Toggle expand/collapse on the current line if it's a group header.
+- pub `resolve_cursor` function L184-201 — `(&self) -> Option<(usize, Option<usize>)>` — Resolve cursor position to (group_index, Some(entity_index)) or (group_index, None) for header.
+- pub `selected_entity` function L204-210 — `(&self) -> Option<&EntityRow>` — Get the entity at the current cursor, if it's an entity line.
+- pub `visible_lines` function L213-262 — `(&self, height: usize) -> Vec<(String, bool, bool)>` — Build a list of (line_text, is_header, is_cursor) for rendering.
+- pub `adjust_scroll` function L265-282 — `(&mut self, height: usize)` — Update scroll offset to keep cursor visible for a given viewport height.
+- pub `start_search` function L285-291 — `(&mut self)` — Enter search mode.
+- pub `stop_search` function L294-301 — `(&mut self)` — Exit search mode.
+- pub `search_push` function L304-309 — `(&mut self, c: char)` — Update search query and refresh results.
+- pub `search_pop` function L312-317 — `(&mut self)` — Remove last character from search query.
+- pub `selected_search_entity` function L335-338 — `(&self) -> Option<&EntityRow>` — Get the entity at the cursor when in search mode.
+- pub `search_lines` function L341-358 — `(&self, height: usize) -> Vec<(String, bool, bool)>` — Build search result lines for rendering.
+-  `Navigator` type L35-359 — `= Navigator`
+-  `recompute_visible_count` function L142-151 — `(&mut self)`
+-  `update_search_results` function L320-332 — `(&mut self)` — Rebuild search results based on current query.
 
 #### clotho-tui/src/pty.rs
 
@@ -1639,5 +1647,5 @@
 -  `render_navigator` function L58-130 — `(frame: &mut Frame, app: &mut App, area: Rect)`
 -  `render_content` function L132-198 — `(frame: &mut Frame, app: &mut App, area: Rect)`
 -  `render_status_bar` function L200-226 — `(frame: &mut Frame, app: &App, area: Rect)`
--  `render_help_overlay` function L228-273 — `(frame: &mut Frame, area: Rect)`
+-  `render_help_overlay` function L228-274 — `(frame: &mut Frame, area: Rect)`
 

@@ -79,11 +79,21 @@ Ask these questions one at a time. Wait for the user to respond to each before m
 
 Capture the user's responses — these become part of the reflection content.
 
-## Step 4: Launch agent
+## Step 4: Consolidation pass
+
+Launch the **entity-consolidator** agent to clean up the workspace:
+- Find and merge duplicate risks, blockers, decisions, questions
+- Suggest archival of done tasks, resolved blockers, answered questions
+- Create summary notes for clusters of related items
+
+Present the consolidation plan and wait for user approval before executing.
+
+## Step 5: Launch review agent
 
 Launch the **review-compiler** agent with:
 - The week's data summary
 - The user's reflection responses
+- Results of the consolidation pass
 
 The agent will:
 - Analyze patterns across programs
@@ -91,7 +101,7 @@ The agent will:
 - Create a Reflection entity with structured content
 - Link it to relevant programs
 
-## Step 5: Review and forward focus
+## Step 6: Review and forward focus
 
 After the agent completes, present its findings. Then ask:
 
@@ -100,6 +110,6 @@ After the agent completes, present its findings. Then ask:
 Capture this as part of the reflection content. Update the Reflection entity if needed.
 
 End with:
-> "Weekly reflection captured. Have a good weekend."
+> "Weekly reflection captured. Workspace cleaned up. Have a good weekend."
 
 Sync: `clotho_sync()`
