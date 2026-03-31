@@ -27,6 +27,7 @@ pub const CATEGORY_KEYWORD: &str = "keyword";
 pub const CATEGORY_SIGNAL_TECHNICAL: &str = "signal_technical";
 pub const CATEGORY_SIGNAL_SOCIAL: &str = "signal_social";
 pub const CATEGORY_PERSON: &str = "person";
+pub const CATEGORY_IGNORE: &str = "ignore";
 
 /// A single ontology entry.
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -47,6 +48,7 @@ pub struct Ontology {
     pub signal_technical: Vec<String>,
     pub signal_social: Vec<String>,
     pub people: Vec<String>,
+    pub ignore: Vec<String>,
 }
 
 /// Ontology store backed by a table in entities.db.
@@ -80,6 +82,7 @@ impl OntologyStore {
         let mut signal_technical = Vec::new();
         let mut signal_social = Vec::new();
         let mut people = Vec::new();
+        let mut ignore = Vec::new();
 
         let rows = stmt.query_map(params![entity_id], |row| {
             Ok((row.get::<_, String>(0)?, row.get::<_, String>(1)?))
@@ -92,6 +95,7 @@ impl OntologyStore {
                 CATEGORY_SIGNAL_TECHNICAL => signal_technical.push(value),
                 CATEGORY_SIGNAL_SOCIAL => signal_social.push(value),
                 CATEGORY_PERSON => people.push(value),
+                CATEGORY_IGNORE => ignore.push(value),
                 _ => {} // ignore unknown categories
             }
         }
@@ -102,6 +106,7 @@ impl OntologyStore {
             signal_technical,
             signal_social,
             people,
+            ignore,
         })
     }
 

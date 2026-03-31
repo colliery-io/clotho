@@ -91,11 +91,40 @@ If the user tells you to skip certain meeting types during the session, **offer 
    clotho_mark_processed(entity_id: "<transcript_id>", process_name: "extraction")
    ```
 
+## Ontology Filtering
+
+Before extracting, load the ontology for the relevant program(s):
+```
+clotho_get_ontology(entity_id: "<program_id>")
+```
+
+The ontology tells you what to look for AND what to ignore:
+- **Keywords** — topics this program cares about. Prioritize signals matching these.
+- **Technical/social signals** — specific signal types to watch for.
+- **Ignore list** — topics to skip. If a signal matches an ignore entry, do NOT create an entity for it. Report it as skipped in the summary.
+
+If a signal doesn't match any program's keywords or signal types, **flag it for the user** rather than auto-creating:
+> "I found a potential risk about 'supply chain delays' but it doesn't match any program's ontology. Should I create it, or is it noise?"
+
+To add ignore rules:
+```
+clotho_update_ontology(entity_id: "<program_id>", add_ignore: "office logistics, catering, parking")
+```
+
+## Search Before Create
+
+**MANDATORY**: Before creating any entity, search for existing matches:
+```
+clotho_search(query: "<abstract theme>")
+```
+If a match exists, add an `extracted_from` relation to the existing entity instead of creating a duplicate. See the debrief-processor agent for the full search-before-create protocol.
+
 ## Important Principles
 
 - **Human-in-the-loop**: Present your extractions to the user for review before creating entities. Say what you found and ask for confirmation.
 - **Confidence**: Be explicit about certainty. "I'm confident this is a decision" vs "This might be a risk, but it could also be a concern without action."
 - **Don't over-extract**: Not every statement is a speech act. "Updates" (status reports) don't need entities — they're context.
+- **Respect the ignore list**: If the ontology says to ignore a topic, ignore it. Don't second-guess.
 - **Do capture follow-ups**: "Let's schedule a meeting about X" is an action item, not admin noise. Capture it.
 - **Watch the wrap-up**: The end of a meeting is often the richest section for action items and next steps.
 - **Preserve provenance**: Always create EXTRACTED_FROM relations back to the source transcript.

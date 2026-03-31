@@ -3,7 +3,7 @@ use crate::resolve;
 use crate::workspace_resolver;
 use clotho_store::data::entities::EntityStore;
 use clotho_store::data::ontology::{
-    OntologyStore, CATEGORY_KEYWORD, CATEGORY_PERSON, CATEGORY_SIGNAL_SOCIAL,
+    OntologyStore, CATEGORY_IGNORE, CATEGORY_KEYWORD, CATEGORY_PERSON, CATEGORY_SIGNAL_SOCIAL,
     CATEGORY_SIGNAL_TECHNICAL,
 };
 use clotho_store::workspace::Workspace;
@@ -74,11 +74,18 @@ impl GetOntologyTool {
                 ontology.people.join(", ")
             ));
         }
+        if !ontology.ignore.is_empty() {
+            output.push_str(&format!(
+                "**Ignore (excluded from extraction):** {}\n\n",
+                ontology.ignore.join(", ")
+            ));
+        }
 
         if ontology.keywords.is_empty()
             && ontology.signal_technical.is_empty()
             && ontology.signal_social.is_empty()
             && ontology.people.is_empty()
+            && ontology.ignore.is_empty()
         {
             output.push_str("No ontology configured yet.");
         }
@@ -111,6 +118,10 @@ pub struct UpdateOntologyTool {
     pub add_people: Option<String>,
     /// People to remove (comma-separated)
     pub remove_people: Option<String>,
+    /// Topics to ignore/exclude from extraction (comma-separated)
+    pub add_ignore: Option<String>,
+    /// Topics to stop ignoring (comma-separated)
+    pub remove_ignore: Option<String>,
     /// Who is making this change: "user" or "agent"
     pub added_by: Option<String>,
 }
@@ -166,7 +177,20 @@ impl UpdateOntologyTool {
                 .map_err(|e| CallToolError::new(std::io::Error::other(e.to_string())))?;
         }
 
+        if let Some(ref ig) = self.add_ignore {
+            let vals: Vec<&str> = ig.split(',').collect();
+            ontology_store
+                .add(resolved_id, CATEGORY_IGNORE, &vals, Some(added_by))
+                .map_err(|e| CallToolError::new(std::io::Error::other(e.to_string())))?;
+        }
+
         // Removals
+        if let Some(ref ig) = self.remove_ignore {
+            let vals: Vec<&str> = ig.split(',').collect();
+            ontology_store
+                .remove(resolved_id, CATEGORY_IGNORE, &vals)
+                .map_err(|e| CallToolError::new(std::io::Error::other(e.to_string())))?;
+        }
         if let Some(ref kw) = self.remove_keywords {
             let vals: Vec<&str> = kw.split(',').collect();
             ontology_store

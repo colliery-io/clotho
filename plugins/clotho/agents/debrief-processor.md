@@ -48,8 +48,10 @@ clotho_get_ontology(entity_id: "<program_id>")
 This returns the extraction lens for that program: keywords it cares about, signal types to look for, and people frequently involved.
 
 Build a routing map:
-- **Program X** (id: abc): keywords=[database coupling, service contracts], technical signals=[architecture coupling], people=[Ali K, Harrison]
-- **Program Y** (id: def): keywords=[hiring, team structure], social signals=[ownership gaps], people=[Riley, Nicholas]
+- **Program X** (id: abc): keywords=[database coupling, service contracts], technical signals=[architecture coupling], people=[Ali K, Harrison], ignore=[office logistics, catering]
+- **Program Y** (id: def): keywords=[hiring, team structure], social signals=[ownership gaps], people=[Riley, Nicholas], ignore=[parking, building maintenance]
+
+**The ignore list is a hard filter.** If a signal matches any ignore entry across any program, do NOT create an entity for it. Report it as skipped in the summary.
 
 Also load existing risks and blockers for dedup context:
 ```
@@ -111,9 +113,11 @@ Beyond generic speech acts, look for signals that matter to the specific program
 **The program's own description tells you what to look for.** Extract signals that are relevant to that program's concerns, not just generic speech acts.
 
 ### What to ignore
+- **Anything on the ignore list.** If a signal's topic matches an ignore entry from any program's ontology, skip it completely.
 - Routine status updates with no signal
 - Small talk and pleasantries
-- Things that are already captured (check existing entities) — if you find reinforcing evidence for an existing risk or blocker, note it but don't create a duplicate
+- Things that are already captured (check existing entities) — if you find reinforcing evidence for an existing risk or blocker, link it (Step 2c), don't duplicate
+- Signals that don't match any program's keywords or signal types — flag these for user review instead of auto-creating
 
 ### Pay extra attention to
 - **Meeting wrap-ups** — the last section of a meeting often contains explicit action items, next steps, and follow-up scheduling. These are high-signal.
