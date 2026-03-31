@@ -1,3 +1,4 @@
+use std::collections::HashMap;
 use std::io;
 use std::path::PathBuf;
 use std::time::Duration;
@@ -572,9 +573,15 @@ impl App {
             id: t.id.clone(),
         }).collect();
 
-        let navigator_expanded = self.navigator.groups.iter()
-            .map(|g| (g.entity_type.clone(), g.expanded))
-            .collect();
+        let mut navigator_expanded = HashMap::new();
+        for section in &self.navigator.sections {
+            navigator_expanded.insert(section.title.clone(), section.expanded);
+            for item in &section.items {
+                if let crate::navigator::NavItem::SubSection { title, expanded, .. } = item {
+                    navigator_expanded.insert(title.clone(), *expanded);
+                }
+            }
+        }
 
         let state = TuiState { tabs, active_tab: self.active_tab, navigator_expanded };
         state.save(&self.workspace);
