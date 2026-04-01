@@ -326,6 +326,9 @@ impl App {
             KeyCode::Enter | KeyCode::Right => {
                 if let Some((_, None)) = self.navigator.resolve_cursor() {
                     self.navigator.toggle_expand();
+                } else if let Some((id, _title)) = self.navigator.selected_surface() {
+                    let id = id.to_string();
+                    self.open_surface_tab(&id);
                 } else if let Some(entity) = self.navigator.selected_entity() {
                     self.open_entity_tab(entity.clone());
                 }
@@ -511,6 +514,23 @@ impl App {
     }
 
     fn update_preview(&mut self) {
+        // Check for surface first
+        if !self.navigator.searching {
+            if let Some((id, _title)) = self.navigator.selected_surface() {
+                let id = id.to_string();
+                if self.preview_id.as_deref() == Some(&id) { return; }
+
+                let db_path = self.workspace.join("data/entities.db");
+                if let Ok(store) = clotho_store::data::surfaces::SurfaceStore::open(&db_path) {
+                    if let Ok(Some(surface)) = store.get(&id) {
+                        self.preview_id = Some(surface.id.clone());
+                        self.preview = Some(Tab::new(surface.title.clone(), surface.id.clone(), TabKindLocal::Surface, &surface.content));
+                        return;
+                    }
+                }
+            }
+        }
+
         // Get the currently highlighted entity from navigator
         let entity = if self.navigator.searching {
             self.navigator.selected_search_entity().cloned()
@@ -524,10 +544,7 @@ impl App {
             return;
         };
 
-        // Don't rebuild if already previewing this entity
-        if self.preview_id.as_deref() == Some(&entity.id) {
-            return;
-        }
+        if self.preview_id.as_deref() == Some(&entity.id) { return; }
 
         let body = if let Some(ref content_path) = entity.content_path {
             let full_path = self.workspace.join("content").join(content_path);
@@ -567,6 +584,29 @@ impl App {
         self.tabs.push(Tab::new(entity.title.clone(), entity.id.clone(), TabKindLocal::Entity, &content));
         self.active_tab = self.tabs.len() - 1;
         self.focused = FocusedPanel::Content;
+    }
+
+    fn open_surface_tab(&mut self, surface_id: &str) {
+        // Don't open duplicate
+        if let Some(idx) = self.tabs.iter().position(|t| t.id == surface_id) {
+            self.active_tab = idx;
+            self.focused = FocusedPanel::Content;
+            return;
+        }
+
+        let db_path = self.workspace.join("data/entities.db");
+        if let Ok(store) = clotho_store::data::surfaces::SurfaceStore::open(&db_path) {
+            if let Ok(Some(surface)) = store.get(surface_id) {
+                self.tabs.push(Tab::new(
+                    surface.title.clone(),
+                    surface.id.clone(),
+                    TabKindLocal::Surface,
+                    &surface.content,
+                ));
+                self.active_tab = self.tabs.len() - 1;
+                self.focused = FocusedPanel::Content;
+            }
+        }
     }
 
     fn load_relations_header(&self, entity: &clotho_store::data::entities::EntityRow) -> String {

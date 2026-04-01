@@ -1,5 +1,6 @@
 use clotho_core::graph::GraphStore;
 use clotho_store::data::entities::{EntityRow, EntityStore};
+use clotho_store::data::surfaces::SurfaceStore;
 use std::collections::{BTreeMap, HashMap, HashSet};
 use std::path::Path;
 
@@ -22,6 +23,8 @@ pub enum NavItem {
     },
     /// A leaf entity with no nesting.
     Entity(EntityRow),
+    /// A surface (agent-pushed text blob).
+    Surface { id: String, title: String },
 }
 
 /// Navigator state.
@@ -297,6 +300,23 @@ impl Navigator {
             .filter(|e| !accounted.contains(&e.id))
             .cloned()
             .collect();
+        // Surfaces section
+        if let Ok(surface_store) = SurfaceStore::open(db_path) {
+            if let Ok(active_surfaces) = surface_store.list_active() {
+                if !active_surfaces.is_empty() {
+                    let surface_items: Vec<NavItem> = active_surfaces
+                        .into_iter()
+                        .map(|s| NavItem::Surface { id: s.id, title: s.title })
+                        .collect();
+                    sections.push(NavSection {
+                        title: "Surfaces".to_string(),
+                        items: surface_items,
+                        expanded: self.is_expanded("Surfaces", true),
+                    });
+                }
+            }
+        }
+
         if !unlinked.is_empty() {
             let unlinked_items = unlinked.into_iter().map(NavItem::Entity).collect();
             sections.push(NavSection {
@@ -321,7 +341,7 @@ impl Navigator {
             if section.expanded {
                 for item in &section.items {
                     match item {
-                        NavItem::Entity(_) => self.visible_count += 1,
+                        NavItem::Entity(_) | NavItem::Surface { .. } => self.visible_count += 1,
                         NavItem::SubSection { entities, expanded, .. } => {
                             self.visible_count += 1; // subsection header
                             if *expanded {
@@ -382,6 +402,14 @@ impl Navigator {
         }
     }
 
+    /// Get the surface at the cursor (id, title).
+    pub fn selected_surface(&self) -> Option<(&str, &str)> {
+        match self.resolve_cursor_position()? {
+            CursorPosition::SurfaceItem(id, title) => Some((id, title)),
+            _ => None,
+        }
+    }
+
     /// Resolve what the cursor is pointing at.
     pub fn resolve_cursor(&self) -> Option<(usize, Option<usize>)> {
         // Legacy compat — returns (section, None) for headers
@@ -406,6 +434,12 @@ impl Navigator {
                         NavItem::Entity(entity) => {
                             if pos == self.cursor {
                                 return Some(CursorPosition::TopLevelEntity(si, entity));
+                            }
+                            pos += 1;
+                        }
+                        NavItem::Surface { id, title } => {
+                            if pos == self.cursor {
+                                return Some(CursorPosition::SurfaceItem(id, title));
                             }
                             pos += 1;
                         }
@@ -455,6 +489,13 @@ impl Navigator {
                         NavItem::Entity(entity) => {
                             if pos >= scroll {
                                 let text = format!("  {}", entity.title);
+                                lines.push((text, false, pos == self.cursor));
+                            }
+                            pos += 1;
+                        }
+                        NavItem::Surface { title, .. } => {
+                            if pos >= scroll {
+                                let text = format!("  {}", title);
                                 lines.push((text, false, pos == self.cursor));
                             }
                             pos += 1;
@@ -540,6 +581,9 @@ impl Navigator {
                             self.search_results.push(entity.clone());
                         }
                     }
+                    NavItem::Surface { .. } => {
+                        // Surfaces don't go in entity search results
+                    }
                     NavItem::SubSection { entities, .. } => {
                         for entity in entities {
                             if query.is_empty() || entity.title.to_lowercase().contains(&query) {
@@ -577,6 +621,7 @@ enum CursorPosition<'a> {
     SubSectionHeader(usize, usize),
     TopLevelEntity(usize, &'a EntityRow),
     SubSectionEntity(usize, usize, &'a EntityRow),
+    SurfaceItem(&'a str, &'a str), // (id, title)
     #[allow(dead_code)]
     Entity(usize, &'a EntityRow),
 }

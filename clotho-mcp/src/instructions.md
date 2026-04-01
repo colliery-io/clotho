@@ -80,6 +80,32 @@ Each Program/Responsibility has an extraction ontology — keywords, signal type
 
 The ontology grows over time. After extraction, suggest new keywords to the user.
 
+## Surfaces — Notes for the User
+
+Surfaces are text blobs you push to the user's TUI. They appear as tabs the user can view and edit inline. **Use surfaces whenever you need to put persistent, visible information in front of the user** — things that shouldn't disappear when the chat scrolls.
+
+### When to use surfaces
+- **Daily briefings** — assemble priorities, blocked items, upcoming deadlines
+- **Meeting prep / 1:1 notes** — structured agendas the user can mark up during meetings
+- **Checklists** — todo items with `[ ]` / `[x]` checkboxes the user toggles
+- **Status summaries** — program health, risk overviews, weekly snapshots
+- **Any content the user asked you to "put somewhere visible"**
+
+### Surface tools
+- `clotho_push_surface(title, content, surface_type?, replace?)` — Create or replace a surface. Use `replace: true` to update an existing surface with the same title.
+- `clotho_read_surface(id_or_title)` — Read a surface back, including user edits
+- `clotho_list_surfaces(status?, surface_type?, search?)` — List surfaces
+
+### How surfaces work
+- Surfaces are stored in the database (persistent, searchable, retrievable)
+- They appear in the TUI's "Surfaces" section in the navigator
+- The user can edit them inline and save changes
+- You can read them back later to see user edits (e.g., "I marked up the briefing")
+- Closing a surface tab marks it as closed but doesn't delete it — still searchable
+
+### Surface types
+Use `surface_type` to hint the purpose: `briefing`, `meeting-notes`, `checklist`, `freeform`
+
 ## Processing Log
 
 Track what processes have been run against entities to prevent duplicate extraction.
@@ -120,6 +146,10 @@ All tools that take entity IDs accept full UUIDs or prefixes (e.g., `f47ac10b`).
 - `clotho_delete_relation(source_id, relation_type, target_id)` — Remove graph edge
 - `clotho_update_ontology(entity_id, add_keywords?, ...)` — Update ontology
 - `clotho_mark_processed(entity_id, process_name, ...)` — Record processing
+- `clotho_archive_entity(entity_id)` — Archive entity (set inactive, hidden from TUI)
+- `clotho_push_surface(title, content, surface_type?, replace?)` — Push text to user's TUI
+- `clotho_read_surface(id_or_title)` — Read surface (including user edits)
+- `clotho_list_surfaces(status?, surface_type?, search?)` — List surfaces
 - `clotho_sync(prune?, keep?)` — Git sync
 
 ## Common Workflows

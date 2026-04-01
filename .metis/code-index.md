@@ -1,6 +1,6 @@
 # Code Index
 
-> Generated: 2026-03-31T23:51:25Z | 103 files | Rust
+> Generated: 2026-03-31T23:55:53Z | 103 files | Rust
 
 ## Project Structure
 
@@ -1532,30 +1532,31 @@
 - pub `ContentMode` enum L28-31 — `Command | Edit` — Content panel mode.
 - pub `TabKindLocal` enum L35-38 — `Entity | Surface` — What kind of item a tab represents.
 - pub `Tab` struct L41-49 — `{ title: String, id: String, kind: TabKindLocal, textarea: TextArea<'static>, di...` — A tab open in the content panel.
-- pub `App` struct L91-103 — `{ workspace: PathBuf, focused: FocusedPanel, should_quit: bool, navigator: Navig...` — Top-level application state.
-- pub `new` function L106-170 — `(workspace: PathBuf) -> Result<Self, Box<dyn std::error::Error>>`
-- pub `run` function L172-219 — `(&mut self) -> Result<(), Box<dyn std::error::Error>>`
+- pub `App` struct L91-107 — `{ workspace: PathBuf, focused: FocusedPanel, should_quit: bool, navigator: Navig...` — Top-level application state.
+- pub `new` function L110-176 — `(workspace: PathBuf) -> Result<Self, Box<dyn std::error::Error>>`
+- pub `run` function L178-225 — `(&mut self) -> Result<(), Box<dyn std::error::Error>>`
 -  `Tab` type L51-88 — `= Tab`
 -  `new` function L52-74 — `(title: String, id: String, kind: TabKindLocal, content: &str) -> Self`
 -  `content` function L76-78 — `(&self) -> String`
 -  `check_dirty` function L80-82 — `(&mut self)`
 -  `mark_saved` function L84-87 — `(&mut self)`
--  `App` type L105-664 — `= App`
--  `handle_mouse` function L221-253 — `(&mut self, mouse: MouseEvent)`
--  `handle_key` function L255-288 — `(&mut self, key: KeyEvent)`
--  `handle_navigator_key` function L290-328 — `(&mut self, key: KeyEvent)`
--  `handle_navigator_search_key` function L330-347 — `(&mut self, key: KeyEvent)`
--  `handle_content_key` function L349-354 — `(&mut self, key: KeyEvent)`
--  `handle_content_command_key` function L356-418 — `(&mut self, key: KeyEvent)`
--  `handle_content_edit_key` function L420-433 — `(&mut self, key: KeyEvent)`
--  `toggle_checkbox` function L435-467 — `(&mut self)`
--  `save_active_tab` function L469-497 — `(&mut self)`
--  `open_entity_tab` function L499-523 — `(&mut self, entity: clotho_store::data::entities::EntityRow)`
--  `load_relations_header` function L525-590 — `(&self, entity: &clotho_store::data::entities::EntityRow) -> String`
--  `cycle_focus` function L592-597 — `(&mut self)`
--  `on_tick` function L599-640 — `(&mut self)`
--  `save_state` function L642-663 — `(&self)`
--  `format_entity_details` function L666-682 — `(entity: &clotho_store::data::entities::EntityRow) -> String`
+-  `App` type L109-711 — `= App`
+-  `handle_mouse` function L227-259 — `(&mut self, mouse: MouseEvent)`
+-  `handle_key` function L261-294 — `(&mut self, key: KeyEvent)`
+-  `handle_navigator_key` function L296-340 — `(&mut self, key: KeyEvent)`
+-  `handle_navigator_search_key` function L342-361 — `(&mut self, key: KeyEvent)`
+-  `handle_content_key` function L363-368 — `(&mut self, key: KeyEvent)`
+-  `handle_content_command_key` function L370-432 — `(&mut self, key: KeyEvent)`
+-  `handle_content_edit_key` function L434-447 — `(&mut self, key: KeyEvent)`
+-  `toggle_checkbox` function L449-481 — `(&mut self)`
+-  `save_active_tab` function L483-511 — `(&mut self)`
+-  `update_preview` function L513-544 — `(&mut self)`
+-  `open_entity_tab` function L546-570 — `(&mut self, entity: clotho_store::data::entities::EntityRow)`
+-  `load_relations_header` function L572-637 — `(&self, entity: &clotho_store::data::entities::EntityRow) -> String`
+-  `cycle_focus` function L639-644 — `(&mut self)`
+-  `on_tick` function L646-687 — `(&mut self)`
+-  `save_state` function L689-710 — `(&self)`
+-  `format_entity_details` function L713-729 — `(entity: &clotho_store::data::entities::EntityRow) -> String`
 
 #### clotho-tui/src/editor.rs
 
@@ -1652,7 +1653,7 @@
 -  `panel_border_style` function L42-48 — `(app: &App, panel: FocusedPanel) -> Style`
 -  `panel_border_type` function L50-56 — `(app: &App, panel: FocusedPanel) -> ratatui::widgets::BorderType`
 -  `render_navigator` function L58-130 — `(frame: &mut Frame, app: &mut App, area: Rect)`
--  `render_content` function L132-198 — `(frame: &mut Frame, app: &mut App, area: Rect)`
--  `render_status_bar` function L200-226 — `(frame: &mut Frame, app: &App, area: Rect)`
--  `render_help_overlay` function L228-274 — `(frame: &mut Frame, area: Rect)`
+-  `render_content` function L132-214 — `(frame: &mut Frame, app: &mut App, area: Rect)`
+-  `render_status_bar` function L216-242 — `(frame: &mut Frame, app: &App, area: Rect)`
+-  `render_help_overlay` function L244-290 — `(frame: &mut Frame, area: Rect)`
 
