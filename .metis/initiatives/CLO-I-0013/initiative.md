@@ -4,14 +4,14 @@ level: initiative
 title: "Hierarchical navigation — ontology-driven nesting in TUI and content layout"
 short_code: "CLO-I-0013"
 created_at: 2026-03-28T12:30:45.927898+00:00
-updated_at: 2026-03-28T12:30:45.927898+00:00
+updated_at: 2026-04-01T00:17:56.575876+00:00
 parent: 
 blocked_by: []
 archived: false
 
 tags:
   - "#initiative"
-  - "#phase/discovery"
+  - "#phase/completed"
 
 
 exit_criteria_met: false

@@ -7,7 +7,7 @@ created_at: 2026-03-16T13:23:16.443679+00:00
 updated_at: 2026-03-16T13:23:16.443679+00:00
 parent: CLO-V-0001
 blocked_by: []
-archived: false
+archived: true
 
 tags:
   - "#initiative"

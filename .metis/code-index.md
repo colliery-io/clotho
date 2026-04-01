@@ -1,6 +1,6 @@
 # Code Index
 
-> Generated: 2026-03-31T23:55:53Z | 103 files | Rust
+> Generated: 2026-04-01T00:05:59Z | 103 files | Rust
 
 ## Project Structure
 
@@ -1540,23 +1540,24 @@
 -  `content` function L76-78 — `(&self) -> String`
 -  `check_dirty` function L80-82 — `(&mut self)`
 -  `mark_saved` function L84-87 — `(&mut self)`
--  `App` type L109-711 — `= App`
+-  `App` type L109-751 — `= App`
 -  `handle_mouse` function L227-259 — `(&mut self, mouse: MouseEvent)`
 -  `handle_key` function L261-294 — `(&mut self, key: KeyEvent)`
--  `handle_navigator_key` function L296-340 — `(&mut self, key: KeyEvent)`
--  `handle_navigator_search_key` function L342-361 — `(&mut self, key: KeyEvent)`
--  `handle_content_key` function L363-368 — `(&mut self, key: KeyEvent)`
--  `handle_content_command_key` function L370-432 — `(&mut self, key: KeyEvent)`
--  `handle_content_edit_key` function L434-447 — `(&mut self, key: KeyEvent)`
--  `toggle_checkbox` function L449-481 — `(&mut self)`
--  `save_active_tab` function L483-511 — `(&mut self)`
--  `update_preview` function L513-544 — `(&mut self)`
--  `open_entity_tab` function L546-570 — `(&mut self, entity: clotho_store::data::entities::EntityRow)`
--  `load_relations_header` function L572-637 — `(&self, entity: &clotho_store::data::entities::EntityRow) -> String`
--  `cycle_focus` function L639-644 — `(&mut self)`
--  `on_tick` function L646-687 — `(&mut self)`
--  `save_state` function L689-710 — `(&self)`
--  `format_entity_details` function L713-729 — `(entity: &clotho_store::data::entities::EntityRow) -> String`
+-  `handle_navigator_key` function L296-343 — `(&mut self, key: KeyEvent)`
+-  `handle_navigator_search_key` function L345-364 — `(&mut self, key: KeyEvent)`
+-  `handle_content_key` function L366-371 — `(&mut self, key: KeyEvent)`
+-  `handle_content_command_key` function L373-435 — `(&mut self, key: KeyEvent)`
+-  `handle_content_edit_key` function L437-450 — `(&mut self, key: KeyEvent)`
+-  `toggle_checkbox` function L452-484 — `(&mut self)`
+-  `save_active_tab` function L486-514 — `(&mut self)`
+-  `update_preview` function L516-561 — `(&mut self)`
+-  `open_entity_tab` function L563-587 — `(&mut self, entity: clotho_store::data::entities::EntityRow)`
+-  `open_surface_tab` function L589-610 — `(&mut self, surface_id: &str)`
+-  `load_relations_header` function L612-677 — `(&self, entity: &clotho_store::data::entities::EntityRow) -> String`
+-  `cycle_focus` function L679-684 — `(&mut self)`
+-  `on_tick` function L686-727 — `(&mut self)`
+-  `save_state` function L729-750 — `(&self)`
+-  `format_entity_details` function L753-769 — `(entity: &clotho_store::data::entities::EntityRow) -> String`
 
 #### clotho-tui/src/editor.rs
 
@@ -1601,33 +1602,34 @@
 
 #### clotho-tui/src/navigator.rs
 
-- pub `NavSection` struct L8-12 — `{ title: String, items: Vec<NavItem>, expanded: bool }` — A navigable section in the tree.
-- pub `NavItem` enum L16-25 — `SubSection | Entity` — An item within a section — either a subsection or a leaf entity.
-- pub `Navigator` struct L28-41 — `{ sections: Vec<NavSection>, cursor: usize, visible_count: usize, scroll_offset:...` — Navigator state.
-- pub `new` function L44-56 — `() -> Self`
-- pub `set_expanded` function L58-60 — `(&mut self, key: &str, expanded: bool)`
-- pub `refresh` function L78-315 — `(&mut self, db_path: &Path)` — Reload from entity store and graph.
-- pub `cursor_up` function L337-341 — `(&mut self)`
-- pub `cursor_down` function L343-348 — `(&mut self)`
-- pub `toggle_expand` function L351-373 — `(&mut self)` — Toggle expand/collapse at cursor.
-- pub `selected_entity` function L376-383 — `(&self) -> Option<&EntityRow>` — Get the entity at the cursor.
-- pub `resolve_cursor` function L386-393 — `(&self) -> Option<(usize, Option<usize>)>` — Resolve what the cursor is pointing at.
-- pub `visible_lines` function L434-487 — `(&self, height: usize) -> Vec<(String, bool, bool)>` — Build visible lines for rendering.
-- pub `adjust_scroll` function L489-497 — `(&mut self, height: usize)`
-- pub `start_search` function L501-507 — `(&mut self)`
-- pub `stop_search` function L509-515 — `(&mut self)`
-- pub `search_push` function L517-522 — `(&mut self, c: char)`
-- pub `search_pop` function L524-529 — `(&mut self)`
-- pub `selected_search_entity` function L555-557 — `(&self) -> Option<&EntityRow>`
-- pub `search_lines` function L559-572 — `(&self, height: usize) -> Vec<(String, bool, bool)>`
--  `Navigator` type L43-573 — `= Navigator`
--  `is_expanded` function L62-64 — `(&self, key: &str, default: bool) -> bool`
--  `save_expansion` function L66-75 — `(&mut self)`
--  `recompute_visible_count` function L317-335 — `(&mut self)`
--  `resolve_cursor_position` function L395-431 — `(&self) -> Option<CursorPosition>`
--  `update_search_results` function L531-553 — `(&mut self)`
--  `CursorPosition` enum L575-582 — `SectionHeader | SubSectionHeader | TopLevelEntity | SubSectionEntity | Entity`
--  `load_parent_map` function L585-604 — `(graph_path: &Path) -> HashMap<String, String>` — Load all belongs_to relations: child_id -> parent_id
+- pub `NavSection` struct L9-13 — `{ title: String, items: Vec<NavItem>, expanded: bool }` — A navigable section in the tree.
+- pub `NavItem` enum L17-28 — `SubSection | Entity | Surface` — An item within a section — either a subsection or a leaf entity.
+- pub `Navigator` struct L31-44 — `{ sections: Vec<NavSection>, cursor: usize, visible_count: usize, scroll_offset:...` — Navigator state.
+- pub `new` function L47-59 — `() -> Self`
+- pub `set_expanded` function L61-63 — `(&mut self, key: &str, expanded: bool)`
+- pub `refresh` function L81-335 — `(&mut self, db_path: &Path)` — Reload from entity store and graph.
+- pub `cursor_up` function L357-361 — `(&mut self)`
+- pub `cursor_down` function L363-368 — `(&mut self)`
+- pub `toggle_expand` function L371-393 — `(&mut self)` — Toggle expand/collapse at cursor.
+- pub `selected_entity` function L396-403 — `(&self) -> Option<&EntityRow>` — Get the entity at the cursor.
+- pub `selected_surface` function L406-411 — `(&self) -> Option<(&str, &str)>` — Get the surface at the cursor (id, title).
+- pub `resolve_cursor` function L414-421 — `(&self) -> Option<(usize, Option<usize>)>` — Resolve what the cursor is pointing at.
+- pub `visible_lines` function L468-528 — `(&self, height: usize) -> Vec<(String, bool, bool)>` — Build visible lines for rendering.
+- pub `adjust_scroll` function L530-538 — `(&mut self, height: usize)`
+- pub `start_search` function L542-548 — `(&mut self)`
+- pub `stop_search` function L550-556 — `(&mut self)`
+- pub `search_push` function L558-563 — `(&mut self, c: char)`
+- pub `search_pop` function L565-570 — `(&mut self)`
+- pub `selected_search_entity` function L599-601 — `(&self) -> Option<&EntityRow>`
+- pub `search_lines` function L603-616 — `(&self, height: usize) -> Vec<(String, bool, bool)>`
+-  `Navigator` type L46-617 — `= Navigator`
+-  `is_expanded` function L65-67 — `(&self, key: &str, default: bool) -> bool`
+-  `save_expansion` function L69-78 — `(&mut self)`
+-  `recompute_visible_count` function L337-355 — `(&mut self)`
+-  `resolve_cursor_position` function L423-465 — `(&self) -> Option<CursorPosition>`
+-  `update_search_results` function L572-597 — `(&mut self)`
+-  `CursorPosition` enum L619-627 — `SectionHeader | SubSectionHeader | TopLevelEntity | SubSectionEntity | SurfaceIt...`
+-  `load_parent_map` function L630-649 — `(graph_path: &Path) -> HashMap<String, String>` — Load all belongs_to relations: child_id -> parent_id
 
 #### clotho-tui/src/pty.rs
 

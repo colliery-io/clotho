@@ -4,14 +4,14 @@ level: initiative
 title: "Entity lifecycle management — search, consolidation, and retirement"
 short_code: "CLO-I-0012"
 created_at: 2026-03-28T12:30:44.876556+00:00
-updated_at: 2026-03-28T12:30:44.876556+00:00
+updated_at: 2026-04-01T00:22:25.887150+00:00
 parent: 
 blocked_by: []
 archived: false
 
 tags:
   - "#initiative"
-  - "#phase/discovery"
+  - "#phase/completed"
 
 
 exit_criteria_met: false
